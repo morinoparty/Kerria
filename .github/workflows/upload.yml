@@ -27,10 +27,10 @@ jobs:
           sed -i -e "s/VersionPlaceholder/$after/i" './gradle.properties'
 
       - name: Build with Gradle
-        run: ./gradlew :core:build -x test
+        run: ./gradlew :app:build -x test
 
       - name: Change file name
-        run: mv ./app/build/libs/app-all.jar ./app/build/libs/Kerria-core_${{ github.event.release.tag_name }}.jar
+        run: mv ./app/build/libs/app-all.jar ./app/build/libs/Kerria_${{ github.event.release.tag_name }}.jar
 
       - uses: Kir-Antipov/mc-publish@v3.3
         with:
