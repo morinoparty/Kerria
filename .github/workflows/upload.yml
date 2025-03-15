@@ -41,7 +41,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           github-draft: false
           files: |
-            /app/build/libs/Kerria-core_${{ github.event.release.tag_name }}.jar
+            /app/build/libs/Kerria_${{ github.event.release.tag_name }}.jar
           loaders: |
             paper
             purpur
