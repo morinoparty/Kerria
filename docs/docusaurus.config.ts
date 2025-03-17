@@ -23,7 +23,10 @@ const config: Config = {
         defaultLocale: "ja",
         locales: ["ja"],
     },
-
+    markdown: {
+        mermaid: true,
+    },
+    themes: ["@docusaurus/theme-mermaid"],
     presets: [
         [
             "classic",
@@ -51,9 +54,12 @@ const config: Config = {
                 docsRouteBasePath: "/",
             },
         ],
-    ],
+    ],  
     themeConfig: {
         image: "img/docusaurus-social-card.jpg",
+        mermaid: {
+            theme: {light: "forest", dark: "dark"},
+        },
         navbar: {
             title: "Kerria",
             logo: {

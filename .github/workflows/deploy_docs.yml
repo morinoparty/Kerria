@@ -25,7 +25,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
-        run: ./gradlew :api:dokkaGenerate
+        run: ./gradlew dokkaGenerate
 
       - uses: actions/setup-node@v4
         with:

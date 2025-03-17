@@ -1,5 +1,3 @@
-import org.apache.tools.ant.taskdefs.optional.depend.Depend
-
 plugins {
     java
     alias(libs.plugins.kotlin.jvm)
@@ -26,7 +24,7 @@ dependencies {
 
     implementation(libs.bundles.coroutines)
 
-    implementation(libs.bundles.exposed)
+    implementation(libs.bundles.database)
 
     implementation(libs.koin.core)
 

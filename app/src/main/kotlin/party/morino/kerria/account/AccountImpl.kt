@@ -1,0 +1,99 @@
+package party.morino.kerria.account
+
+import org.bukkit.OfflinePlayer
+import org.jetbrains.exposed.dao.UUIDEntity
+import org.jetbrains.exposed.dao.UUIDEntityClass
+import org.jetbrains.exposed.dao.id.EntityID
+import party.morino.kerria.api.account.Account
+import party.morino.kerria.api.log.Log
+import party.morino.kerria.model.database.AccountTable
+import java.math.BigDecimal
+import java.time.LocalDateTime
+import java.util.UUID
+
+/**
+ * アカウントエンティティの実装クラス
+ *
+ * このクラスは[Account]インターフェースを実装し、データベース上のアカウント情報を表現します。
+ * [UUIDEntity]を継承し、Exposedフレームワークを使用してデータベースとのマッピングを行います。
+ * アカウントIDとしてUUIDを主キーとして使用します。
+ *
+ * @property playerUniqueId プレイヤーのUUID（文字列形式）
+ * @property playerName プレイヤーの名前
+ * @property balance アカウントの残高（BigDecimal型）
+ */
+class AccountImpl(id: EntityID<UUID>) : UUIDEntity(id), Account {
+    companion object : UUIDEntityClass<AccountImpl>(AccountTable) {
+        /**
+         * オフラインプレイヤーからアカウントを検索します
+         *
+         * @param offlinePlayer 検索対象のオフラインプレイヤー
+         * @return 見つかったアカウント、または null
+         */
+        fun findByOfflinePlayer(offlinePlayer: OfflinePlayer) = 
+            find { AccountTable.playerUniqueId eq offlinePlayer.uniqueId.toString() }.firstOrNull()
+
+        /**
+         * アカウントUUIDからアカウントを検索します
+         *
+         * @param accountUniqueId 検索対象のアカウントUUID
+         * @return 見つかったアカウント、または null
+         */
+        fun findByAccountUniqueId(accountUniqueId: UUID) = findById(accountUniqueId)
+    }
+
+    var playerUniqueId by AccountTable.playerUniqueId
+    var playerName by AccountTable.playerName
+    var balance by AccountTable.balance
+
+    /**
+     * アカウントのUUIDを取得します
+     *
+     * @return アカウントのUUID
+     */
+    override fun getAccountUniqueId(): UUID = id.value
+
+    /**
+     * プレイヤーのUUIDを取得します
+     *
+     * @return プレイヤーのUUID
+     */
+    override fun getPlayerUniqueId(): UUID = UUID.fromString(playerUniqueId)
+
+    /**
+     * プレイヤーの名前を取得します
+     *
+     * @return プレイヤーの名前
+     */
+    override fun getPlayerName(): String = playerName
+
+    /**
+     * アカウントの残高を取得します
+     *
+     * @return アカウントの残高
+     */
+    override fun getBalance(): BigDecimal = balance
+
+    /**
+     * アカウントの残高を設定します
+     *
+     * @param balance 設定する残高
+     */
+    override fun setBalance(balance: BigDecimal) {
+        this.balance = balance
+    }
+
+    /**
+     * アカウントの取引履歴を取得します
+     *
+     * @param since この日時以降の履歴を取得
+     * @param until この日時以前の履歴を取得
+     * @param limit 取得する履歴の最大件数
+     * @param offset 取得開始位置
+     * @return 取引履歴のリスト
+     */
+    override fun getLogs(since: LocalDateTime, until: LocalDateTime, limit: Int, offset: Int): List<Log> {
+        // TODO: LogManagerを使用してログを取得する実装を追加
+        return emptyList()
+    }
+}

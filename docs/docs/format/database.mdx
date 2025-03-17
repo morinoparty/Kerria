@@ -1,0 +1,23 @@
+---
+title: データベース
+sidebar_position: 1
+---
+
+# データベース
+
+KerriaはSQLiteとPostgreSQLをサポートしています。
+
+## ER図
+
+```mermaid
+erDiagram
+
+    ACCOUNT {
+        int id
+        uuid player_unique_id
+        string player_name
+        long balance
+    }
+
+    ACCOUNT ||--|| LOG : has
+```

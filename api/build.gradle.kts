@@ -2,21 +2,14 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.dokka)
+
     `maven-publish`
 }
 
 group = project.group
 version = project.version.toString()
 
-dokka {
-    pluginsConfiguration.html {
-        footerMessage.set("No right reserved. This docs under CC0 1.0.")
-    }
-    dokkaPublications.html {
-        outputDirectory.set(file("${project.rootDir}/docs/static/dokka"))
-    }
-}
+
 
 publishing {
     publications {
@@ -34,6 +27,8 @@ dependencies{
 
     implementation(libs.arrow.core)
     implementation(libs.arrow.fx.coroutines)
+
+    implementation(libs.kotlinx.serialization.json)
 }
 kotlin {
     jvmToolchain {

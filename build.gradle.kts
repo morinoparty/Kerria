@@ -37,6 +37,8 @@ allprojects {
     }
 
 
+
+
     kotlin {
         jvmToolchain {
             (this).languageVersion.set(JavaLanguageVersion.of(21))
@@ -71,5 +73,19 @@ allprojects {
         withType<JavaCompile>().configureEach {
             options.encoding = "UTF-8"
         }
+    }
+}
+
+dependencies {
+    dokka(project(":app"))
+    dokka(project(":api"))
+}
+
+dokka {
+    pluginsConfiguration.html {
+        footerMessage.set("No right reserved. This docs under CC0 1.0.")
+    }
+    dokkaPublications.html {
+        outputDirectory.set(file("${project.rootDir}/docs/static/dokka"))
     }
 }
