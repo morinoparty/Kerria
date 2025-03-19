@@ -3,9 +3,55 @@ title: コマンド
 sidebar_position: 2
 ---
 
-import { CommandLine } from "@site/src/components/command-line";
+import { Command } from "@site/src/types/command";
+
+export const commandList = [
+    {
+        command: "/balance [player]",
+        description: "残高を確認します",
+        aliases: ["/bal"],
+        permission: "kerria.command.balance",
+        status: "proposal"
+    },
+    {
+        command: "/balance [player]",
+        description: "残高を確認します",
+        aliases: ["/bal"],
+        permission: "kerria.command.balance",
+        status: "newly"
+    },
+    {
+        command: "/balance [player]",
+        description: "残高を確認します",
+        aliases: ["/bal"],
+        permission: "kerria.command.balance",
+        status: "beta"
+    },
+    {
+        command: "/balance [player]",
+        description: "残高を確認します",
+        aliases: ["/bal"],
+        permission: "kerria.command.balance",
+        status: "stable"
+    },
+    {
+        command: "/balance [player]",
+        description: "残高を確認します",
+        aliases: ["/bal"],
+        permission: "kerria.command.balance",
+        status: "deprecated"
+    },
+    {
+        command: "/pay <player> <amount>",
+        description: "指定されたユーザーに指定された金額を支払います",
+        aliases : [],
+        permission: "kerria.command.pay",
+        status: "proposal"
+    }
+];
+import { CommandList } from "@site/src/components/command-list";
 
 # コマンド
 
-<CommandLine status="proposal" command="balance" />
+<CommandList list={commandList} />
 
