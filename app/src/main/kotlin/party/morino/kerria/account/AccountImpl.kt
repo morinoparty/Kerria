@@ -18,9 +18,9 @@ import java.util.UUID
  * [UUIDEntity]を継承し、Exposedフレームワークを使用してデータベースとのマッピングを行います。
  * アカウントIDとしてUUIDを主キーとして使用します。
  *
- * @property playerUniqueId プレイヤーのUUID（文字列形式）
- * @property playerName プレイヤーの名前
- * @property balance アカウントの残高（BigDecimal型）
+ * @property _playerUniqueId プレイヤーのUUID（文字列形式）
+ * @property _playerName プレイヤーの名前
+ * @property _balance アカウントの残高（BigDecimal型）
  */
 class AccountImpl(id: EntityID<UUID>) : UUIDEntity(id), Account {
     companion object : UUIDEntityClass<AccountImpl>(AccountTable) {
@@ -42,9 +42,9 @@ class AccountImpl(id: EntityID<UUID>) : UUIDEntity(id), Account {
         fun findByAccountUniqueId(accountUniqueId: UUID) = findById(accountUniqueId)
     }
 
-    var playerUniqueId by AccountTable.playerUniqueId
-    var playerName by AccountTable.playerName
-    var balance by AccountTable.balance
+    private var _playerUniqueId by AccountTable.playerUniqueId
+    private var _playerName by AccountTable.playerName
+    private var _balance by AccountTable.balance
 
     /**
      * アカウントのUUIDを取得します
@@ -58,21 +58,21 @@ class AccountImpl(id: EntityID<UUID>) : UUIDEntity(id), Account {
      *
      * @return プレイヤーのUUID
      */
-    override fun getPlayerUniqueId(): UUID = UUID.fromString(playerUniqueId)
+    override fun getPlayerUniqueId(): UUID = UUID.fromString(_playerUniqueId)
 
     /**
      * プレイヤーの名前を取得します
      *
      * @return プレイヤーの名前
      */
-    override fun getPlayerName(): String = playerName
+    override fun getPlayerName(): String = _playerName
 
     /**
      * アカウントの残高を取得します
      *
      * @return アカウントの残高
      */
-    override fun getBalance(): BigDecimal = balance
+    override fun getBalance(): BigDecimal = _balance
 
     /**
      * アカウントの残高を設定します
@@ -80,7 +80,7 @@ class AccountImpl(id: EntityID<UUID>) : UUIDEntity(id), Account {
      * @param balance 設定する残高
      */
     override fun setBalance(balance: BigDecimal) {
-        this.balance = balance
+        _balance = balance
     }
 
     /**

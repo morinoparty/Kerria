@@ -31,7 +31,7 @@ class AccountManagerImpl() : AccountManager {
      * このメソッドは指定されたUUIDに対応するプレイヤーのアカウント情報をデータベースから取得します。
      * トランザクション内で実行され、プレイヤーが見つからない場合はエラーを返します。
      *
-     * @param playerUniqueId 取得対象のプレイヤーUUID
+     * @param player 取得対象のプレイヤー
      * @return Either<KerriaError, Account> 成功時はアカウント情報、失敗時はエラー情報を含むEither
      * @throws PlayerError.PlayerNotFound 指定されたUUIDのプレイヤーが見つからない場合
      */
