@@ -7,45 +7,187 @@ import { Command } from "@site/src/types/command";
 
 export const commandList = [
     {
-        command: "/balance [player]",
+        command: "/test",
+        description: "テストコマンドです",
+        tags: ["player"],
+        aliases: [],
+        permission: "kerria.command.test",
+        status: "proposal"
+    },
+    {
+        command: "/test",
+        description: "テストコマンドです",
+        tags: ["player"],
+        aliases: [],
+        permission: "kerria.command.test",
+        status: "beta"
+    },
+    {
+        command: "/test",
+        description: "テストコマンドです",
+        tags: ["player"],
+        aliases: [],
+        permission: "kerria.command.test",
+        status: "newly"
+    },
+    {
+        command: "/test",
+        description: "テストコマンドです",
+        tags: ["player"],
+        aliases: [],
+        permission: "kerria.command.test",
+        status: "stable"
+    },
+    {
+        command: "/test",
+        description: "テストコマンドです",
+        tags: ["player"],
+        aliases: [],
+        permission: "kerria.command.test",
+        status: "deprecated"
+    },
+    {
+        command: "/kerria balance",
         description: "残高を確認します",
-        aliases: ["/bal"],
+        tags: ["player"],
+        aliases: ["/bal", "/balance"],
         permission: "kerria.command.balance",
         status: "proposal"
     },
     {
-        command: "/balance [player]",
-        description: "残高を確認します",
-        aliases: ["/bal"],
-        permission: "kerria.command.balance",
-        status: "newly"
+        command: "/kerria balance [player] [currency]",
+        description: "指定されたユーザーの指定された通貨の残高を確認します",
+        tags: ["admin"],
+        aliases: ["/bal", "/balance"],
+        permission: "kerria.command.balance.currency",
+        status: "proposal"
     },
     {
-        command: "/balance [player]",
-        description: "残高を確認します",
-        aliases: ["/bal"],
-        permission: "kerria.command.balance",
-        status: "beta"
-    },
-    {
-        command: "/balance [player]",
-        description: "残高を確認します",
-        aliases: ["/bal"],
-        permission: "kerria.command.balance",
-        status: "stable"
-    },
-    {
-        command: "/balance [player]",
-        description: "残高を確認します",
-        aliases: ["/bal"],
-        permission: "kerria.command.balance",
-        status: "deprecated"
-    },
-    {
-        command: "/pay <player> <amount>",
+        command: "/kerria pay <player> <amount> [-m message]",
         description: "指定されたユーザーに指定された金額を支払います",
-        aliases : [],
+        tags: ["player"],
+        aliases : ["/pay"],
         permission: "kerria.command.pay",
+        status: "proposal"
+    },
+    {
+        command: "/kerria add <player> <amount> [currency] [-m message] [--quiet]",
+        description: "指定されたユーザーに指定された金額を追加します",
+        tags: ["admin"],
+        aliases : [],
+        permission: "kerria.command.add",
+        status: "proposal"
+    },
+    {
+        command: "/kerria take <player> <amount> [currency] [-m message] [--quiet]",
+        description: "指定されたユーザーから指定された金額を削除します",
+        tags: ["admin"],
+        aliases : [],
+        permission: "kerria.command.take",
+        status: "proposal"
+    },
+    {
+        command: "/kerria set <player> <amount> [currency] [-m message] [--quiet]",
+        description: "指定されたユーザーの残高を指定された金額に設定します",
+        tags: ["admin"],
+        aliases : [],
+        permission: "kerria.command.set",
+        status: "proposal"
+    },
+    {
+        command: "/kerria setting currency <id> [name] [plural] [sign]",
+        description: "通貨の設定を変更します",
+        tags: ["admin"],
+        aliases : [],
+        permission: "kerria.command.setting.currency",
+        status: "proposal"
+    },
+    {
+        command: "/kerria reload",
+        description: "プラグインを再読み込みします",
+        tags: ["admin"],
+        aliases : [],
+        permission: "kerria.command.reload",
+        status: "proposal"
+    },
+    {
+        command: "/kerria help",
+        description: "コマンドのヘルプを表示します",
+        tags: ["player"],
+        aliases : [],
+        permission: "kerria.command.help",
+        status: "proposal"
+    },
+    {
+        command: "/kerria version",
+        description: "プラグインのバージョンを表示します",
+        tags: ["player"],
+        aliases : [],
+        permission: "kerria.command.version",
+        status: "proposal"
+    },
+    {
+        command: "/kerria top <page> [currency]",
+        description: "残高の上位ユーザーを表示します",
+        tags: ["admin"],
+        aliases : [],
+        permission: "kerria.command.top",
+        status: "proposal"
+    },
+    {
+        command: "/kerria bank create <name> <owner> [currency]",
+        description: "銀行を作成します",
+        tags: ["admin"],
+        aliases : [],
+        permission: "kerria.command.bank.create",
+        status: "proposal"
+    },
+    {
+        command: "/kerria bank delete <name>",
+        description: "銀行を削除します",
+        tags: ["admin"],
+        aliases : [],
+        permission: "kerria.command.bank.delete",
+        status: "proposal"
+    },
+    {
+        command: "/kerria bank list",
+        description: "銀行の一覧を表示します",
+        tags: ["admin"],
+        aliases : [],
+        permission: "kerria.command.bank.list",
+        status: "proposal"
+    },
+    {
+        command: "/kerria bank withdraw <name> <amount> [currency] [-m message]",
+        description: "指定された銀行から指定された金額を引き出します",
+        tags: ["player"],
+        aliases : [],
+        permission: "kerria.command.bank.withdraw",
+        status: "proposal"
+    },
+    {
+        command: "/kerria bank deposit <name> <amount> [currency] [-m message]",
+        description: "指定された銀行に指定された金額を預金します",
+        tags: ["admin"],
+        aliases : [],
+        permission: "kerria.command.bank.deposit",
+        status: "proposal"
+    },
+    {
+        command: "/kerria bank staff <name> <player>",
+        description: "指定された銀行のスタッフを指定されたユーザーに設定します",
+        tags: ["admin"],
+        aliases : [],
+        permission: "kerria.command.bank.staff",
+        status: "proposal"
+    },
+    {
+        command: "/kerria log [player] [page]",
+        description: "指定されたユーザーの取引履歴を表示します",
+        tags: ["admin"],
+        aliases : [],
+        permission: "kerria.command.log",
         status: "proposal"
     }
 ];
