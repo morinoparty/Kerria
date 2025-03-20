@@ -18,6 +18,11 @@ export interface Command {
     description: string;
 
     /**
+     * コマンドのタグ
+     */
+    tags: string[];
+
+    /**
      * コマンドのエイリアス
      */
     aliases: string[];
