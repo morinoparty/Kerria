@@ -3,7 +3,8 @@ package party.morino.kerria.files
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
-import kotlinx.serialization.builtins.serializer
+import com.charleskorn.kaml.Yaml
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.bukkit.plugin.java.JavaPlugin
 import party.morino.kerria.api.error.KerriaError
@@ -26,7 +27,7 @@ import java.io.File
  * @see Config 設定情報を表すデータクラス
  */
 class ConfigManagerImpl(private val plugin: JavaPlugin) : ConfigManager {
-    private val configFile = File(plugin.dataFolder, "config.json")
+    private val configFile = File(plugin.dataFolder, "config.yaml")
     private var currentConfig = Config()
 
     /**
@@ -73,8 +74,8 @@ class ConfigManagerImpl(private val plugin: JavaPlugin) : ConfigManager {
      */
     override fun reloadConfig(): Either<KerriaError, Unit> = try {
         plugin.logger.info("Loading config...")
-        val json = configFile.readText()
-        currentConfig = Json.decodeFromString(json)
+        val yaml = configFile.readText()
+        currentConfig = Yaml.default.decodeFromString<Config>(yaml)
         plugin.logger.info("Config loaded.")
 
         Unit.right()

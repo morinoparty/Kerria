@@ -1,5 +1,6 @@
 package party.morino.kerria.api.files
 
+import com.charleskorn.kaml.YamlComment
 import kotlinx.serialization.Serializable
 
 /**
@@ -10,7 +11,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class Config(
+    @YamlComment("Comment")
     val debug: Boolean = false,
+    val economy: EconomyConfig = EconomyConfig(),
     val database: DatabaseConfig = DatabaseConfig(),
 )
 
@@ -33,4 +36,28 @@ data class DatabaseConfig(
     val database : String = "kerria",
     val username : String = "user",
     val password : String = "password"
+)
+
+
+@Serializable
+data class EconomyConfig(
+    @YamlComment("小数点以下の桁数")
+    val fractionalDigits : Int = 2,
+    val currency : CurrencyConfig = CurrencyConfig()
+)
+
+@Serializable
+data class CurrencyConfig(
+    @YamlComment("通貨ID")
+    val id : Int = 1,
+    @YamlComment("通貨名")
+    val name : String = "JPY",
+    @YamlComment("通貨記号")
+    val symbol : String = "¥",
+    @YamlComment("通貨複数形")
+    val plural : String = "円",
+    @YamlComment("通貨フォーマット")
+    val format : String = "%amount% %plural%",
+    @YamlComment("小数点以下の桁数")
+    val fractionalDigits : Int = 2
 )

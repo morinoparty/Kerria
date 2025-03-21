@@ -21,6 +21,7 @@ dependencies {
     implementation(libs.bundles.commands)
 
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kaml)
 
     implementation(libs.bundles.coroutines)
 

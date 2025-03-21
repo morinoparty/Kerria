@@ -9,7 +9,6 @@ import party.morino.kerria.api.account.Account
 import party.morino.kerria.api.account.AccountManager
 import party.morino.kerria.api.error.KerriaError
 import party.morino.kerria.api.error.PlayerError
-import party.morino.kerria.model.database.AccountTable.playerUniqueId
 import java.util.UUID
 
 /**
@@ -35,7 +34,7 @@ class AccountManagerImpl() : AccountManager {
      * @return Either<KerriaError, Account> 成功時はアカウント情報、失敗時はエラー情報を含むEither
      * @throws PlayerError.PlayerNotFound 指定されたUUIDのプレイヤーが見つからない場合
      */
-    override fun getAccount(player: OfflinePlayer): Either<KerriaError, Account> = transaction {
+    override fun getAccount(player: OfflinePlayer?): Either<KerriaError, Account> = transaction {
         AccountImpl.findByOfflinePlayer(player)?.right()
             ?: PlayerError.PlayerNotFound(player.uniqueId.toString()).left()
     }

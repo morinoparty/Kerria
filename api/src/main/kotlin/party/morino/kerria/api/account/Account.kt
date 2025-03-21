@@ -1,6 +1,7 @@
 package party.morino.kerria.api.account
 
 import party.morino.kerria.api.log.Log
+import party.morino.kerria.api.model.Currency
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
@@ -40,12 +41,27 @@ interface Account {
      */
     fun getBalance(): BigDecimal
 
+
+    /**
+     * アカウントの現在の残高を取得します
+     *
+     * @return 現在の残高
+     */
+    fun getBalance(currency: Currency): BigDecimal
+
     /**
      * アカウントの残高を設定します
      * 
      * @param balance 設定する残高
      */
     fun setBalance(balance: BigDecimal)
+
+    /**
+     * アカウントの残高を設定します
+     * 
+     * @param balance 設定する残高
+     */
+    fun setBalance(balance: BigDecimal, currency: Currency)
     
     /**
      * アカウントの取引履歴を取得します

@@ -1,5 +1,7 @@
 package party.morino.kerria
 
+import net.milkbowl.vault.economy.Economy
+import org.bukkit.plugin.ServicePriority
 import org.bukkit.plugin.java.JavaPlugin
 import org.jetbrains.exposed.sql.Database
 import org.koin.core.context.startKoin
@@ -9,8 +11,10 @@ import party.morino.kerria.api.KerriaAPI
 import party.morino.kerria.api.account.AccountManager
 import party.morino.kerria.api.files.ConfigManager
 import party.morino.kerria.api.log.LogManager
+import party.morino.kerria.economy.VaultEconomy
 import party.morino.kerria.files.ConfigManagerImpl
 import party.morino.kerria.log.LogManagerImpl
+import sun.jvm.hotspot.HelloWorld.e
 
 /**
  * Kerriaプラグインのメインクラス
@@ -59,6 +63,8 @@ class Kerria : JavaPlugin(), KerriaAPI {
 
         // データベースの初期化
         initDatabase()
+
+        server.servicesManager.register<Economy>(Economy::class.java, VaultEconomy(), this, ServicePriority.Highest)
         logger.info("Kerria has been enabled!")
     }
 

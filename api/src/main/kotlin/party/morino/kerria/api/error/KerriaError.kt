@@ -1,9 +1,16 @@
 package party.morino.kerria.api.error
 
 /**
- * Kerriaプラグインのエラーの基底クラス
- *
- * すべてのエラーはこのクラスを継承します。
- * エラーの種類に応じて適切なサブクラスを定義してください。
+ * Kerriaプラグインのエラー型
  */
-sealed class KerriaError
+sealed class KerriaError(message: String) : Exception(message) {
+    /**
+     * 通貨が見つからない場合のエラー
+     */
+    class CurrencyNotFound(message: String) : KerriaError(message)
+
+    /**
+     * データベースエラー
+     */
+    class DatabaseError(message: String) : KerriaError(message)
+}
