@@ -9,8 +9,6 @@ plugins {
 group = project.group
 version = project.version.toString()
 
-
-
 publishing {
     publications {
         create<MavenPublication>("maven") {
@@ -29,7 +27,9 @@ dependencies{
     implementation(libs.arrow.fx.coroutines)
 
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kaml)
 }
+
 kotlin {
     jvmToolchain {
         (this).languageVersion.set(JavaLanguageVersion.of(21))

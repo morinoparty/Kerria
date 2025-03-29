@@ -9,8 +9,8 @@ serialization = "1.8.0"
 exposed = "0.60.0"
 arrow = "2.0.1"
 sqlite = "3.49.1.0"
+kaml = "0.72.0"
 postgresql = "42.7.5"
-
 
 [libraries]
 paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
@@ -21,6 +21,8 @@ cloud-kotlin-coroutines-annotations = { group = "org.incendo", name = "cloud-kot
 cloudPaper = { group = "org.incendo", name = "cloud-paper", version.ref = "cloudPaper" }
 
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+kaml = { group="com.charleskorn.kaml", name="kaml", version.ref = "kaml"}
+
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutine" }
 
 mccoroutine-bukkit-api = { group = "com.github.shynixn.mccoroutine", name = "mccoroutine-bukkit-api", version.ref = "mccoroutine" }

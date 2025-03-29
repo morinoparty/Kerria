@@ -1,0 +1,11 @@
+api-version: '1.20'
+name: Kerria
+version: unspecified
+main: party.morino.kerria.Kerria
+website: https://kerria.docs.party.morino
+depend:
+- Vault
+libraries:
+- com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.21.0
+- com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.21.0
+- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1

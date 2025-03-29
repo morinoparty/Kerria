@@ -36,9 +36,6 @@ allprojects {
         maven("https://repo.codemc.io/repository/maven-public/")
     }
 
-
-
-
     kotlin {
         jvmToolchain {
             (this).languageVersion.set(JavaLanguageVersion.of(21))
