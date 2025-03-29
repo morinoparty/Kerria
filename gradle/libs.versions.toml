@@ -9,9 +9,8 @@ serialization = "1.8.0"
 exposed = "0.60.0"
 arrow = "2.0.1"
 sqlite = "3.49.1.0"
-postgresql = "42.7.1"
 kaml = "0.72.0"
-
+postgresql = "42.7.5"
 
 [libraries]
 paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
@@ -48,8 +47,8 @@ vault-api = { group = "com.github.MilkBowl", name = "vaultAPI", version = "1.7.1
 run-paper = { id = "xyz.jpenilla.run-paper", version = "2.3.1" }
 resource-factory = { id = "xyz.jpenilla.resource-factory", version = "1.2.0" }
 shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.1.10" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.1.10" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.1.20" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.1.20" }
 dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
 
 [bundles]
