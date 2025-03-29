@@ -7,4 +7,4 @@ import party.morino.kerria.api.error.KerriaError
  * @property message エラーメッセージ
  * @property cause 原因となった例外（存在する場合）
  */
-data class UnexpectedError(val message: String, val cause: Throwable? = null) : KerriaError() 
+data class UnexpectedError(override val message: String, override val cause: Throwable? = null) : KerriaError(message) 

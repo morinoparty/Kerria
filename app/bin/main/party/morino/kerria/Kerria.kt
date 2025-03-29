@@ -11,10 +11,10 @@ import party.morino.kerria.api.KerriaAPI
 import party.morino.kerria.api.account.AccountManager
 import party.morino.kerria.api.files.ConfigManager
 import party.morino.kerria.api.log.LogManager
+import party.morino.kerria.api.currency.CurrencyManager
 import party.morino.kerria.economy.VaultEconomy
 import party.morino.kerria.files.ConfigManagerImpl
 import party.morino.kerria.log.LogManagerImpl
-import sun.jvm.hotspot.HelloWorld.e
 
 /**
  * Kerriaプラグインのメインクラス
@@ -37,7 +37,7 @@ class Kerria : JavaPlugin(), KerriaAPI {
     private lateinit var accountManager: AccountManager
     private lateinit var logManager: LogManager
     private lateinit var configManager: ConfigManager
-
+    private lateinit var currencyManager: CurrencyManager
     /**
      * プラグインの有効化時に呼び出されるメソッド
      *
@@ -53,6 +53,8 @@ class Kerria : JavaPlugin(), KerriaAPI {
                 single<AccountManager> { AccountManagerImpl() }
                 single<LogManager> { LogManagerImpl(this@Kerria) }
                 single<ConfigManager> { ConfigManagerImpl(this@Kerria) }
+                // TODO: 通貨管理機能の実装が完了したら有効化
+                // single<CurrencyManager> { CurrencyManagerImpl() }
             })
         }
 
@@ -60,7 +62,7 @@ class Kerria : JavaPlugin(), KerriaAPI {
         accountManager = org.koin.core.context.GlobalContext.get().get()
         logManager = org.koin.core.context.GlobalContext.get().get()
         configManager = org.koin.core.context.GlobalContext.get().get()
-
+        currencyManager = org.koin.core.context.GlobalContext.get().get()
         // データベースの初期化
         initDatabase()
 
@@ -130,4 +132,11 @@ class Kerria : JavaPlugin(), KerriaAPI {
      * @return 設定管理機能のインスタンス
      */
     override fun getConfigManager(): ConfigManager = configManager
+
+    /**
+     * 通貨管理機能のインスタンスを取得します
+     *
+     * @return 通貨管理機能のインスタンス
+     */
+    override fun getCurrencyManager(): CurrencyManager = currencyManager
 }

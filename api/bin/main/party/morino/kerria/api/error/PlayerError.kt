@@ -5,22 +5,22 @@ import party.morino.kerria.api.error.KerriaError
 /**
  * プレイヤー関連のエラー
  */
-sealed class PlayerError : KerriaError() {
+sealed class PlayerError(message: String) : KerriaError(message) {
     /**
      * プレイヤーが見つからない場合のエラー
      * @property uuid 見つからなかったプレイヤーのUUID
      */
-    data class PlayerNotFound(val uuid: String) : PlayerError()
+    class PlayerNotFound(val uuid: String) : PlayerError("Player not found: $uuid")
 
     /**
      * プレイヤーが既に存在する場合のエラー
      * @property uuid 既に存在するプレイヤーのUUID
      */
-    data class PlayerAlreadyExists(val uuid: String) : PlayerError()
+    class PlayerAlreadyExists(val uuid: String) : PlayerError("Player already exists: $uuid")
 
     /**
      * プレイヤーがオフラインの場合のエラー
      * @property uuid オフラインのプレイヤーのUUID
      */
-    data class PlayerOffline(val uuid: String) : PlayerError()
+    class PlayerOffline(val uuid: String) : PlayerError("Player is offline: $uuid")
 } 

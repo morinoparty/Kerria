@@ -5,18 +5,18 @@ import party.morino.kerria.api.error.KerriaError
 /**
  * 設定関連のエラー
  */
-sealed class ConfigError : KerriaError() {
+sealed class ConfigError(message: String) : KerriaError(message) {
     /**
      * 設定ファイルの読み込みに失敗した場合のエラー
      * @property message エラーメッセージ
      */
-    data class LoadError(val message: String) : ConfigError()
+    class LoadError(override val message: String) : ConfigError(message)
 
     /**
      * 設定ファイルの保存に失敗した場合のエラー
      * @property message エラーメッセージ
      */
-    data class SaveError(val message: String) : ConfigError()
+    class SaveError(override val message: String) : ConfigError(message)
 
     /**
      * 設定値が無効な場合のエラー
@@ -24,11 +24,11 @@ sealed class ConfigError : KerriaError() {
      * @property value 無効な設定値
      * @property reason 無効である理由
      */
-    data class InvalidValue(val key: String, val value: String, val reason: String) : ConfigError()
+    class InvalidValue(val key: String, val value: String, val reason: String) : ConfigError("Invalid value for key: $key, value: $value, reason: $reason")
 
     /**
      * 必要な設定が見つからない場合のエラー
      * @property key 見つからない設定キー
      */
-    data class MissingConfig(val key: String) : ConfigError()
+    class MissingConfig(val key: String) : ConfigError("Missing config key: $key")
 } 

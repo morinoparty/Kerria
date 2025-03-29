@@ -3,6 +3,7 @@ package party.morino.kerria.economy
 import net.milkbowl.vault.economy.AbstractEconomy
 import net.milkbowl.vault.economy.EconomyResponse
 import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.Kerria
@@ -10,7 +11,7 @@ import party.morino.kerria.api.account.AccountManager
 import party.morino.kerria.api.files.ConfigManager
 import java.math.BigDecimal
 import java.math.RoundingMode
-
+import kotlinx.coroutines.runBlocking
 @SuppressWarnings("deprecation")
 class VaultEconomy : AbstractEconomy(), KoinComponent {
     private val plugin: Kerria by inject()
@@ -43,7 +44,7 @@ class VaultEconomy : AbstractEconomy(), KoinComponent {
     }
 
     override fun currencyNameSingular(): String {
-        return configManager.getConfig().economy.currencySymbol
+        return configManager.getConfig().economy.currency.symbol
     }
 
     override fun hasAccount(playerName: String): Boolean {
@@ -59,12 +60,20 @@ class VaultEconomy : AbstractEconomy(), KoinComponent {
     }
 
     override fun getBalance(playerName: String): Double {
-        val offlinePlayer = Bukkit.getOfflinePlayerIfCached(playerName) ?: return 0.0
-        val account = accountManager.getAccount(offlinePlayer).getOrNull() ?: return 0.0
-        return account.getBalance().setScale(fractionalDigits(), RoundingMode.HALF_UP).toDouble()
+        val offlinePlayer: OfflinePlayer = Bukkit.getOfflinePlayerIfCached(playerName) ?: return 0.0
+        return getBalance(offlinePlayer)
     }
 
-    override fun getBalance(playerName: String, world: String?): Double {
+    override fun getBalance(player: OfflinePlayer): Double {
+        val account = accountManager.getAccount(player).getOrNull() ?: return 0.0
+        return runBlocking { account.getBalance() }.setScale(fractionalDigits(), RoundingMode.HALF_UP).toDouble()
+    }
+
+    override fun getBalance(player: OfflinePlayer, world: String?): Double {
+        return getBalance(player)
+    }
+
+    override fun getBalance(playerName: String, world: String): Double {
         return getBalance(playerName)
     }
 

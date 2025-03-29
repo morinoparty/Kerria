@@ -9,7 +9,7 @@ import org.koin.core.component.inject
 import party.morino.kerria.Kerria
 import party.morino.kerria.api.KerriaAPI
 import party.morino.kerria.api.account.AccountManager
-import party.morino.kerria.api.model.Currency
+import party.morino.kerria.api.currency.Currency
 
 
 @Command("kerria")

@@ -2,7 +2,6 @@ package party.morino.kerria.api.account
 
 import party.morino.kerria.api.currency.Currency
 import party.morino.kerria.api.log.Log
-import party.morino.kerria.api.model.Currency
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID

@@ -87,9 +87,7 @@ class AccountImpl(id: EntityID<UUID>) : UUIDEntity(id), Account, KoinComponent {
 
 
     override suspend fun getBalance(currency: Currency): BigDecimal {
-        val balance = newSuspendedTransaction {
-
-        }
+        TODO("Not yet implemented")
     }
 
     /**

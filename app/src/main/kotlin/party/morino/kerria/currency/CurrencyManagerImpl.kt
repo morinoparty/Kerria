@@ -7,15 +7,20 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import party.morino.kerria.api.currency.Currency
 import party.morino.kerria.api.currency.CurrencyManager
 import party.morino.kerria.api.error.KerriaError
-import party.morino.kerria.api.error.KerriaError.CurrencyNotFound
+import party.morino.kerria.api.error.CurrencyError
 
 /**
  * CurrencyManagerの実装
  */
 class CurrencyManagerImpl : CurrencyManager {
+
+    override suspend fun getDefaultCurrency(): Either<KerriaError, Currency> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getCurrency(id: Int): Either<KerriaError, Currency> {
         return newSuspendedTransaction {
-            CurrencyEntity.findById(id)?.right() ?: CurrencyNotFound("Currency not found: $id").left()
+            CurrencyEntity.findById(id)?.right() ?: CurrencyError.CurrencyNotFound("Currency not found: $id").left()
         }
     }
 
