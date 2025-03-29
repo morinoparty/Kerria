@@ -24,6 +24,7 @@
         "@easyops-cn/docusaurus-search-local": "^0.48.4",
         "@mdx-js/react": "^3.0.0",
         "@radix-ui/react-hover-card": "^1.1.6",
+        "@radix-ui/react-popover": "^1.1.6",
         "@radix-ui/react-slot": "^1.1.1",
         "@radix-ui/react-toast": "^1.2.5",
         "class-variance-authority": "^0.7.1",
@@ -31,7 +32,8 @@
         "lucide-react": "^0.474.0",
         "prism-react-renderer": "^2.4.1",
         "react": "^19.0.0",
-        "react-dom": "^19.0.0"
+        "react-dom": "^19.0.0",
+        "uuid": "^11.1.0"
     },
     "devDependencies": {
         "@biomejs/biome": "1.9.4",

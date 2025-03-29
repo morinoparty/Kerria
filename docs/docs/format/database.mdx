@@ -3,21 +3,151 @@ title: データベース
 sidebar_position: 1
 ---
 
+import { UUIDV7 } from '@site/src/components/uuid-example';
+import { UUIDV4 } from '@site/src/components/uuid-example';
+import { v4 } from 'uuid';
+
 # データベース
 
 KerriaはSQLiteとPostgreSQLをサポートしています。
+
+## Table definition
+
+### ACCOUNTS
+
+<table>
+    <thead>
+        <tr>
+            <th>column name</th>
+            <th>type</th>
+            <th>example</th>
+            <th>description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>id</td>
+            <td>uuid v7</td>
+            <td><UUIDV7 /></td>
+            <td>主キー Kerria用のアカウントID</td>
+        </tr>
+        <tr>
+            <td>player_unique_id</td>
+            <td>uuid v4(varchar(36))</td>
+            <td><UUIDV4 /></td>
+            <td>Minecraft用のプレイヤーID</td>
+        </tr>
+        <tr>
+            <td>player_name</td>
+            <td>varchar(16)</td>
+            <td>Notch</td>
+            <td>プレイヤーの名前</td>
+        </tr>
+        <tr>
+            <td>balance</td>
+            <td>decimal(20, 4)</td>
+            <td>1,000,000</td>
+            <td>残高</td>
+        </tr>
+    </tbody>
+</table>
+
+### ACCOUNT_BALANCE
+
+<table>
+    <thead>
+        <tr>
+            <th>column name</th>
+            <th>type</th>
+            <th>example</th>
+            <th>description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>id</td>
+            <td>int</td>
+            <td>1</td>
+            <td>主キー</td>
+        </tr>
+    </tbody>
+</table>
+
+### CURRENCIES
+
+<table>
+    <thead>
+        <tr>
+            <th>column name</th>
+            <th>type</th>
+            <th>example</th>
+            <th>description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>id</td>
+            <td>int</td>
+            <td>1</td>
+            <td>主キー</td>
+        </tr>
+        <tr>
+            <td>name</td>
+            <td>varchar(50)</td>
+            <td>JPY | USD | 葉っぱ</td>
+            <td>通貨名</td>
+        </tr>
+        <tr>
+            <td>plural</td>
+            <td>varchar(50)</td>
+            <td>円 | ドル | 落ち葉</td>
+            <td>通貨の複数形</td>
+        </tr>
+        <tr>
+            <td>symbol</td>
+            <td>varchar(10)</td>
+            <td>￥ | $ | 🍃 | </td>
+            <td>通貨記号</td>
+        </tr>
+        <tr>
+            <td>format</td>
+            <td>varchar(100)</td>
+            <td>#,##0.##\<plural>  <br />  \<symbol> #,##0</td>
+            <td>通貨フォーマット <br /> ex) 1,000.00円 | 1,000🍃</td>
+        </tr>
+    </tbody>
+</table>
+
+### ACCOUNT_BALANCE_HISTORY
+
+<table>
+    <thead>
+        <tr>
+            <th>column name</th>
+            <th>type</th>
+            <th>example</th>
+            <th>description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>id</td>
+            <td>int</td>
+            <td>1</td>
+        </tr>
+    </tbody>
+</table>
 
 ## ER図
 
 ```mermaid
 erDiagram
 
-    ACCOUNT {
+    ACCOUNTS {
         int id
         uuid player_unique_id
-        string player_name
-        long balance
+        varchar player_name
+        decimal balance
     }
 
-    ACCOUNT ||--|| LOG : has
 ```

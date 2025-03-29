@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.shadow)
     alias(libs.plugins.run.paper)
     alias(libs.plugins.resource.factory)
+    alias(libs.plugins.modulegraph)
 }
 
 group = "party.morino"
@@ -75,4 +76,10 @@ fun Provider<ExternalModuleDependencyBundle>.asString(): List<String> {
     return this.get().map { dependency ->
         "${dependency.group}:${dependency.name}:${dependency.version}"
     }
+}
+
+moduleGraphConfig {
+    readmePath.set("${project.rootDir}/docs/docs/dependency.md")
+    heading.set("### Module Graph")
+    showFullPath.set(false)
 }

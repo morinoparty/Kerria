@@ -1,34 +1,27 @@
 import React from "react";
 import {
-    HoverCard,
-    HoverCardContent,
-    HoverCardTrigger,
-} from "@site/src/components/ui/hover-card";
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@site/src/components/ui/popover";
 import { CircleCheckBig, Check, CircleAlert, HandHelping, CircleX } from "lucide-react";
-import { CommandStatus } from "../types/command";
+import { Command } from "../types/command";
 
 interface CommandLineProps {
-    status: CommandStatus;
-    command: string;
-    description: string;
-    aliases: string[];
-    permission: string;
+    command: Command;
 }
 
 // Create the badge component
 export const CommandLine: React.FC<CommandLineProps> = ({
-    status,
     command,
-    description,
-    aliases,
-    permission,
 }) => {
     // Define the common style
-    const commonStyle = "rounded-lg max-w-[1024px] min-h-[48px] text-black"; // Change text color to black
+    const commonStyle = "rounded-lg w-full h-[48px] text-black"; // Change text color to black
 
     // Return the style based on the status
     const getCommandLineStyle = (status: string) => {
         const styles: { [key: string]: string } = {
+    
             stable: `${commonStyle} bg-green-500/50 dark:bg-green-300/70`, // Make green more visible
             newly: `${commonStyle} bg-blue-500/50 dark:bg-blue-300/70`, // Make blue more visible
             beta: `${commonStyle} bg-orange-500/50 dark:bg-orange-200/70`, // Make orange more visible
@@ -51,51 +44,51 @@ export const CommandLine: React.FC<CommandLineProps> = ({
 
     return (
         <>
-            <HoverCard>
-                <HoverCardTrigger className={getCommandLineStyle(status)}>
+            <Popover>
+                <PopoverTrigger className={getCommandLineStyle(command.status)}>
                     <div
-                        className={`flex items-center ${getCommandLineStyle(status)}`}
+                        className={`flex items-center ${getCommandLineStyle(command.status)}`}
                     >
                         <div className="flex items-center ml-8">
-                            {status === "proposal" && (
-                                <HandHelping className={getBadgeStyle(status)} />
+                            {command.status === "proposal" && (
+                                <HandHelping className={getBadgeStyle(command.status)} />
                             )}
-                            {status === "beta" && (
-                                <CircleAlert className={getBadgeStyle(status)} />
+                            {command.status === "beta" && (
+                                <CircleAlert className={getBadgeStyle(command.status)} />
                             )}
-                            {status === "newly" && (
-                                <Check className={getBadgeStyle(status)} />
+                            {command.status === "newly" && (
+                                <Check className={getBadgeStyle(command.status)} />
                             )}
-                            {status === "stable" && (
-                                <CircleCheckBig className={getBadgeStyle(status)} />
+                            {command.status === "stable" && (
+                                <CircleCheckBig className={getBadgeStyle(command.status)} />
                             )}
-                            {status === "deprecated" && (
-                                <CircleX className={getBadgeStyle(status)} />
+                            {command.status === "deprecated" && (
+                                <CircleX className={getBadgeStyle(command.status)} />
                             )}
-                            <span className="text-black">{command}</span>
+                            <span className="text-black">{command.command}</span>
                         </div>
                     </div>
-                </HoverCardTrigger>
-                <HoverCardContent className="text-black bg-white dark:text-white dark:bg-[var(--ifm-background-color)]">
+                </PopoverTrigger>
+                <PopoverContent className="text-black bg-white dark:text-white dark:bg-[var(--ifm-background-color)]">
                     <div className="flex flex-col gap-2 text-black dark:text-white">
                         <div className="flex items-center gap-2">
                             <span className="font-medium">
-                                {status === "proposal" && "提案中のコマンド"}
-                                {status === "beta" && "ベータ版のコマンド"}
-                                {status === "newly" && "新しいコマンド"}
-                                {status === "stable" && "安定版のコマンド"}
-                                {status === "deprecated" && "非推奨のコマンド"}
+                                {command.status === "proposal" && "提案中のコマンド"}
+                                {command.status === "beta" && "ベータ版のコマンド"}
+                                {command.status === "newly" && "新しいコマンド"}
+                                {command.status === "stable" && "安定版のコマンド"}
+                                {command.status === "deprecated" && "非推奨のコマンド"}
                             </span>
                         </div>
                         <div className="h-px bg-gray-200 dark:bg-gray-700" />
                         <div className="flex flex-col gap-1">
-                            <p className="text-sm">エイリアス: {aliases.join(", ")}</p>
-                            <p className="text-sm mb-0">パーミッション: {permission}</p>
+                            <p className="text-sm">エイリアス: {command.aliases.join(", ")}</p>
+                            <p className="text-sm mb-0">パーミッション: {command.permission}</p>
                         </div>
                     </div>
-                </HoverCardContent>
-            </HoverCard>
-            <p className="pt-2 pl-8 text-black dark:text-white">説明: {description}</p>
+                </PopoverContent>
+            </Popover>
+            <p className="pt-2 pl-8 text-black dark:text-white">説明: {command.description} {command.tags.includes("player") ? "" : "(管理者向け)"}</p>
         </>
     );
 };

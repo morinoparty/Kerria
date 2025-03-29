@@ -15,20 +15,21 @@ const ranking = [
 ]
 
 // Create the badge component
-export const CommandList: React.FC<CommandListProps> = ({ list }) => {
+export const CommandList: React.FC<CommandListProps> = ({ list }: CommandListProps) => {
+
+    const sortedList = list.sort((a, b) => b.tags.sort().join(',').localeCompare(a.tags.sort().join(',')));
+    
+    console.log(sortedList.map(item => item.tags));
+
     return (
         <div>
             {ranking.map((rank) => (
-                list
+                sortedList
                     .filter(item => item.status === rank)
                     .map(item => (
                         <div key={item.command} className="pb-2">
                             <CommandLine
-                                status={item.status}
-                                command={item.command}
-                                description={item.description}
-                                aliases={item.aliases}
-                                permission={item.permission}
+                                command={item}
                             />
                         </div>
                     ))
