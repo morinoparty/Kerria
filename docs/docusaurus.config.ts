@@ -54,11 +54,11 @@ const config: Config = {
                 docsRouteBasePath: "/",
             },
         ],
-    ],  
+    ],
     themeConfig: {
         image: "img/docusaurus-social-card.jpg",
         mermaid: {
-            theme: {light: "forest", dark: "dark"},
+            theme: { light: "forest", dark: "dark" },
         },
         navbar: {
             title: "Kerria",
@@ -139,6 +139,9 @@ const config: Config = {
             darkTheme: prismThemes.dracula,
         },
     } satisfies Preset.ThemeConfig,
+    future: {
+        experimental_faster: true,
+    },
 };
 
 export default config;

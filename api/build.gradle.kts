@@ -1,12 +1,11 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
 
     `maven-publish`
 }
 
-group = project.group
+group = "party.morino"
 version = project.version.toString()
 
 publishing {
@@ -20,29 +19,13 @@ publishing {
     }
 }
 
-dependencies{
+dependencies {
     compileOnly(libs.paper.api)
 
     implementation(libs.arrow.core)
     implementation(libs.arrow.fx.coroutines)
 
+    implementation(kotlin("stdlib-jdk8"))
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kaml)
-}
-
-kotlin {
-    jvmToolchain {
-        (this).languageVersion.set(JavaLanguageVersion.of(21))
-    }
-    jvmToolchain(21)
-}
-
-tasks {
-    compileKotlin {
-        compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
-        compilerOptions.javaParameters = true
-    }
-}
-repositories {
-    mavenCentral()
 }

@@ -3,23 +3,17 @@ name: Release Drafter
 on:
   push:
     branches:
-      - master
+      - main
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
 
 jobs:
-  build:
-    permissions:
-      contents: write
-      pull-requests: write
+  release-drafter:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: release-drafter/release-drafter@v6
-        id: release-drafter
+      - uses: release-drafter/release-drafter@b1476f6e6eb133afa41ed8589daba6dc69b4d3f5 # v6.1.0
         with:
           publish: false
         env:
