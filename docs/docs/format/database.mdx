@@ -5,7 +5,7 @@ sidebar_position: 1
 
 import { UUIDV7 } from '@site/src/components/uuid-example';
 import { UUIDV4 } from '@site/src/components/uuid-example';
-import { v4 } from 'uuid';
+import { Timestamp } from '@site/src/components/timestamp';
 
 # データベース
 
@@ -32,15 +32,15 @@ KerriaはSQLiteとPostgreSQLをサポートしています。
             <td>主キー Kerria用のアカウントID</td>
         </tr>
         <tr>
-            <td>player_unique_id</td>
-            <td>uuid v4(varchar(36))</td>
+            <td>minecraft_unique_id</td>
+            <td>uuid v4 <br /> (varchar(36))</td>
             <td><UUIDV4 /></td>
             <td>Minecraft用のプレイヤーID</td>
         </tr>
         <tr>
             <td>player_name</td>
             <td>varchar(16)</td>
-            <td>Notch</td>
+            <td>Notch | bank:Race</td>
             <td>プレイヤーの名前</td>
         </tr>
         <tr>
@@ -48,6 +48,12 @@ KerriaはSQLiteとPostgreSQLをサポートしています。
             <td>decimal(20, 4)</td>
             <td>1,000,000</td>
             <td>残高</td>
+        </tr>
+        <tr>
+            <td>type</td>
+            <td>enum</td>
+            <td>player | bank</td>
+            <td>アカウントの種類</td>
         </tr>
     </tbody>
 </table>
@@ -65,11 +71,24 @@ KerriaはSQLiteとPostgreSQLをサポートしています。
     </thead>
     <tbody>
         <tr>
-            <td>id</td>
-            <td>int</td>
-            <td>1</td>
+            <td>account_unique_id</td>
+            <td>uuid v7 <br /> (varchar(36))</td>
+            <td><UUIDV7 /></td>
             <td>主キー</td>
         </tr>
+        <tr>
+            <td>balance</td>
+            <td>decimal(20, 4)</td>
+            <td>1,000,000</td>
+            <td>残高</td>
+        </tr>
+        <tr>
+            <td>currency_id</td>
+            <td>int</td>
+            <td>1</td>
+            <td>通貨ID</td>
+        </tr>
+        
     </tbody>
 </table>
 
@@ -98,10 +117,22 @@ KerriaはSQLiteとPostgreSQLをサポートしています。
             <td>通貨名</td>
         </tr>
         <tr>
+            <td>minor_name</td>
+            <td>varchar(50)</td>
+            <td>銭 | セント | 葉っぱ</td>
+            <td>小数点以下の桁数の名前</td>
+        </tr>
+        <tr>
             <td>plural</td>
             <td>varchar(50)</td>
             <td>円 | ドル | 落ち葉</td>
             <td>通貨の複数形</td>
+        </tr>
+        <tr>
+            <td>minor_plural</td>
+            <td>varchar(50)</td>
+            <td>銭 | セント | 葉っぱ</td>
+            <td>小数点以下の桁数の複数形</td>
         </tr>
         <tr>
             <td>symbol</td>
@@ -134,6 +165,43 @@ KerriaはSQLiteとPostgreSQLをサポートしています。
             <td>id</td>
             <td>int</td>
             <td>1</td>
+            <td>主キー</td>
+        </tr>
+        <tr>
+            <td>account_unique_id</td>
+            <td>uuid v7 <br /> (varchar(36))</td>
+            <td><UUIDV7 /></td>
+            <td>Kerria用のアカウントID</td>
+        </tr>
+        <tr>
+            <td>amount</td>
+            <td>decimal(20, 4)</td>
+            <td>1,000,000</td>
+            <td>金額 (マイナスも可)</td>
+        </tr>
+        <tr>
+            <td>currency_id</td>
+            <td>int</td>
+            <td>1</td>
+            <td>通貨ID</td>
+        </tr>
+        <tr>
+            <td>treate_plugin_name</td>
+            <td>varchar(100)</td>
+            <td>Kerria | QuickShop  </td>
+            <td>取引を処理したプラグインの名前</td>
+        </tr>
+        <tr>
+            <td>message</td>
+            <td>varchar(100)</td>
+            <td>おこづかい | 購入 | 売却</td>
+            <td>取引のメッセージ</td>
+        </tr>
+        <tr>
+            <td>timestamp</td>
+            <td>datetime</td>
+            <td><Timestamp /></td>
+            <td>取引日時 (ISO 8601)</td>
         </tr>
     </tbody>
 </table>

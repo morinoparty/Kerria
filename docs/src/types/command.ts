@@ -36,4 +36,4 @@ export interface Command {
      * コマンドのステータス
      */
     status: CommandStatus;
-} 
+}

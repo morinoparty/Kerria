@@ -6,19 +6,18 @@ plugins {
     java
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.dokka)
+    alias(libs.plugins.ktlint)
+    id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 
-val projectVersion: String by project
-group = "party.morino.kerria"
-version = projectVersion
+val version: String by project
+group = "party.morino"
 
 buildscript {
     repositories {
         mavenCentral()
     }
 }
-
-val libs = rootProject.libs
 
 allprojects {
 
@@ -36,6 +35,11 @@ allprojects {
         maven("https://repo.codemc.io/repository/maven-public/")
     }
 
+    dependencies {
+        compileOnly(kotlin("stdlib"))
+        compileOnly("org.jetbrains:annotations:26.1.0")
+    }
+
     kotlin {
         jvmToolchain {
             (this).languageVersion.set(JavaLanguageVersion.of(21))
@@ -43,13 +47,12 @@ allprojects {
         jvmToolchain(21)
     }
 
-    tasks.register("hello") {
-        doLast {
-            println("I'm ${this.project.name}")
-        }
-    }
-
     tasks {
+        register("hello") {
+            doLast {
+                println("I'm ${this.project.name}")
+            }
+        }
         test {
             useJUnitPlatform()
             testLogging {
@@ -74,7 +77,18 @@ allprojects {
 }
 
 dependencies {
-    dokka(project(":app"))
+    implementation(kotlin("stdlib-jdk8"))
+}
+repositories {
+    mavenCentral()
+}
+kotlin {
+    jvmToolchain(21)
+}
+
+dependencies {
+    dokka(project(":common"))
+    dokka(project(":paper"))
     dokka(project(":api"))
 }
 
@@ -83,6 +97,24 @@ dokka {
         footerMessage.set("No right reserved. This docs under CC0 1.0.")
     }
     dokkaPublications.html {
-        outputDirectory.set(file("${project.rootDir}/docs/static/dokka"))
+        outputDirectory.set(file("${project.rootDir}/docs/public/dokka"))
     }
+}
+detekt {
+    toolVersion = "1.23.8"
+    source.setFrom(
+        "api/src/main/java",
+        "api/src/main/kotlin",
+        "common/src/main/java",
+        "common/src/main/kotlin",
+        "paper/src/main/java",
+        "paper/src/main/kotlin",
+    )
+    parallel = true
+    buildUponDefaultConfig = true
+    allRules = true
+    baseline = file("./detekt-baseline.xml")
+    disableDefaultRuleSets = false
+    debug = false
+    ignoreFailures = true
 }
