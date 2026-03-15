@@ -4,7 +4,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
-import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.koin.core.component.KoinComponent
@@ -83,27 +83,26 @@ class DatabaseManager(private val plugin: JavaPlugin) : KoinComponent {
 
     /**
      * デフォルト通貨がなければ設定から作成する
+     *
+     * シーケンス競合を避けるため、明示的IDの指定はせず insertAndGetId を使う。
+     * 既に通貨が1つでも存在すればシード処理をスキップする。
      */
     private fun seedDefaultCurrency() {
         val currencyConfig = configManager.getConfig().economy.currency
         transaction {
-            // デフォルト通貨が存在しない場合のみ作成
-            val exists = CurrencyTable
-                .selectAll()
-                .where { CurrencyTable.id eq currencyConfig.id }
-                .count() > 0
+            // 通貨が1つでも存在すればスキップ
+            val hasAnyCurrency = CurrencyTable.selectAll().count() > 0
+            if (hasAnyCurrency) return@transaction
 
-            if (!exists) {
-                CurrencyTable.insert {
-                    it[id] = currencyConfig.id
-                    it[name] = currencyConfig.name
-                    it[symbol] = currencyConfig.symbol
-                    it[plural] = currencyConfig.plural
-                    it[format] = currencyConfig.format
-                    it[fractionalDigits] = currencyConfig.fractionalDigits
-                }
-                plugin.logger.info("Default currency '${currencyConfig.name}' created.")
+            // デフォルト通貨を作成（IDは DB が自動採番）
+            val generatedId = CurrencyTable.insertAndGetId {
+                it[name] = currencyConfig.name
+                it[symbol] = currencyConfig.symbol
+                it[plural] = currencyConfig.plural
+                it[format] = currencyConfig.format
+                it[fractionalDigits] = currencyConfig.fractionalDigits
             }
+            plugin.logger.info("Default currency '${currencyConfig.name}' created with id=${generatedId.value}.")
         }
     }
 }

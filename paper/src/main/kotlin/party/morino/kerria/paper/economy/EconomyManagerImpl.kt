@@ -18,6 +18,7 @@ import java.util.UUID
  * 経済操作のビジネスロジックを実装するクラス
  *
  * アトミックなDB操作で入金・出金・送金を行い、ログ記録の結果も確認する。
+ * ログ失敗時はトランザクション全体をロールバックする。
  */
 class EconomyManagerImpl : EconomyManager, KoinComponent {
     private val accountRepository: AccountRepository by inject()
@@ -36,21 +37,24 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
             transaction {
                 // アカウントの存在確認
                 accountRepository.findById(accountId)
-                    ?: return@transaction KerriaError.PlayerNotFound(accountId.toString()).left()
+                    ?: throw KerriaError.PlayerNotFound(accountId.toString())
 
                 // 残高行を確保し、アトミックに加算
                 accountRepository.ensureBalanceRow(accountId, currencyId)
                 accountRepository.addBalance(accountId, currencyId, amount)
 
-                // 取引ログを記録し、エラーがあれば伝搬する
+                // 取引ログを記録（失敗時は throw してロールバック）
                 logManager.logTransaction(accountId, accountId, currencyId, amount)
-                    .onLeft { return@transaction it.left() }
+                    .onLeft { throw it }
 
                 // 更新後の残高を返す
                 accountRepository.getBalance(accountId, currencyId).right()
             }
         }.getOrElse { e ->
-            KerriaError.DatabaseError("Deposit failed: ${e.message}", e).left()
+            when (e) {
+                is KerriaError -> e.left()
+                else -> KerriaError.DatabaseError("Deposit failed: ${e.message}", e).left()
+            }
         }
     }
 
@@ -66,27 +70,30 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
             transaction {
                 // アカウントの存在確認
                 accountRepository.findById(accountId)
-                    ?: return@transaction KerriaError.PlayerNotFound(accountId.toString()).left()
+                    ?: throw KerriaError.PlayerNotFound(accountId.toString())
 
                 // アトミックに減算（残高チェック付き）
                 val rows = accountRepository.subtractBalance(accountId, currencyId, amount)
                 if (rows == 0) {
                     val currentBalance = accountRepository.getBalance(accountId, currencyId)
-                    return@transaction KerriaError.InsufficientBalance(
+                    throw KerriaError.InsufficientBalance(
                         required = amount,
                         actual = currentBalance,
-                    ).left()
+                    )
                 }
 
-                // 取引ログを記録
+                // 取引ログを記録（失敗時は throw してロールバック）
                 logManager.logTransaction(accountId, accountId, currencyId, amount.negate())
-                    .onLeft { return@transaction it.left() }
+                    .onLeft { throw it }
 
                 // 更新後の残高を返す
                 accountRepository.getBalance(accountId, currencyId).right()
             }
         }.getOrElse { e ->
-            KerriaError.DatabaseError("Withdraw failed: ${e.message}", e).left()
+            when (e) {
+                is KerriaError -> e.left()
+                else -> KerriaError.DatabaseError("Withdraw failed: ${e.message}", e).left()
+            }
         }
     }
 
@@ -107,33 +114,36 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
             transaction {
                 // 送金元の存在確認
                 accountRepository.findById(fromAccountId)
-                    ?: return@transaction KerriaError.PlayerNotFound(fromAccountId.toString()).left()
+                    ?: throw KerriaError.PlayerNotFound(fromAccountId.toString())
                 // 送金先の存在確認
                 accountRepository.findById(toAccountId)
-                    ?: return@transaction KerriaError.PlayerNotFound(toAccountId.toString()).left()
+                    ?: throw KerriaError.PlayerNotFound(toAccountId.toString())
 
                 // 送金元からアトミックに減算（残高チェック付き）
                 val rows = accountRepository.subtractBalance(fromAccountId, currencyId, amount)
                 if (rows == 0) {
                     val currentBalance = accountRepository.getBalance(fromAccountId, currencyId)
-                    return@transaction KerriaError.InsufficientBalance(
+                    throw KerriaError.InsufficientBalance(
                         required = amount,
                         actual = currentBalance,
-                    ).left()
+                    )
                 }
 
                 // 送金先に加算
                 accountRepository.ensureBalanceRow(toAccountId, currencyId)
                 accountRepository.addBalance(toAccountId, currencyId, amount)
 
-                // 取引ログを記録
+                // 取引ログを記録（失敗時は throw してロールバック）
                 logManager.logTransaction(fromAccountId, toAccountId, currencyId, amount)
-                    .onLeft { return@transaction it.left() }
+                    .onLeft { throw it }
 
                 Unit.right()
             }
         }.getOrElse { e ->
-            KerriaError.DatabaseError("Transfer failed: ${e.message}", e).left()
+            when (e) {
+                is KerriaError -> e.left()
+                else -> KerriaError.DatabaseError("Transfer failed: ${e.message}", e).left()
+            }
         }
     }
 }
