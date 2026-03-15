@@ -2,43 +2,42 @@ package party.morino.kerria.api
 
 import party.morino.kerria.api.account.AccountManager
 import party.morino.kerria.api.currency.CurrencyManager
-import party.morino.kerria.api.files.ConfigManager
+import party.morino.kerria.api.economy.EconomyManager
 import party.morino.kerria.api.log.LogManager
 
 /**
- * KerriaプラグインのメインAPIインターフェース
- * 
+ * KerriaプラグインのメインAPIファサード
+ *
  * このインターフェースを通じて、Kerriaの主要な機能にアクセスできます。
- * アカウント管理、ログ管理、設定管理などの機能を提供します。
+ * アカウント管理、通貨管理、経済操作、ログ管理の機能を提供します。
  */
 interface KerriaAPI {
 
     /**
      * アカウント管理機能へのアクセスを提供します
-     * 
-     * @return アカウント管理機能を持つ[party.morino.kerria.api.account.AccountManager]のインスタンス
+     *
+     * @return [AccountManager]のインスタンス
      */
     fun getAccountManager(): AccountManager
 
     /**
-     * ログ管理機能へのアクセスを提供します
-     * 
-     * @return ログ管理機能を持つ[party.morino.kerria.api.log.LogManager]のインスタンス
-     */
-    fun getLogManager(): LogManager
-
-    /**
-     * 設定管理機能へのアクセスを提供します
-     * 
-     * @return 設定管理機能を持つ[party.morino.kerria.api.files.ConfigManager]のインスタンス
-     */
-    fun getConfigManager(): ConfigManager
-
-
-    /**
      * 通貨管理機能へのアクセスを提供します
-     * 
-     * @return 通貨管理機能を持つ[party.morino.kerria.api.currency.CurrencyManager]のインスタンス
+     *
+     * @return [CurrencyManager]のインスタンス
      */
     fun getCurrencyManager(): CurrencyManager
+
+    /**
+     * 経済操作機能へのアクセスを提供します
+     *
+     * @return [EconomyManager]のインスタンス
+     */
+    fun getEconomyManager(): EconomyManager
+
+    /**
+     * ログ管理機能へのアクセスを提供します
+     *
+     * @return [LogManager]のインスタンス
+     */
+    fun getLogManager(): LogManager
 }

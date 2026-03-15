@@ -1,14 +1,15 @@
 package party.morino.kerria.api.account
 
 import arrow.core.Either
-import org.bukkit.OfflinePlayer
 import party.morino.kerria.api.error.KerriaError
+import java.math.BigDecimal
 import java.util.UUID
 
 /**
  * アカウント管理機能を提供するインターフェース
  *
- * プレイヤーのアカウント情報を管理し、UUIDやIDを使用してアカウントにアクセスする機能を提供します。
+ * プレイヤーのアカウント情報をUUIDベースで管理し、
+ * 残高の取得機能を提供します。
  * すべての操作は[Either]を返し、エラーハンドリングを型安全に行います。
  */
 interface AccountManager {
@@ -16,20 +17,26 @@ interface AccountManager {
     /**
      * プレイヤーのUUIDからアカウントを取得します
      *
-     * @param player 取得対象のプレイヤー
+     * @param playerUniqueId プレイヤーのUUID
      * @return アカウントの取得結果。成功時は[Account]、失敗時は[KerriaError]を返します
-     * @throws PlayerNotFound 指定されたUUIDのプレイヤーが見つからない場合
-     * @throws DatabaseError データベース操作に失敗した場合
      */
-    fun getAccount(player: OfflinePlayer): Either<KerriaError, Account>
+    fun getAccount(playerUniqueId: UUID): Either<KerriaError, Account>
 
     /**
-     * アカウントIDからアカウントを取得します
+     * プレイヤーのUUIDからアカウントを取得し、存在しない場合は作成します
      *
-     * @param uniqueId 取得対象のアカウントID(uuid v7)
-     * @return アカウントの取得結果。成功時は[Account]、失敗時は[KerriaError]を返します
-     * @throws PlayerNotFound 指定されたIDのアカウントが見つからない場合
-     * @throws DatabaseError データベース操作に失敗した場合
+     * @param playerUniqueId プレイヤーのUUID
+     * @param playerName プレイヤー名（新規作成時に使用）
+     * @return アカウントの取得または作成結果
      */
-    fun getAccount(uniqueId: UUID): Either<KerriaError, Account>
+    fun getOrCreateAccount(playerUniqueId: UUID, playerName: String): Either<KerriaError, Account>
+
+    /**
+     * アカウントIDと通貨IDから残高を取得します
+     *
+     * @param accountId アカウントのUUID
+     * @param currencyId 通貨のID
+     * @return 残高の取得結果
+     */
+    fun getBalance(accountId: UUID, currencyId: Int): Either<KerriaError, BigDecimal>
 }

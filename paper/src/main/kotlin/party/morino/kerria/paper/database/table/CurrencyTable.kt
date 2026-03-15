@@ -1,9 +1,9 @@
-package party.morino.kerria.paper.model.database
+package party.morino.kerria.paper.database.table
 
 import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 
 /**
- * 通貨テーブル
+ * 通貨テーブルの定義
  */
 object CurrencyTable : IntIdTable("currencies") {
     // 通貨名

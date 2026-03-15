@@ -17,6 +17,5 @@ buildCache {
         directory = file("$rootDir/.gradle/build-cache")
     }
 }
-include("common")
 include("paper")
 include("api")

@@ -1,0 +1,109 @@
+package party.morino.kerria.paper.database
+
+import org.bukkit.plugin.java.JavaPlugin
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import party.morino.kerria.api.files.ConfigManager
+import party.morino.kerria.api.files.DatabaseConfig
+import party.morino.kerria.paper.database.table.AccountBalanceTable
+import party.morino.kerria.paper.database.table.AccountTable
+import party.morino.kerria.paper.database.table.CurrencyTable
+import party.morino.kerria.paper.database.table.TransactionLogTable
+
+/**
+ * データベースの接続・テーブル作成を管理するクラス
+ */
+class DatabaseManager(private val plugin: JavaPlugin) : KoinComponent {
+    private val configManager: ConfigManager by inject()
+
+    /**
+     * データベースを初期化する
+     *
+     * 設定ファイルに基づいてDB接続を確立し、全テーブルを作成する。
+     */
+    fun initialize() {
+        val databaseConfig = configManager.getConfig().database
+        if (!connect(databaseConfig)) {
+            return
+        }
+        createTables()
+        seedDefaultCurrency()
+    }
+
+    /**
+     * DB接続を確立する
+     *
+     * @return 接続成功なら true、失敗なら false
+     */
+    private fun connect(config: DatabaseConfig): Boolean {
+        when (config.mode) {
+            "sqlite" -> {
+                Database.connect(
+                    "jdbc:sqlite:${plugin.dataFolder.resolve("${config.database}.db").absolutePath}",
+                    "org.sqlite.JDBC",
+                )
+                plugin.logger.info("SQLite database connected!")
+            }
+            "postgresql" -> {
+                Database.connect(
+                    url = "jdbc:postgresql://${config.host}:${config.port}/${config.database}",
+                    driver = "org.postgresql.Driver",
+                    user = config.username,
+                    password = config.password,
+                )
+                plugin.logger.info("PostgreSQL database connected!")
+            }
+            else -> {
+                plugin.logger.severe("Invalid database type: ${config.mode}. Plugin will not function correctly.")
+                return false
+            }
+        }
+        return true
+    }
+
+    /**
+     * 全テーブルを作成する
+     */
+    private fun createTables() {
+        transaction {
+            SchemaUtils.create(
+                AccountTable,
+                CurrencyTable,
+                AccountBalanceTable,
+                TransactionLogTable,
+            )
+        }
+    }
+
+    /**
+     * デフォルト通貨がなければ設定から作成する
+     */
+    private fun seedDefaultCurrency() {
+        val currencyConfig = configManager.getConfig().economy.currency
+        transaction {
+            // デフォルト通貨が存在しない場合のみ作成
+            val exists = CurrencyTable
+                .selectAll()
+                .where { CurrencyTable.id eq currencyConfig.id }
+                .count() > 0
+
+            if (!exists) {
+                CurrencyTable.insert {
+                    it[id] = currencyConfig.id
+                    it[name] = currencyConfig.name
+                    it[symbol] = currencyConfig.symbol
+                    it[plural] = currencyConfig.plural
+                    it[format] = currencyConfig.format
+                    it[fractionalDigits] = currencyConfig.fractionalDigits
+                }
+                plugin.logger.info("Default currency '${currencyConfig.name}' created.")
+            }
+        }
+    }
+}

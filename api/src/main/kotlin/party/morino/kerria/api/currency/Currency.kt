@@ -1,55 +1,46 @@
 package party.morino.kerria.api.currency
 
-import arrow.core.Either
-import party.morino.kerria.api.error.KerriaError
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 /**
- * 通貨を表すインターフェース
+ * 通貨を表す不変データクラス
+ *
+ * @property id 通貨のID
+ * @property name 通貨の名前
+ * @property plural 通貨の複数形
+ * @property symbol 通貨の記号
+ * @property format 通貨のフォーマットパターン（例: "%amount% %plural%"）
+ * @property fractionalDigits 小数点以下の桁数
  */
-interface Currency {
+data class Currency(
+    val id: Int,
+    val name: String,
+    val plural: String,
+    val symbol: String,
+    val format: String,
+    val fractionalDigits: Int,
+) {
     /**
-     * 通貨のID
-     */
-    val currencyId: Int
-
-
-    /**
-     * 通貨の名前
-     */
-    val name: String
-
-    /**
-     * 通貨の複数形
-     */
-    val plural: String
-
-    /**
-     * 通貨の記号
-     */
-    val symbol: String
-
-    /**
-     * 小数点以下の桁数
-     */
-    val fractionalDigits: Int
-
-    /**
-     * 通貨のフォーマット
-     */
-    val format: String
-
-    /**
-     * 金額をフォーマットする
+     * 金額をこの通貨のフォーマットで文字列に変換する
+     *
      * @param amount フォーマットする金額
-     * @return フォーマットされた金額、もしくはエラー
+     * @return フォーマットされた金額文字列
      */
-    suspend fun format(amount: BigDecimal): Either<KerriaError, String>
+    fun format(amount: BigDecimal): String {
+        val rounded = round(amount)
+        return format
+            .replace("%amount%", rounded.toPlainString())
+            .replace("%plural%", plural)
+    }
 
     /**
-     * 金額を丸める
+     * 金額をこの通貨の小数点桁数に丸める
+     *
      * @param amount 丸める金額
-     * @return 丸められた金額、もしくはエラー
+     * @return 丸められた金額
      */
-    suspend fun round(amount: BigDecimal): Either<KerriaError, BigDecimal>
+    fun round(amount: BigDecimal): BigDecimal {
+        return amount.setScale(fractionalDigits, RoundingMode.HALF_UP)
+    }
 }
