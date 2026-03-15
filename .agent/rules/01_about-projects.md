@@ -1,5 +1,5 @@
 ## このアプリケーションの概要
-「PluginName」という、Minecraftのプラグインです。
+「Kerria」という、Minecraftのプラグインです。
 
 ## 主な技術スタック
 - Kotlin (言語)
