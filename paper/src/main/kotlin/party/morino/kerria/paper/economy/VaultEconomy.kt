@@ -1,148 +1,209 @@
 package party.morino.kerria.paper.economy
 
-import kotlinx.coroutines.runBlocking
 import net.milkbowl.vault.economy.AbstractEconomy
 import net.milkbowl.vault.economy.EconomyResponse
 import org.bukkit.Bukkit
-import org.bukkit.OfflinePlayer
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.account.AccountManager
+import party.morino.kerria.api.currency.CurrencyManager
+import party.morino.kerria.api.economy.EconomyManager
 import party.morino.kerria.api.files.ConfigManager
 import party.morino.kerria.paper.Kerria
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-@SuppressWarnings("deprecation")
+/**
+ * Vault Economy API のブリッジ実装
+ *
+ * EconomyManager に委譲して Vault API を実現する。
+ */
+@Suppress("deprecation")
 class VaultEconomy : AbstractEconomy(), KoinComponent {
     private val plugin: Kerria by inject()
-
     private val accountManager: AccountManager by inject()
+    private val economyManager: EconomyManager by inject()
+    private val currencyManager: CurrencyManager by inject()
     private val configManager: ConfigManager by inject()
 
-    override fun isEnabled(): Boolean {
-        return plugin.isEnabled
-    }
+    /** デフォルト通貨IDを取得するヘルパー */
+    private val defaultCurrencyId: Int
+        get() = configManager.getConfig().economy.currency.id
 
-    override fun getName(): String {
-        return plugin.pluginMeta.name
-    }
+    override fun isEnabled(): Boolean = plugin.isEnabled
 
-    override fun hasBankSupport(): Boolean {
-        return true
-    }
+    override fun getName(): String = plugin.pluginMeta.name
 
-    override fun fractionalDigits(): Int {
-        return configManager.getConfig().economy.fractionalDigits
-    }
+    // 銀行機能は未対応
+    override fun hasBankSupport(): Boolean = false
+
+    override fun fractionalDigits(): Int = configManager.getConfig().economy.fractionalDigits
 
     override fun format(amount: Double): String {
-        return BigDecimal.valueOf(amount).setScale(fractionalDigits(), RoundingMode.HALF_UP).toPlainString()
+        val currency = currencyManager.getDefaultCurrency().getOrNull()
+            ?: return BigDecimal.valueOf(amount).setScale(fractionalDigits(), RoundingMode.HALF_UP).toPlainString()
+        return currency.format(BigDecimal.valueOf(amount))
     }
 
-    override fun currencyNamePlural(): String {
-        return currencyNameSingular()
-    }
+    override fun currencyNamePlural(): String = configManager.getConfig().economy.currency.plural
 
-    override fun currencyNameSingular(): String {
-        return configManager.getConfig().economy.currency.symbol
-    }
+    override fun currencyNameSingular(): String = configManager.getConfig().economy.currency.name
+
+    // --- アカウント存在確認 ---
 
     override fun hasAccount(playerName: String): Boolean {
-        val offlinePlayer = Bukkit.getOfflinePlayerIfCached(playerName) ?: return false
-        accountManager.getAccount(offlinePlayer).isLeft {
-            return false
-        }
-        return true
+        val player = Bukkit.getOfflinePlayerIfCached(playerName) ?: return false
+        return accountManager.getAccount(player.uniqueId).isRight()
     }
 
-    override fun hasAccount(playerName: String, worldName: String?): Boolean {
-        return hasAccount(playerName)
-    }
+    override fun hasAccount(playerName: String, worldName: String?): Boolean = hasAccount(playerName)
+
+    // --- 残高取得 ---
 
     override fun getBalance(playerName: String): Double {
-        val offlinePlayer: OfflinePlayer = Bukkit.getOfflinePlayerIfCached(playerName) ?: return 0.0
-        return getBalance(offlinePlayer)
+        val player = Bukkit.getOfflinePlayerIfCached(playerName) ?: return 0.0
+        return getBalanceByUuid(player.uniqueId)
     }
 
-    override fun getBalance(player: OfflinePlayer): Double {
-        val account = accountManager.getAccount(player).getOrNull() ?: return 0.0
-        return runBlocking { account.getBalance() }.setScale(fractionalDigits(), RoundingMode.HALF_UP).toDouble()
-    }
+    override fun getBalance(playerName: String, world: String): Double = getBalance(playerName)
 
-    override fun getBalance(player: OfflinePlayer, world: String?): Double {
-        return getBalance(player)
-    }
+    override fun getBalance(player: org.bukkit.OfflinePlayer): Double = getBalanceByUuid(player.uniqueId)
 
-    override fun getBalance(playerName: String, world: String): Double {
-        return getBalance(playerName)
-    }
+    override fun getBalance(player: org.bukkit.OfflinePlayer, world: String?): Double = getBalance(player)
 
-    override fun has(playerName: String, amount: Double): Boolean {
-        return (getBalance(playerName) >= amount)
-    }
+    // --- 残高チェック ---
 
-    override fun has(playerName: String, worldName: String?, amount: Double): Boolean {
-        return has(playerName, amount)
-    }
+    override fun has(playerName: String, amount: Double): Boolean = getBalance(playerName) >= amount
+
+    override fun has(playerName: String, worldName: String?, amount: Double): Boolean = has(playerName, amount)
+
+    // --- 出金 ---
 
     override fun withdrawPlayer(playerName: String?, amount: Double): EconomyResponse {
-        TODO("Not yet implemented")
+        if (playerName == null) {
+            return EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Player name is null")
+        }
+        val player = Bukkit.getOfflinePlayerIfCached(playerName)
+            ?: return EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Player not found")
+        return withdrawByUuid(player.uniqueId, amount)
     }
 
-    override fun withdrawPlayer(playerName: String?, worldName: String?, amount: Double): EconomyResponse {
-        TODO("Not yet implemented")
-    }
+    override fun withdrawPlayer(playerName: String?, worldName: String?, amount: Double): EconomyResponse =
+        withdrawPlayer(playerName, amount)
+
+    override fun withdrawPlayer(player: org.bukkit.OfflinePlayer, amount: Double): EconomyResponse =
+        withdrawByUuid(player.uniqueId, amount)
+
+    override fun withdrawPlayer(player: org.bukkit.OfflinePlayer, worldName: String?, amount: Double): EconomyResponse =
+        withdrawPlayer(player, amount)
+
+    // --- 入金 ---
 
     override fun depositPlayer(playerName: String?, amount: Double): EconomyResponse {
-        TODO("Not yet implemented")
+        if (playerName == null) {
+            return EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Player name is null")
+        }
+        val player = Bukkit.getOfflinePlayerIfCached(playerName)
+            ?: return EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Player not found")
+        return depositByUuid(player.uniqueId, amount)
     }
 
-    override fun depositPlayer(playerName: String?, worldName: String?, amount: Double): EconomyResponse {
-        TODO("Not yet implemented")
-    }
+    override fun depositPlayer(playerName: String?, worldName: String?, amount: Double): EconomyResponse =
+        depositPlayer(playerName, amount)
 
-    override fun createBank(name: String?, player: String?): EconomyResponse {
-        TODO("Not yet implemented")
-    }
+    override fun depositPlayer(player: org.bukkit.OfflinePlayer, amount: Double): EconomyResponse =
+        depositByUuid(player.uniqueId, amount)
 
-    override fun deleteBank(name: String): EconomyResponse {
-        TODO("Not yet implemented")
-    }
+    override fun depositPlayer(player: org.bukkit.OfflinePlayer, worldName: String?, amount: Double): EconomyResponse =
+        depositPlayer(player, amount)
 
-    override fun bankBalance(name: String): EconomyResponse {
-        TODO("Not yet implemented")
-    }
-
-    override fun bankHas(name: String, amount: Double): EconomyResponse {
-        TODO("Not yet implemented")
-    }
-
-    override fun bankWithdraw(name: String, amount: Double): EconomyResponse {
-        TODO("Not yet implemented")
-    }
-
-    override fun bankDeposit(name: String, amount: Double): EconomyResponse {
-        TODO("Not yet implemented")
-    }
-
-    override fun isBankOwner(name: String, playerName: String?): EconomyResponse {
-        TODO("Not yet implemented")
-    }
-
-    override fun isBankMember(name: String, playerName: String): EconomyResponse {
-        TODO("Not yet implemented")
-    }
-
-    override fun getBanks(): List<String> {
-        TODO("Not yet implemented")
-    }
+    // --- アカウント作成 ---
 
     override fun createPlayerAccount(playerName: String): Boolean {
-        TODO("Not yet implemented")
+        val player = Bukkit.getOfflinePlayerIfCached(playerName) ?: return false
+        return accountManager.getOrCreateAccount(player.uniqueId, playerName).isRight()
     }
 
-    override fun createPlayerAccount(playerName: String, worldName: String?): Boolean {
-        return createPlayerAccount(playerName)
+    override fun createPlayerAccount(playerName: String, worldName: String?): Boolean =
+        createPlayerAccount(playerName)
+
+    override fun createPlayerAccount(player: org.bukkit.OfflinePlayer): Boolean {
+        val name = player.name ?: return false
+        return accountManager.getOrCreateAccount(player.uniqueId, name).isRight()
+    }
+
+    override fun createPlayerAccount(player: org.bukkit.OfflinePlayer, worldName: String?): Boolean =
+        createPlayerAccount(player)
+
+    // --- 銀行機能（未対応） ---
+
+    override fun createBank(name: String?, player: String?): EconomyResponse =
+        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+
+    override fun deleteBank(name: String): EconomyResponse =
+        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+
+    override fun bankBalance(name: String): EconomyResponse =
+        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+
+    override fun bankHas(name: String, amount: Double): EconomyResponse =
+        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+
+    override fun bankWithdraw(name: String, amount: Double): EconomyResponse =
+        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+
+    override fun bankDeposit(name: String, amount: Double): EconomyResponse =
+        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+
+    override fun isBankOwner(name: String, playerName: String?): EconomyResponse =
+        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+
+    override fun isBankMember(name: String, playerName: String): EconomyResponse =
+        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+
+    override fun getBanks(): List<String> = emptyList()
+
+    // --- 内部ヘルパーメソッド ---
+
+    /** UUID からアカウントの残高を取得する */
+    private fun getBalanceByUuid(uuid: java.util.UUID): Double {
+        val account = accountManager.getAccount(uuid).getOrNull() ?: return 0.0
+        return accountManager.getBalance(account.accountId, defaultCurrencyId)
+            .getOrNull()
+            ?.setScale(fractionalDigits(), RoundingMode.HALF_UP)
+            ?.toDouble()
+            ?: 0.0
+    }
+
+    /** UUID から出金する */
+    private fun withdrawByUuid(uuid: java.util.UUID, amount: Double): EconomyResponse {
+        val account = accountManager.getAccount(uuid).getOrNull()
+            ?: return EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Account not found")
+
+        return economyManager.withdraw(account.accountId, defaultCurrencyId, BigDecimal.valueOf(amount)).fold(
+            ifLeft = { error ->
+                val balance = getBalanceByUuid(uuid)
+                EconomyResponse(amount, balance, EconomyResponse.ResponseType.FAILURE, error.message)
+            },
+            ifRight = { newBalance ->
+                EconomyResponse(amount, newBalance.toDouble(), EconomyResponse.ResponseType.SUCCESS, null)
+            },
+        )
+    }
+
+    /** UUID から入金する */
+    private fun depositByUuid(uuid: java.util.UUID, amount: Double): EconomyResponse {
+        val account = accountManager.getAccount(uuid).getOrNull()
+            ?: return EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Account not found")
+
+        return economyManager.deposit(account.accountId, defaultCurrencyId, BigDecimal.valueOf(amount)).fold(
+            ifLeft = { error ->
+                val balance = getBalanceByUuid(uuid)
+                EconomyResponse(amount, balance, EconomyResponse.ResponseType.FAILURE, error.message)
+            },
+            ifRight = { newBalance ->
+                EconomyResponse(amount, newBalance.toDouble(), EconomyResponse.ResponseType.SUCCESS, null)
+            },
+        )
     }
 }

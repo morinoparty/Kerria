@@ -11,7 +11,6 @@ group = "party.morino"
 version = project.version.toString()
 
 dependencies {
-    implementation(project(":common"))
     implementation(project(":api"))
     compileOnly(libs.paper.api)
 

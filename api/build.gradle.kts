@@ -20,8 +20,6 @@ publishing {
 }
 
 dependencies {
-    compileOnly(libs.paper.api)
-
     implementation(libs.arrow.core)
     implementation(libs.arrow.fx.coroutines)
 

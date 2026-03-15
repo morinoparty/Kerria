@@ -87,7 +87,6 @@ kotlin {
 }
 
 dependencies {
-    dokka(project(":common"))
     dokka(project(":paper"))
     dokka(project(":api"))
 }
@@ -105,8 +104,6 @@ detekt {
     source.setFrom(
         "api/src/main/java",
         "api/src/main/kotlin",
-        "common/src/main/java",
-        "common/src/main/kotlin",
         "paper/src/main/java",
         "paper/src/main/kotlin",
     )
