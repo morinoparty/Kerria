@@ -5,7 +5,7 @@ import arrow.core.left
 import arrow.core.right
 import com.charleskorn.kaml.Yaml
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
 import org.bukkit.plugin.java.JavaPlugin
 import party.morino.kerria.api.error.ConfigError
 import party.morino.kerria.api.error.KerriaError
@@ -86,11 +86,12 @@ class ConfigManagerImpl(private val plugin: JavaPlugin) : ConfigManager {
     /**
      * 現在の設定をファイルに保存します
      *
-     * このメソッドは現在メモリ上にある設定をJSON形式でファイルに保存します。
+     * このメソッドは現在メモリ上にある設定をYAML形式でファイルに保存します。
      * 主に初期設定の作成時に使用されます。
      */
     private fun saveConfig() {
-        val json = Json.encodeToString(currentConfig)
-        configFile.writeText(json)
+        // 読み込みと同じYAML形式で保存する
+        val yaml = Yaml.default.encodeToString<Config>(currentConfig)
+        configFile.writeText(yaml)
     }
 }

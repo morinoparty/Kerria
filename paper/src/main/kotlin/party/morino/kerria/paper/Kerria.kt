@@ -4,6 +4,8 @@ import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.plugin.ServicePriority
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.GlobalContext.getOrNull
 import org.koin.dsl.module
@@ -18,6 +20,9 @@ import party.morino.kerria.paper.currency.CurrencyManagerImpl
 import party.morino.kerria.paper.economy.VaultEconomy
 import party.morino.kerria.paper.files.ConfigManagerImpl
 import party.morino.kerria.paper.log.LogManagerImpl
+import party.morino.kerria.paper.model.TransactionLogTable
+import party.morino.kerria.paper.model.database.AccountTable
+import party.morino.kerria.paper.model.database.CurrencyTable
 
 /**
  * Kerriaプラグインのメインクラス
@@ -118,14 +123,14 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
         val config = configManager.getConfig()
         val databaseConfig = config.database
 
-        if (databaseConfig.database == "sqlite") {
+        if (databaseConfig.mode == "sqlite") {
             // SQLiteの初期化処理
             Database.connect(
                 "jdbc:sqlite:${dataFolder.resolve("${databaseConfig.database}.db").absolutePath}",
                 "org.sqlite.JDBC",
             )
             logger.info("SQLite database connected!")
-        } else if (databaseConfig.database == "postgresql") {
+        } else if (databaseConfig.mode == "postgresql") {
             // PostgreSQLの初期化処理
             Database.connect(
                 url = "jdbc:postgresql://${databaseConfig.host}:${databaseConfig.port}/${databaseConfig.database}",
@@ -135,7 +140,13 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
             )
             logger.info("PostgreSQL database connected!")
         } else {
-            logger.warning("Invalid database type: ${databaseConfig.database}")
+            logger.warning("Invalid database type: ${databaseConfig.mode}")
+            return
+        }
+
+        // テーブルが存在しない場合は自動作成する
+        transaction {
+            SchemaUtils.create(AccountTable, CurrencyTable, TransactionLogTable)
         }
     }
 
