@@ -35,12 +35,12 @@ class AccountRepository {
     }
 
     /**
-     * サービス名からサービスアカウントを検索する
+     * アカウント名から非PLAYERアカウントを検索する
      */
-    fun findByServiceName(serviceName: String): Account? {
+    fun findByName(name: String): Account? {
         return AccountTable
             .selectAll()
-            .where { AccountTable.serviceName eq serviceName }
+            .where { AccountTable.name eq name }
             .map { it.toAccount() }
             .firstOrNull()
     }
@@ -63,14 +63,13 @@ class AccountRepository {
         val id = AccountTable.insertAndGetId {
             it[AccountTable.accountType] = AccountType.PLAYER.name
             it[AccountTable.playerUniqueId] = playerUniqueId.toString()
-            it[AccountTable.playerName] = playerName
+            it[AccountTable.name] = playerName
         }
         return Account(
             accountId = id.value,
             accountType = AccountType.PLAYER,
             playerUniqueId = playerUniqueId,
-            playerName = playerName,
-            serviceName = null,
+            name = playerName,
         )
     }
 
@@ -80,14 +79,13 @@ class AccountRepository {
     fun createServiceAccount(serviceName: String, accountType: AccountType): Account {
         val id = AccountTable.insertAndGetId {
             it[AccountTable.accountType] = accountType.name
-            it[AccountTable.serviceName] = serviceName
+            it[AccountTable.name] = serviceName
         }
         return Account(
             accountId = id.value,
             accountType = accountType,
             playerUniqueId = null,
-            playerName = null,
-            serviceName = serviceName,
+            name = serviceName,
         )
     }
 
@@ -160,8 +158,7 @@ class AccountRepository {
             accountId = this[AccountTable.id].value,
             accountType = type,
             playerUniqueId = playerUidStr?.let { UUID.fromString(it) },
-            playerName = this[AccountTable.playerName],
-            serviceName = this[AccountTable.serviceName],
+            name = this[AccountTable.name],
         )
     }
 }

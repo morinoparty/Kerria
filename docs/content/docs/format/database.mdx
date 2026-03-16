@@ -41,16 +41,10 @@ KerriaはSQLiteとPostgreSQLをサポートしています。
             <td>MinecraftプレイヤーのUUID（一意インデックス、PLAYERの場合のみ）</td>
         </tr>
         <tr>
-            <td>player_name</td>
-            <td>varchar(16), nullable</td>
-            <td>Notch</td>
-            <td>プレイヤーの名前（PLAYERの場合のみ）</td>
-        </tr>
-        <tr>
-            <td>service_name</td>
+            <td>name</td>
             <td>varchar(128), nullable</td>
-            <td>shop_plugin</td>
-            <td>サービス名（一意インデックス、非PLAYERの場合のみ）</td>
+            <td>Notch | shop_plugin</td>
+            <td>アカウント名（プレイヤー名またはサービス名）</td>
         </tr>
     </tbody>
 </table>
@@ -227,8 +221,7 @@ erDiagram
         uuid id PK
         varchar account_type
         varchar player_unique_id UK
-        varchar player_name
-        varchar service_name UK
+        varchar name
     }
 
     ACCOUNT_BALANCES {

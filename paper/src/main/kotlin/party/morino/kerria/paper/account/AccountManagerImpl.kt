@@ -60,7 +60,7 @@ class AccountManagerImpl : AccountManager, KoinComponent {
         runCatching {
             transaction {
                 // 既存サービスアカウントがあればそのまま返す
-                val existing = accountRepository.findByServiceName(serviceName)
+                val existing = accountRepository.findByName(serviceName)
                 if (existing != null) {
                     return@transaction existing.right()
                 }
@@ -69,7 +69,7 @@ class AccountManagerImpl : AccountManager, KoinComponent {
                     accountRepository.createServiceAccount(serviceName, accountType).right()
                 } catch (_: Exception) {
                     // 制約例外 = 並行で作成済み → 再取得する
-                    accountRepository.findByServiceName(serviceName)?.right()
+                    accountRepository.findByName(serviceName)?.right()
                         ?: KerriaError.AccountNotFound(serviceName).left()
                 }
             }
