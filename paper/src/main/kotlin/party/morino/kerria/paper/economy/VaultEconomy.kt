@@ -180,7 +180,12 @@ class VaultEconomy : AbstractEconomy(), KoinComponent {
         val account = accountManager.getAccount(uuid).getOrNull()
             ?: return EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Account not found")
 
-        return economyManager.withdraw(account.accountId, defaultCurrencyId, BigDecimal.valueOf(amount)).fold(
+        return economyManager.withdraw(
+            account.accountId,
+            defaultCurrencyId,
+            BigDecimal.valueOf(amount),
+            treatePluginName = "Vault",
+        ).fold(
             ifLeft = { error ->
                 val balance = getBalanceByUuid(uuid)
                 EconomyResponse(amount, balance, EconomyResponse.ResponseType.FAILURE, error.message)
@@ -196,7 +201,12 @@ class VaultEconomy : AbstractEconomy(), KoinComponent {
         val account = accountManager.getAccount(uuid).getOrNull()
             ?: return EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Account not found")
 
-        return economyManager.deposit(account.accountId, defaultCurrencyId, BigDecimal.valueOf(amount)).fold(
+        return economyManager.deposit(
+            account.accountId,
+            defaultCurrencyId,
+            BigDecimal.valueOf(amount),
+            treatePluginName = "Vault",
+        ).fold(
             ifLeft = { error ->
                 val balance = getBalanceByUuid(uuid)
                 EconomyResponse(amount, balance, EconomyResponse.ResponseType.FAILURE, error.message)

@@ -31,7 +31,7 @@ KerriaはSQLiteとPostgreSQLをサポートしています。
         <tr>
             <td>account_type</td>
             <td>varchar(16)</td>
-            <td>PLAYER | SERVICE</td>
+            <td>PLAYER | SERVER | PLUGIN | SYSTEM</td>
             <td>アカウント種別（デフォルト: PLAYER）</td>
         </tr>
         <tr>
@@ -50,7 +50,7 @@ KerriaはSQLiteとPostgreSQLをサポートしています。
             <td>service_name</td>
             <td>varchar(128), nullable</td>
             <td>shop_plugin</td>
-            <td>サービス名（一意インデックス、SERVICEの場合のみ）</td>
+            <td>サービス名（一意インデックス、非PLAYERの場合のみ）</td>
         </tr>
     </tbody>
 </table>
@@ -205,6 +205,12 @@ KerriaはSQLiteとPostgreSQLをサポートしています。
             <td>取引に関するメモ・説明</td>
         </tr>
         <tr>
+            <td>treate_plugin_name</td>
+            <td>varchar(128), nullable</td>
+            <td>Vault | ShopPlugin</td>
+            <td>取引を実行したプラグイン名</td>
+        </tr>
+        <tr>
             <td>timestamp</td>
             <td>datetime</td>
             <td><Timestamp /></td>
@@ -248,6 +254,7 @@ erDiagram
         int currency_id FK
         decimal amount
         varchar message
+        varchar treate_plugin_name
         datetime timestamp
     }
 

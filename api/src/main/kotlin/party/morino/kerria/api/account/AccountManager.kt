@@ -37,9 +37,13 @@ interface AccountManager {
      * プラグインやシステムが通貨の発行・回収を行う際に使用するアカウントです。
      *
      * @param serviceName サービス名（例: "shop_plugin", "lottery"）
+     * @param accountType アカウント種別（SERVER, PLUGIN, SYSTEMのいずれか）
      * @return サービスアカウントの取得または作成結果
      */
-    fun getOrCreateServiceAccount(serviceName: String): Either<KerriaError, Account>
+    fun getOrCreateServiceAccount(
+        serviceName: String,
+        accountType: AccountType = AccountType.PLUGIN,
+    ): Either<KerriaError, Account>
 
     /**
      * アカウントIDと通貨IDから残高を取得します

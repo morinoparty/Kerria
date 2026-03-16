@@ -13,6 +13,7 @@ import java.util.UUID
  * @property currencyId 通貨のID
  * @property amount 取引金額
  * @property message 取引に関するメモ・説明
+ * @property treatePluginName 取引を実行したプラグイン名
  * @property timestamp 取引時刻
  */
 data class TransactionLog(
@@ -22,5 +23,6 @@ data class TransactionLog(
     val currencyId: Int,
     val amount: BigDecimal,
     val message: String?,
+    val treatePluginName: String?,
     val timestamp: LocalDateTime,
 )

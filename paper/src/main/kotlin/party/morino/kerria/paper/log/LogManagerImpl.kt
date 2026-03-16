@@ -28,10 +28,19 @@ class LogManagerImpl : LogManager, KoinComponent {
         currencyId: Int,
         amount: BigDecimal,
         message: String?,
+        treatePluginName: String?,
         timestamp: LocalDateTime,
     ): Either<KerriaError, Unit> = runCatching {
         transaction {
-            transactionLogRepository.create(fromAccountId, toAccountId, currencyId, amount, message, timestamp)
+            transactionLogRepository.create(
+                fromAccountId,
+                toAccountId,
+                currencyId,
+                amount,
+                message,
+                treatePluginName,
+                timestamp,
+            )
             Unit.right()
         }
     }.getOrElse { e ->

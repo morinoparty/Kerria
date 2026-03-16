@@ -1,12 +1,12 @@
 package party.morino.kerria.paper.database
 
 import org.bukkit.plugin.java.JavaPlugin
-import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.migration.jdbc.MigrationUtils
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.files.ConfigManager
@@ -73,8 +73,11 @@ class DatabaseManager(private val plugin: JavaPlugin) : KoinComponent {
     private fun createTables() {
         val tables = arrayOf(AccountTable, CurrencyTable, AccountBalanceTable, TransactionLogTable)
         transaction {
+            // テーブルが存在しなければ作成
             SchemaUtils.create(*tables)
-            SchemaUtils.createMissingTablesAndColumns(*tables)
+            // 既存テーブルとの差分を検出し、マイグレーションSQLを実行
+            val migrationStatements = MigrationUtils.statementsRequiredForDatabaseMigration(*tables, withLogs = true)
+            migrationStatements.forEach { exec(it) }
         }
     }
 

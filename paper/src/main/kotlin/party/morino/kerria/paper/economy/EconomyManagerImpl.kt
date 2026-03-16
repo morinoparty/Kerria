@@ -30,6 +30,7 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
         currencyId: Int,
         amount: BigDecimal,
         message: String?,
+        treatePluginName: String?,
     ): Either<KerriaError, BigDecimal> {
         // 金額バリデーション
         if (amount <= BigDecimal.ZERO) {
@@ -49,7 +50,7 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
                 accountRepository.addBalance(accountId, currencyId, amount)
 
                 // 取引ログを記録（失敗時は throw してロールバック）
-                logManager.logTransaction(accountId, accountId, currencyId, amount, message)
+                logManager.logTransaction(accountId, accountId, currencyId, amount, message, treatePluginName)
                     .onLeft { throw it }
 
                 // 更新後の残高を返す
@@ -68,6 +69,7 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
         currencyId: Int,
         amount: BigDecimal,
         message: String?,
+        treatePluginName: String?,
     ): Either<KerriaError, BigDecimal> {
         // 金額バリデーション
         if (amount <= BigDecimal.ZERO) {
@@ -93,7 +95,7 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
                 }
 
                 // 取引ログを記録（失敗時は throw してロールバック）
-                logManager.logTransaction(accountId, accountId, currencyId, amount.negate(), message)
+                logManager.logTransaction(accountId, accountId, currencyId, amount.negate(), message, treatePluginName)
                     .onLeft { throw it }
 
                 // 更新後の残高を返す
@@ -113,6 +115,7 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
         currencyId: Int,
         amount: BigDecimal,
         message: String?,
+        treatePluginName: String?,
     ): Either<KerriaError, Unit> {
         // 金額バリデーション
         if (amount <= BigDecimal.ZERO) {
@@ -145,7 +148,7 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
                 accountRepository.addBalance(toAccountId, currencyId, amount)
 
                 // 取引ログを記録（失敗時は throw してロールバック）
-                logManager.logTransaction(fromAccountId, toAccountId, currencyId, amount, message)
+                logManager.logTransaction(fromAccountId, toAccountId, currencyId, amount, message, treatePluginName)
                     .onLeft { throw it }
 
                 Unit.right()

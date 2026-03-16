@@ -37,6 +37,8 @@ exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version
 exposed-dao = { group = "org.jetbrains.exposed", name = "exposed-dao", version.ref = "exposed" }
 exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
 exposed-java-time = { group = "org.jetbrains.exposed", name = "exposed-java-time", version.ref = "exposed" }
+exposed-migration-core = { group = "org.jetbrains.exposed", name = "exposed-migration-core", version.ref = "exposed" }
+exposed-migration-jdbc = { group = "org.jetbrains.exposed", name = "exposed-migration-jdbc", version.ref = "exposed" }
 
 sqlite = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqlite" }
 postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
@@ -69,4 +71,4 @@ commands-paper = ["cloud", "cloudPaper", "cloud-annotations", "cloud-kotlin-coro
 coroutines-bukkit = ["mccoroutine-bukkit-api", "mccoroutine-bukkit-core", "kotlinx-coroutines-core"]
 junit-jupiter = ["junit-jupiter", "junit-platform-launcher"]
 koin-test = ["koin-test", "koin-test-junit5"]
-database = ["exposed-core", "exposed-dao", "exposed-jdbc", "exposed-java-time", "sqlite", "postgresql"]
+database = ["exposed-core", "exposed-dao", "exposed-jdbc", "exposed-java-time", "exposed-migration-core", "exposed-migration-jdbc", "sqlite", "postgresql"]

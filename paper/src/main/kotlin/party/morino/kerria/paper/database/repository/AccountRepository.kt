@@ -77,14 +77,14 @@ class AccountRepository {
     /**
      * 新しいサービスアカウントを作成する
      */
-    fun createServiceAccount(serviceName: String): Account {
+    fun createServiceAccount(serviceName: String, accountType: AccountType): Account {
         val id = AccountTable.insertAndGetId {
-            it[AccountTable.accountType] = AccountType.SERVICE.name
+            it[AccountTable.accountType] = accountType.name
             it[AccountTable.serviceName] = serviceName
         }
         return Account(
             accountId = id.value,
-            accountType = AccountType.SERVICE,
+            accountType = accountType,
             playerUniqueId = null,
             playerName = null,
             serviceName = serviceName,

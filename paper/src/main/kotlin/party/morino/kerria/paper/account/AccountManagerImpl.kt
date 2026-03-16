@@ -8,6 +8,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.account.Account
 import party.morino.kerria.api.account.AccountManager
+import party.morino.kerria.api.account.AccountType
 import party.morino.kerria.api.error.KerriaError
 import party.morino.kerria.paper.database.repository.AccountRepository
 import java.math.BigDecimal
@@ -52,7 +53,10 @@ class AccountManagerImpl : AccountManager, KoinComponent {
             KerriaError.DatabaseError("Failed to create account: ${e.message}", e).left()
         }
 
-    override fun getOrCreateServiceAccount(serviceName: String): Either<KerriaError, Account> =
+    override fun getOrCreateServiceAccount(
+        serviceName: String,
+        accountType: AccountType,
+    ): Either<KerriaError, Account> =
         runCatching {
             transaction {
                 // 既存サービスアカウントがあればそのまま返す
@@ -62,7 +66,7 @@ class AccountManagerImpl : AccountManager, KoinComponent {
                 }
                 // 新規作成を試みる（競合時は制約例外が発生する）
                 try {
-                    accountRepository.createServiceAccount(serviceName).right()
+                    accountRepository.createServiceAccount(serviceName, accountType).right()
                 } catch (_: Exception) {
                     // 制約例外 = 並行で作成済み → 再取得する
                     accountRepository.findByServiceName(serviceName)?.right()

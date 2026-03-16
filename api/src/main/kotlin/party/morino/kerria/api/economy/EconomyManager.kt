@@ -20,6 +20,7 @@ interface EconomyManager {
      * @param currencyId 通貨のID
      * @param amount 入金額
      * @param message 取引メモ（任意）
+     * @param treatePluginName 取引を実行したプラグイン名（任意）
      * @return 入金後の残高、もしくはエラー
      */
     fun deposit(
@@ -27,6 +28,7 @@ interface EconomyManager {
         currencyId: Int,
         amount: BigDecimal,
         message: String? = null,
+        treatePluginName: String? = null,
     ): Either<KerriaError, BigDecimal>
 
     /**
@@ -36,6 +38,7 @@ interface EconomyManager {
      * @param currencyId 通貨のID
      * @param amount 出金額
      * @param message 取引メモ（任意）
+     * @param treatePluginName 取引を実行したプラグイン名（任意）
      * @return 出金後の残高、もしくはエラー
      */
     fun withdraw(
@@ -43,6 +46,7 @@ interface EconomyManager {
         currencyId: Int,
         amount: BigDecimal,
         message: String? = null,
+        treatePluginName: String? = null,
     ): Either<KerriaError, BigDecimal>
 
     /**
@@ -53,6 +57,7 @@ interface EconomyManager {
      * @param currencyId 通貨のID
      * @param amount 送金額
      * @param message 取引メモ（任意）
+     * @param treatePluginName 取引を実行したプラグイン名（任意）
      * @return 成功時はUnit、失敗時はエラー
      */
     fun transfer(
@@ -61,5 +66,6 @@ interface EconomyManager {
         currencyId: Int,
         amount: BigDecimal,
         message: String? = null,
+        treatePluginName: String? = null,
     ): Either<KerriaError, Unit>
 }
