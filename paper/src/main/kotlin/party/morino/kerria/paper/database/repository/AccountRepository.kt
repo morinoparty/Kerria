@@ -12,6 +12,7 @@ import org.jetbrains.exposed.v1.jdbc.insertIgnore
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 import party.morino.kerria.api.account.Account
+import party.morino.kerria.api.account.AccountType
 import party.morino.kerria.paper.database.table.AccountBalanceTable
 import party.morino.kerria.paper.database.table.AccountTable
 import java.math.BigDecimal
@@ -34,6 +35,17 @@ class AccountRepository {
     }
 
     /**
+     * サービス名からサービスアカウントを検索する
+     */
+    fun findByServiceName(serviceName: String): Account? {
+        return AccountTable
+            .selectAll()
+            .where { AccountTable.serviceName eq serviceName }
+            .map { it.toAccount() }
+            .firstOrNull()
+    }
+
+    /**
      * アカウントIDからアカウントを検索する
      */
     fun findById(accountId: UUID): Account? {
@@ -45,17 +57,37 @@ class AccountRepository {
     }
 
     /**
-     * 新しいアカウントを作成する
+     * 新しいプレイヤーアカウントを作成する
      */
     fun create(playerUniqueId: UUID, playerName: String): Account {
         val id = AccountTable.insertAndGetId {
+            it[AccountTable.accountType] = AccountType.PLAYER.name
             it[AccountTable.playerUniqueId] = playerUniqueId.toString()
             it[AccountTable.playerName] = playerName
         }
         return Account(
             accountId = id.value,
+            accountType = AccountType.PLAYER,
             playerUniqueId = playerUniqueId,
             playerName = playerName,
+            serviceName = null,
+        )
+    }
+
+    /**
+     * 新しいサービスアカウントを作成する
+     */
+    fun createServiceAccount(serviceName: String): Account {
+        val id = AccountTable.insertAndGetId {
+            it[AccountTable.accountType] = AccountType.SERVICE.name
+            it[AccountTable.serviceName] = serviceName
+        }
+        return Account(
+            accountId = id.value,
+            accountType = AccountType.SERVICE,
+            playerUniqueId = null,
+            playerName = null,
+            serviceName = serviceName,
         )
     }
 
@@ -122,10 +154,14 @@ class AccountRepository {
      * ResultRow を Account data class に変換する
      */
     private fun ResultRow.toAccount(): Account {
+        val type = AccountType.valueOf(this[AccountTable.accountType])
+        val playerUidStr = this[AccountTable.playerUniqueId]
         return Account(
             accountId = this[AccountTable.id].value,
-            playerUniqueId = UUID.fromString(this[AccountTable.playerUniqueId]),
+            accountType = type,
+            playerUniqueId = playerUidStr?.let { UUID.fromString(it) },
             playerName = this[AccountTable.playerName],
+            serviceName = this[AccountTable.serviceName],
         )
     }
 }

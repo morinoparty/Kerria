@@ -25,6 +25,7 @@ class TransactionLogRepository {
         toAccountId: UUID,
         currencyId: Int,
         amount: BigDecimal,
+        message: String?,
         timestamp: LocalDateTime,
     ): TransactionLog {
         val id = TransactionLogTable.insertAndGetId {
@@ -32,6 +33,7 @@ class TransactionLogRepository {
             it[TransactionLogTable.toAccountId] = toAccountId
             it[TransactionLogTable.currencyId] = currencyId
             it[TransactionLogTable.amount] = amount
+            it[TransactionLogTable.message] = message
             it[TransactionLogTable.timestamp] = timestamp
         }
         return TransactionLog(
@@ -40,6 +42,7 @@ class TransactionLogRepository {
             toAccountId = toAccountId,
             currencyId = currencyId,
             amount = amount,
+            message = message,
             timestamp = timestamp,
         )
     }
@@ -70,6 +73,7 @@ class TransactionLogRepository {
             toAccountId = this[TransactionLogTable.toAccountId].value,
             currencyId = this[TransactionLogTable.currencyId].value,
             amount = this[TransactionLogTable.amount],
+            message = this[TransactionLogTable.message],
             timestamp = this[TransactionLogTable.timestamp],
         )
     }

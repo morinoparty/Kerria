@@ -8,7 +8,7 @@ import java.util.UUID
 /**
  * アカウント管理機能を提供するインターフェース
  *
- * プレイヤーのアカウント情報をUUIDベースで管理し、
+ * プレイヤーおよびサービスのアカウント情報を管理し、
  * 残高の取得機能を提供します。
  * すべての操作は[Either]を返し、エラーハンドリングを型安全に行います。
  */
@@ -30,6 +30,16 @@ interface AccountManager {
      * @return アカウントの取得または作成結果
      */
     fun getOrCreateAccount(playerUniqueId: UUID, playerName: String): Either<KerriaError, Account>
+
+    /**
+     * サービス名からサービスアカウントを取得し、存在しない場合は作成します
+     *
+     * プラグインやシステムが通貨の発行・回収を行う際に使用するアカウントです。
+     *
+     * @param serviceName サービス名（例: "shop_plugin", "lottery"）
+     * @return サービスアカウントの取得または作成結果
+     */
+    fun getOrCreateServiceAccount(serviceName: String): Either<KerriaError, Account>
 
     /**
      * アカウントIDと通貨IDから残高を取得します

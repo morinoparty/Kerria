@@ -19,9 +19,15 @@ interface EconomyManager {
      * @param accountId 入金先アカウントのUUID
      * @param currencyId 通貨のID
      * @param amount 入金額
+     * @param message 取引メモ（任意）
      * @return 入金後の残高、もしくはエラー
      */
-    fun deposit(accountId: UUID, currencyId: Int, amount: BigDecimal): Either<KerriaError, BigDecimal>
+    fun deposit(
+        accountId: UUID,
+        currencyId: Int,
+        amount: BigDecimal,
+        message: String? = null,
+    ): Either<KerriaError, BigDecimal>
 
     /**
      * 指定アカウントから出金する
@@ -29,9 +35,15 @@ interface EconomyManager {
      * @param accountId 出金元アカウントのUUID
      * @param currencyId 通貨のID
      * @param amount 出金額
+     * @param message 取引メモ（任意）
      * @return 出金後の残高、もしくはエラー
      */
-    fun withdraw(accountId: UUID, currencyId: Int, amount: BigDecimal): Either<KerriaError, BigDecimal>
+    fun withdraw(
+        accountId: UUID,
+        currencyId: Int,
+        amount: BigDecimal,
+        message: String? = null,
+    ): Either<KerriaError, BigDecimal>
 
     /**
      * アカウント間で送金する
@@ -40,6 +52,7 @@ interface EconomyManager {
      * @param toAccountId 送金先アカウントのUUID
      * @param currencyId 通貨のID
      * @param amount 送金額
+     * @param message 取引メモ（任意）
      * @return 成功時はUnit、失敗時はエラー
      */
     fun transfer(
@@ -47,5 +60,6 @@ interface EconomyManager {
         toAccountId: UUID,
         currencyId: Int,
         amount: BigDecimal,
+        message: String? = null,
     ): Either<KerriaError, Unit>
 }

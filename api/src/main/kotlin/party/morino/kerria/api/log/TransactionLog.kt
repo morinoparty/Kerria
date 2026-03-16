@@ -12,6 +12,7 @@ import java.util.UUID
  * @property toAccountId 送金先アカウントのUUID
  * @property currencyId 通貨のID
  * @property amount 取引金額
+ * @property message 取引に関するメモ・説明
  * @property timestamp 取引時刻
  */
 data class TransactionLog(
@@ -20,5 +21,6 @@ data class TransactionLog(
     val toAccountId: UUID,
     val currencyId: Int,
     val amount: BigDecimal,
+    val message: String?,
     val timestamp: LocalDateTime,
 )

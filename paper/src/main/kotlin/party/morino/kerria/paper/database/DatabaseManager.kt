@@ -68,16 +68,13 @@ class DatabaseManager(private val plugin: JavaPlugin) : KoinComponent {
     }
 
     /**
-     * 全テーブルを作成する
+     * 全テーブルを作成し、既存テーブルに不足カラムがあれば追加する
      */
     private fun createTables() {
+        val tables = arrayOf(AccountTable, CurrencyTable, AccountBalanceTable, TransactionLogTable)
         transaction {
-            SchemaUtils.create(
-                AccountTable,
-                CurrencyTable,
-                AccountBalanceTable,
-                TransactionLogTable,
-            )
+            SchemaUtils.create(*tables)
+            SchemaUtils.createMissingTablesAndColumns(*tables)
         }
     }
 

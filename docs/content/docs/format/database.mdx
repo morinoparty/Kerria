@@ -9,7 +9,8 @@ KerriaはSQLiteとPostgreSQLをサポートしています。
 
 ### ACCOUNTS
 
-プレイヤーのアカウント情報を管理するテーブルです。
+プレイヤーおよびサービスのアカウント情報を管理するテーブルです。
+プレイヤーアカウントはMinecraftプレイヤーに対応し、サービスアカウントはプラグインやシステムが通貨の発行・回収を行う際に使用します。
 
 <table>
     <thead>
@@ -28,16 +29,28 @@ KerriaはSQLiteとPostgreSQLをサポートしています。
             <td>主キー Kerria用のアカウントID</td>
         </tr>
         <tr>
+            <td>account_type</td>
+            <td>varchar(16)</td>
+            <td>PLAYER | SERVICE</td>
+            <td>アカウント種別（デフォルト: PLAYER）</td>
+        </tr>
+        <tr>
             <td>player_unique_id</td>
-            <td>varchar(36)</td>
+            <td>varchar(36), nullable</td>
             <td><UUIDV4 /></td>
-            <td>MinecraftプレイヤーのUUID（一意インデックス）</td>
+            <td>MinecraftプレイヤーのUUID（一意インデックス、PLAYERの場合のみ）</td>
         </tr>
         <tr>
             <td>player_name</td>
-            <td>varchar(16)</td>
+            <td>varchar(16), nullable</td>
             <td>Notch</td>
-            <td>プレイヤーの名前</td>
+            <td>プレイヤーの名前（PLAYERの場合のみ）</td>
+        </tr>
+        <tr>
+            <td>service_name</td>
+            <td>varchar(128), nullable</td>
+            <td>shop_plugin</td>
+            <td>サービス名（一意インデックス、SERVICEの場合のみ）</td>
         </tr>
     </tbody>
 </table>
@@ -186,6 +199,12 @@ KerriaはSQLiteとPostgreSQLをサポートしています。
             <td>取引金額</td>
         </tr>
         <tr>
+            <td>message</td>
+            <td>varchar(512), nullable</td>
+            <td>ダイヤモンドの剣を売却</td>
+            <td>取引に関するメモ・説明</td>
+        </tr>
+        <tr>
             <td>timestamp</td>
             <td>datetime</td>
             <td><Timestamp /></td>
@@ -200,8 +219,10 @@ KerriaはSQLiteとPostgreSQLをサポートしています。
 erDiagram
     ACCOUNTS {
         uuid id PK
+        varchar account_type
         varchar player_unique_id UK
         varchar player_name
+        varchar service_name UK
     }
 
     ACCOUNT_BALANCES {
@@ -226,6 +247,7 @@ erDiagram
         uuid to_account_id FK
         int currency_id FK
         decimal amount
+        varchar message
         datetime timestamp
     }
 
