@@ -56,4 +56,35 @@ class CurrencyManagerImpl : CurrencyManager, KoinComponent {
     }.getOrElse { e ->
         KerriaError.DatabaseError("Failed to get currencies: ${e.message}", e).left()
     }
+
+    override fun getCurrencyByName(name: String): Either<KerriaError, Currency> = runCatching {
+        transaction {
+            currencyRepository.findByName(name)?.right()
+                ?: KerriaError.CurrencyNotFound(name).left()
+        }
+    }.getOrElse { e ->
+        KerriaError.DatabaseError("Failed to get currency: ${e.message}", e).left()
+    }
+
+    override fun deleteCurrency(id: Int): Either<KerriaError, Unit> = runCatching {
+        transaction {
+            // デフォルト通貨の削除を防止
+            val defaultId = configManager.getConfig().economy.currency.id
+            if (id == defaultId) {
+                return@transaction KerriaError.InvalidAmount(
+                    java.math.BigDecimal.ZERO,
+                    "Cannot delete default currency",
+                ).left()
+            }
+
+            val deleted = currencyRepository.deleteById(id)
+            if (deleted == 0) {
+                KerriaError.CurrencyNotFound(id.toString()).left()
+            } else {
+                Unit.right()
+            }
+        }
+    }.getOrElse { e ->
+        KerriaError.DatabaseError("Failed to delete currency: ${e.message}", e).left()
+    }
 }
