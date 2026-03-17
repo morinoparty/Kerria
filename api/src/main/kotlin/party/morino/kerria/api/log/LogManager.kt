@@ -20,6 +20,8 @@ interface LogManager {
      * @param toAccountId 送金先アカウントのUUID
      * @param currencyId 通貨のID
      * @param amount 取引金額
+     * @param message 取引メモ（任意）
+     * @param treatePluginName 取引を実行したプラグイン名（任意）
      * @param timestamp 取引時刻
      * @return 成功時はUnit、失敗時はエラー
      */
@@ -28,6 +30,8 @@ interface LogManager {
         toAccountId: UUID,
         currencyId: Int,
         amount: BigDecimal,
+        message: String? = null,
+        treatePluginName: String? = null,
         timestamp: LocalDateTime = LocalDateTime.now(),
     ): Either<KerriaError, Unit>
 

@@ -8,6 +8,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.account.Account
 import party.morino.kerria.api.account.AccountManager
+import party.morino.kerria.api.account.AccountType
 import party.morino.kerria.api.error.KerriaError
 import party.morino.kerria.paper.database.repository.AccountRepository
 import java.math.BigDecimal
@@ -25,7 +26,7 @@ class AccountManagerImpl : AccountManager, KoinComponent {
     override fun getAccount(playerUniqueId: UUID): Either<KerriaError, Account> = runCatching {
         transaction {
             accountRepository.findByPlayerUniqueId(playerUniqueId)?.right()
-                ?: KerriaError.PlayerNotFound(playerUniqueId.toString()).left()
+                ?: KerriaError.AccountNotFound(playerUniqueId.toString()).left()
         }
     }.getOrElse { e ->
         KerriaError.DatabaseError("Failed to get account: ${e.message}", e).left()
@@ -45,18 +46,42 @@ class AccountManagerImpl : AccountManager, KoinComponent {
                 } catch (_: Exception) {
                     // 制約例外 = 並行で作成済み → 再取得する
                     accountRepository.findByPlayerUniqueId(playerUniqueId)?.right()
-                        ?: KerriaError.PlayerNotFound(playerUniqueId.toString()).left()
+                        ?: KerriaError.AccountNotFound(playerUniqueId.toString()).left()
                 }
             }
         }.getOrElse { e ->
             KerriaError.DatabaseError("Failed to create account: ${e.message}", e).left()
         }
 
+    override fun getOrCreateServiceAccount(
+        serviceName: String,
+        accountType: AccountType,
+    ): Either<KerriaError, Account> =
+        runCatching {
+            transaction {
+                // 既存サービスアカウントがあればそのまま返す
+                val existing = accountRepository.findByName(serviceName)
+                if (existing != null) {
+                    return@transaction existing.right()
+                }
+                // 新規作成を試みる（競合時は制約例外が発生する）
+                try {
+                    accountRepository.createServiceAccount(serviceName, accountType).right()
+                } catch (_: Exception) {
+                    // 制約例外 = 並行で作成済み → 再取得する
+                    accountRepository.findByName(serviceName)?.right()
+                        ?: KerriaError.AccountNotFound(serviceName).left()
+                }
+            }
+        }.getOrElse { e ->
+            KerriaError.DatabaseError("Failed to create service account: ${e.message}", e).left()
+        }
+
     override fun getBalance(accountId: UUID, currencyId: Int): Either<KerriaError, BigDecimal> = runCatching {
         transaction {
             // アカウントが存在するか確認
             accountRepository.findById(accountId)
-                ?: return@transaction KerriaError.PlayerNotFound(accountId.toString()).left()
+                ?: return@transaction KerriaError.AccountNotFound(accountId.toString()).left()
 
             accountRepository.getBalance(accountId, currencyId).right()
         }

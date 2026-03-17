@@ -17,6 +17,10 @@ object TransactionLogTable : LongIdTable("transaction_logs") {
     val currencyId = reference("currency_id", CurrencyTable)
     // 取引金額
     val amount = decimal("amount", precision = 20, scale = 4)
+    // 取引メモ・説明
+    val message = varchar("message", 512).nullable()
+    // 取引を実行したプラグイン名
+    val treatePluginName = varchar("treate_plugin_name", 128).nullable()
     // 取引時刻
     val timestamp = datetime("timestamp")
 }

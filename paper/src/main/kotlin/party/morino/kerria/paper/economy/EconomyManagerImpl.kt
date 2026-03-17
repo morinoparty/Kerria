@@ -25,7 +25,13 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
     private val logManager: LogManager by inject()
     private val currencyManager: CurrencyManager by inject()
 
-    override fun deposit(accountId: UUID, currencyId: Int, amount: BigDecimal): Either<KerriaError, BigDecimal> {
+    override fun deposit(
+        accountId: UUID,
+        currencyId: Int,
+        amount: BigDecimal,
+        message: String?,
+        treatePluginName: String?,
+    ): Either<KerriaError, BigDecimal> {
         // 金額バリデーション
         if (amount <= BigDecimal.ZERO) {
             return KerriaError.InvalidAmount(amount, "Amount must be positive").left()
@@ -37,14 +43,14 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
             transaction {
                 // アカウントの存在確認
                 accountRepository.findById(accountId)
-                    ?: throw KerriaError.PlayerNotFound(accountId.toString())
+                    ?: throw KerriaError.AccountNotFound(accountId.toString())
 
                 // 残高行を確保し、アトミックに加算
                 accountRepository.ensureBalanceRow(accountId, currencyId)
                 accountRepository.addBalance(accountId, currencyId, amount)
 
                 // 取引ログを記録（失敗時は throw してロールバック）
-                logManager.logTransaction(accountId, accountId, currencyId, amount)
+                logManager.logTransaction(accountId, accountId, currencyId, amount, message, treatePluginName)
                     .onLeft { throw it }
 
                 // 更新後の残高を返す
@@ -58,7 +64,13 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
         }
     }
 
-    override fun withdraw(accountId: UUID, currencyId: Int, amount: BigDecimal): Either<KerriaError, BigDecimal> {
+    override fun withdraw(
+        accountId: UUID,
+        currencyId: Int,
+        amount: BigDecimal,
+        message: String?,
+        treatePluginName: String?,
+    ): Either<KerriaError, BigDecimal> {
         // 金額バリデーション
         if (amount <= BigDecimal.ZERO) {
             return KerriaError.InvalidAmount(amount, "Amount must be positive").left()
@@ -70,7 +82,7 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
             transaction {
                 // アカウントの存在確認
                 accountRepository.findById(accountId)
-                    ?: throw KerriaError.PlayerNotFound(accountId.toString())
+                    ?: throw KerriaError.AccountNotFound(accountId.toString())
 
                 // アトミックに減算（残高チェック付き）
                 val rows = accountRepository.subtractBalance(accountId, currencyId, amount)
@@ -83,7 +95,7 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
                 }
 
                 // 取引ログを記録（失敗時は throw してロールバック）
-                logManager.logTransaction(accountId, accountId, currencyId, amount.negate())
+                logManager.logTransaction(accountId, accountId, currencyId, amount.negate(), message, treatePluginName)
                     .onLeft { throw it }
 
                 // 更新後の残高を返す
@@ -102,6 +114,8 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
         toAccountId: UUID,
         currencyId: Int,
         amount: BigDecimal,
+        message: String?,
+        treatePluginName: String?,
     ): Either<KerriaError, Unit> {
         // 金額バリデーション
         if (amount <= BigDecimal.ZERO) {
@@ -114,10 +128,10 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
             transaction {
                 // 送金元の存在確認
                 accountRepository.findById(fromAccountId)
-                    ?: throw KerriaError.PlayerNotFound(fromAccountId.toString())
+                    ?: throw KerriaError.AccountNotFound(fromAccountId.toString())
                 // 送金先の存在確認
                 accountRepository.findById(toAccountId)
-                    ?: throw KerriaError.PlayerNotFound(toAccountId.toString())
+                    ?: throw KerriaError.AccountNotFound(toAccountId.toString())
 
                 // 送金元からアトミックに減算（残高チェック付き）
                 val rows = accountRepository.subtractBalance(fromAccountId, currencyId, amount)
@@ -134,7 +148,7 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
                 accountRepository.addBalance(toAccountId, currencyId, amount)
 
                 // 取引ログを記録（失敗時は throw してロールバック）
-                logManager.logTransaction(fromAccountId, toAccountId, currencyId, amount)
+                logManager.logTransaction(fromAccountId, toAccountId, currencyId, amount, message, treatePluginName)
                     .onLeft { throw it }
 
                 Unit.right()

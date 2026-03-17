@@ -25,6 +25,8 @@ class TransactionLogRepository {
         toAccountId: UUID,
         currencyId: Int,
         amount: BigDecimal,
+        message: String?,
+        treatePluginName: String?,
         timestamp: LocalDateTime,
     ): TransactionLog {
         val id = TransactionLogTable.insertAndGetId {
@@ -32,6 +34,8 @@ class TransactionLogRepository {
             it[TransactionLogTable.toAccountId] = toAccountId
             it[TransactionLogTable.currencyId] = currencyId
             it[TransactionLogTable.amount] = amount
+            it[TransactionLogTable.message] = message
+            it[TransactionLogTable.treatePluginName] = treatePluginName
             it[TransactionLogTable.timestamp] = timestamp
         }
         return TransactionLog(
@@ -40,6 +44,8 @@ class TransactionLogRepository {
             toAccountId = toAccountId,
             currencyId = currencyId,
             amount = amount,
+            message = message,
+            treatePluginName = treatePluginName,
             timestamp = timestamp,
         )
     }
@@ -70,6 +76,8 @@ class TransactionLogRepository {
             toAccountId = this[TransactionLogTable.toAccountId].value,
             currencyId = this[TransactionLogTable.currencyId].value,
             amount = this[TransactionLogTable.amount],
+            message = this[TransactionLogTable.message],
+            treatePluginName = this[TransactionLogTable.treatePluginName],
             timestamp = this[TransactionLogTable.timestamp],
         )
     }

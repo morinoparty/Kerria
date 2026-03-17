@@ -10,11 +10,11 @@ import java.math.BigDecimal
  */
 sealed class KerriaError(message: String) : Exception(message) {
 
-    // --- Player ---
+    // --- Account ---
 
-    /** 指定されたUUIDのプレイヤーが見つからない */
-    class PlayerNotFound(val uuid: String) :
-        KerriaError("Player not found: $uuid")
+    /** 指定されたIDのアカウントが見つからない */
+    class AccountNotFound(val identifier: String) :
+        KerriaError("Account not found: $identifier")
 
     /** 指定されたUUIDのプレイヤーが既に存在する */
     class PlayerAlreadyExists(val uuid: String) :
