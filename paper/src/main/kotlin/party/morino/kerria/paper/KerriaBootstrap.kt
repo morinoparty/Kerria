@@ -11,14 +11,17 @@ import org.incendo.cloud.paper.PaperCommandManager
 @Suppress("unused", "UnstableApiUsage")
 class KerriaBootstrap : PluginBootstrap {
 
-    override fun bootstrap(context: BootstrapContext) {
-        val commandManager: PaperCommandManager<CommandSourceStack> =
-            PaperCommandManager
-                .builder()
-                .executionCoordinator(ExecutionCoordinator.asyncCoordinator())
-                .buildBootstrapped(context)
+    companion object {
+        // コマンドマネージャーをBootstrapで作成し、プラグインのonEnable時にコマンド登録で使用する
+        // テスト環境(MockBukkit)ではBootstrapが実行されないためnullableとする
+        var commandManager: PaperCommandManager<CommandSourceStack>? = null
+    }
 
-        // TODO: コマンドの登録をここで行う
+    override fun bootstrap(context: BootstrapContext) {
+        commandManager = PaperCommandManager
+            .builder()
+            .executionCoordinator(ExecutionCoordinator.asyncCoordinator())
+            .buildBootstrapped(context)
     }
 
     override fun createPlugin(context: PluginProviderContext): JavaPlugin {

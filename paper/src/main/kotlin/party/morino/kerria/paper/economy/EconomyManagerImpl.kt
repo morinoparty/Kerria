@@ -109,6 +109,44 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
         }
     }
 
+    override fun setBalance(
+        accountId: UUID,
+        currencyId: Int,
+        amount: BigDecimal,
+        message: String?,
+        treatePluginName: String?,
+    ): Either<KerriaError, BigDecimal> {
+        // 金額バリデーション
+        if (amount < BigDecimal.ZERO) {
+            return KerriaError.InvalidAmount(amount, "Amount cannot be negative").left()
+        }
+        // 通貨が存在するか確認
+        currencyManager.getCurrency(currencyId).onLeft { return it.left() }
+
+        return runCatching {
+            transaction {
+                // アカウントの存在確認
+                accountRepository.findById(accountId)
+                    ?: throw KerriaError.AccountNotFound(accountId.toString())
+
+                // 残高を直接設定
+                accountRepository.setBalance(accountId, currencyId, amount)
+
+                // 取引ログを記録（失敗時は throw してロールバック）
+                logManager.logTransaction(accountId, accountId, currencyId, amount, message, treatePluginName)
+                    .onLeft { throw it }
+
+                // 設定後の残高を返す
+                accountRepository.getBalance(accountId, currencyId).right()
+            }
+        }.getOrElse { e ->
+            when (e) {
+                is KerriaError -> e.left()
+                else -> KerriaError.DatabaseError("Set balance failed: ${e.message}", e).left()
+            }
+        }
+    }
+
     override fun transfer(
         fromAccountId: UUID,
         toAccountId: UUID,
