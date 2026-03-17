@@ -68,4 +68,22 @@ interface EconomyManager {
         message: String? = null,
         treatePluginName: String? = null,
     ): Either<KerriaError, Unit>
+
+    /**
+     * 指定アカウントの残高を直接設定する（管理者用）
+     *
+     * @param accountId 対象アカウントのUUID
+     * @param currencyId 通貨のID
+     * @param amount 設定する残高
+     * @param message 取引メモ（任意）
+     * @param treatePluginName 取引を実行したプラグイン名（任意）
+     * @return 設定後の残高、もしくはエラー
+     */
+    fun setBalance(
+        accountId: UUID,
+        currencyId: Int,
+        amount: BigDecimal,
+        message: String? = null,
+        treatePluginName: String? = null,
+    ): Either<KerriaError, BigDecimal>
 }

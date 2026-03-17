@@ -1,23 +1,29 @@
 package party.morino.kerria.paper.commands
 
-import org.bukkit.command.CommandSender
+import io.papermc.paper.command.brigadier.CommandSourceStack
 import org.bukkit.entity.Player
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Default
+import org.incendo.cloud.annotations.Permission
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.KerriaAPI
 
 /**
  * 残高確認コマンド
+ *
+ * /kerria balance [currencyId]
  */
 @Command("kerria")
 class BalanceCommand : KoinComponent {
 
-    val api: KerriaAPI by inject()
+    private val api: KerriaAPI by inject()
 
     @Command("balance [currencyId]")
-    fun balance(sender: CommandSender, @Default("1") currencyId: Int) {
+    @Permission("kerria.balance")
+    @Suppress("UnstableApiUsage")
+    fun balance(stack: CommandSourceStack, @Default("1") currencyId: Int) {
+        val sender = stack.sender
         if (sender !is Player) {
             sender.sendRichMessage("<red>このコマンドはプレイヤーのみが使用できます。")
             return

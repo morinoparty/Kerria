@@ -53,4 +53,18 @@ interface AccountManager {
      * @return 残高の取得結果
      */
     fun getBalance(accountId: UUID, currencyId: Int): Either<KerriaError, BigDecimal>
+
+    /**
+     * 指定通貨の残高ランキングを取得します
+     *
+     * @param currencyId 通貨のID
+     * @param limit 取得する最大件数
+     * @param offset 取得開始位置
+     * @return アカウントと残高のペアのリスト（残高降順）
+     */
+    fun getTopBalances(
+        currencyId: Int,
+        limit: Int = 10,
+        offset: Int = 0,
+    ): Either<KerriaError, List<Pair<Account, BigDecimal>>>
 }

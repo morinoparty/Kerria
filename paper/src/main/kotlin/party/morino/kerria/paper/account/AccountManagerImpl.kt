@@ -88,4 +88,16 @@ class AccountManagerImpl : AccountManager, KoinComponent {
     }.getOrElse { e ->
         KerriaError.DatabaseError("Failed to get balance: ${e.message}", e).left()
     }
+
+    override fun getTopBalances(
+        currencyId: Int,
+        limit: Int,
+        offset: Int,
+    ): Either<KerriaError, List<Pair<Account, BigDecimal>>> = runCatching {
+        transaction {
+            accountRepository.getTopBalances(currencyId, limit, offset).right()
+        }
+    }.getOrElse { e ->
+        KerriaError.DatabaseError("Failed to get top balances: ${e.message}", e).left()
+    }
 }

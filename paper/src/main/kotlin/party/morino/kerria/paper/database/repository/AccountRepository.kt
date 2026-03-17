@@ -1,6 +1,7 @@
 package party.morino.kerria.paper.database.repository
 
 import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greaterEq
@@ -146,6 +147,37 @@ class AccountRepository {
         ) {
             it.update(AccountBalanceTable.balance, AccountBalanceTable.balance minus amount)
         }
+    }
+
+    /**
+     * 残高を直接設定する
+     *
+     * @return 更新された行数
+     */
+    fun setBalance(accountId: UUID, currencyId: Int, amount: BigDecimal): Int {
+        ensureBalanceRow(accountId, currencyId)
+        return AccountBalanceTable.update(
+            where = {
+                (AccountBalanceTable.accountId eq accountId) and
+                    (AccountBalanceTable.currencyId eq currencyId)
+            },
+        ) {
+            it[AccountBalanceTable.balance] = amount
+        }
+    }
+
+    /**
+     * 指定通貨の残高ランキングを取得する（残高降順）
+     */
+    fun getTopBalances(currencyId: Int, limit: Int, offset: Int): List<Pair<Account, BigDecimal>> {
+        return AccountBalanceTable
+            .innerJoin(AccountTable)
+            .selectAll()
+            .where { AccountBalanceTable.currencyId eq currencyId }
+            .orderBy(AccountBalanceTable.balance, SortOrder.DESC)
+            .limit(limit)
+            .offset(offset.toLong())
+            .map { Pair(it.toAccount(), it[AccountBalanceTable.balance]) }
     }
 
     /**

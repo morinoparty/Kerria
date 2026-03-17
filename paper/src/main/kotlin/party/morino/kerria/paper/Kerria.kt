@@ -3,6 +3,8 @@ package party.morino.kerria.paper
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.plugin.ServicePriority
+import io.papermc.paper.command.brigadier.CommandSourceStack
+import org.incendo.cloud.annotations.AnnotationParser
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.GlobalContext.getOrNull
 import org.koin.dsl.module
@@ -13,6 +15,11 @@ import party.morino.kerria.api.economy.EconomyManager
 import party.morino.kerria.api.files.ConfigManager
 import party.morino.kerria.api.log.LogManager
 import party.morino.kerria.paper.account.AccountManagerImpl
+import party.morino.kerria.paper.commands.AdminEconomyCommand
+import party.morino.kerria.paper.commands.BalanceCommand
+import party.morino.kerria.paper.commands.LogCommand
+import party.morino.kerria.paper.commands.PayCommand
+import party.morino.kerria.paper.commands.TopCommand
 import party.morino.kerria.paper.currency.CurrencyManagerImpl
 import party.morino.kerria.paper.database.DatabaseManager
 import party.morino.kerria.paper.database.repository.AccountRepository
@@ -48,6 +55,9 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
         // データベースの初期化
         val databaseManager: DatabaseManager = GlobalContext.get().get()
         databaseManager.initialize()
+
+        // コマンドの登録
+        registerCommands()
 
         // Vault Economy サービスの登録
         server.servicesManager.register<Economy>(
@@ -106,4 +116,28 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
     override fun getCurrencyManager(): CurrencyManager = currencyManager
     override fun getEconomyManager(): EconomyManager = economyManager
     override fun getLogManager(): LogManager = logManager
+
+    /**
+     * Cloud Annotations を使ってコマンドを登録する
+     */
+    private fun registerCommands() {
+        val commandManager = KerriaBootstrap.commandManager
+        if (commandManager == null) {
+            logger.warning("CommandManager is not initialized. Skipping command registration.")
+            return
+        }
+
+        @Suppress("UnstableApiUsage")
+        val annotationParser = AnnotationParser(
+            commandManager,
+            CommandSourceStack::class.java,
+        )
+        annotationParser.parse(
+            BalanceCommand(),
+            PayCommand(),
+            AdminEconomyCommand(),
+            TopCommand(),
+            LogCommand(),
+        )
+    }
 }
