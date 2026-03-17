@@ -49,4 +49,20 @@ interface CurrencyManager {
      * @return 通貨のリスト、もしくはエラー
      */
     fun getAllCurrencies(): Either<KerriaError, List<Currency>>
+
+    /**
+     * 通貨名から通貨を取得する
+     *
+     * @param name 通貨の名前
+     * @return 通貨、もしくはエラー
+     */
+    fun getCurrencyByName(name: String): Either<KerriaError, Currency>
+
+    /**
+     * 通貨を削除する
+     *
+     * @param id 削除する通貨のID
+     * @return 成功時はUnit、失敗時はエラー
+     */
+    fun deleteCurrency(id: Int): Either<KerriaError, Unit>
 }

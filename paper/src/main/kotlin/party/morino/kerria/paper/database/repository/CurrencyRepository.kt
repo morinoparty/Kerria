@@ -2,6 +2,7 @@ package party.morino.kerria.paper.database.repository
 
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import party.morino.kerria.api.currency.Currency
@@ -45,12 +46,32 @@ class CurrencyRepository {
     }
 
     /**
+     * 通貨名から通貨を検索する
+     */
+    fun findByName(name: String): Currency? {
+        return CurrencyTable
+            .selectAll()
+            .where { CurrencyTable.name eq name }
+            .map { it.toCurrency() }
+            .firstOrNull()
+    }
+
+    /**
      * 全ての通貨を取得する
      */
     fun findAll(): List<Currency> {
         return CurrencyTable
             .selectAll()
             .map { it.toCurrency() }
+    }
+
+    /**
+     * 通貨を削除する
+     *
+     * @return 削除された行数
+     */
+    fun deleteById(id: Int): Int {
+        return CurrencyTable.deleteWhere { CurrencyTable.id eq id }
     }
 
     /**
