@@ -30,11 +30,19 @@ sealed class KerriaError(message: String) : Exception(message) {
     class InvalidAmount(val amount: BigDecimal, val reason: String) :
         KerriaError("Invalid amount: $amount ($reason)")
 
+    /** 自分自身への送金 */
+    class TransferToSelf :
+        KerriaError("Cannot transfer to self")
+
     // --- Currency ---
 
     /** 通貨が見つからない */
     class CurrencyNotFound(val currencyId: String) :
         KerriaError("Currency not found: $currencyId")
+
+    /** 同名の通貨が既に存在する */
+    class CurrencyAlreadyExists(val name: String) :
+        KerriaError("Currency already exists: $name")
 
     // --- Database ---
 

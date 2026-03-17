@@ -155,6 +155,10 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
         message: String?,
         treatePluginName: String?,
     ): Either<KerriaError, Unit> {
+        // 自分自身への送金チェック
+        if (fromAccountId == toAccountId) {
+            return KerriaError.TransferToSelf().left()
+        }
         // 金額バリデーション
         if (amount <= BigDecimal.ZERO) {
             return KerriaError.InvalidAmount(amount, "Amount must be positive").left()
