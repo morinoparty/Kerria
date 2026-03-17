@@ -60,6 +60,14 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
         // コマンドの登録
         registerCommands()
 
+        // Kerria API サービスの登録（外部プラグイン向け）
+        server.servicesManager.register<KerriaAPI>(
+            KerriaAPI::class.java,
+            this,
+            this,
+            ServicePriority.Normal,
+        )
+
         // Vault Economy サービスの登録
         server.servicesManager.register<Economy>(
             Economy::class.java,
