@@ -2,8 +2,6 @@
     "pages": [
         "index",
         "commands",
-        "permissions",
-        "api",
         "---",
         "...format"
     ]
