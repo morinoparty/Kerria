@@ -1,0 +1,74 @@
+---
+title: 管理者コマンド
+description: サーバー管理者向けコマンドの一覧
+---
+
+管理者向けのコマンドです。すべて適切なパーミッションが必要です。
+`<param>` は必須パラメータ、`[param]` はオプションパラメータを示します。
+
+## 残高操作
+
+プレイヤーの残高を直接操作するコマンドです。
+
+### `/kerria set <player> <amount> [currencyId]`
+
+指定したプレイヤーの残高を直接設定します。
+
+- **パーミッション:** `kerria.admin.economy`
+
+### `/kerria give <player> <amount> [currencyId]`
+
+指定したプレイヤーに金額を付与します。
+
+- **パーミッション:** `kerria.admin.economy`
+
+### `/kerria take <player> <amount> [currencyId]`
+
+指定したプレイヤーから金額を徴収します。残高が不足している場合はエラーになります。
+
+- **パーミッション:** `kerria.admin.economy`
+
+## 取引履歴の閲覧
+
+### `/kerria log player <player> [page]`
+
+指定したプレイヤーの取引履歴を表示します。
+
+- **パーミッション:** `kerria.admin.log`
+
+## 通貨管理
+
+### `/kerria currency create <name> <symbol> [decimals]`
+
+新しい通貨を登録します。
+`decimals` は小数点以下の桁数で、省略時は 2 になります。
+フォーマットはデフォルトで `%amount% <name>` が設定されます。
+
+- **パーミッション:** `kerria.admin.currency`
+
+### `/kerria currency delete <name>`
+
+通貨を削除します。デフォルト通貨は削除できません。
+
+- **パーミッション:** `kerria.admin.currency`
+
+### `/kerria currency list`
+
+登録されている全通貨の一覧を表示します。ID・名前・記号・小数桁数が確認できます。
+
+- **パーミッション:** `kerria.admin.currency`
+
+### `/kerria currency info <name>`
+
+指定した通貨の詳細情報を表示します。フォーマット設定や表示例も確認できます。
+
+- **パーミッション:** `kerria.admin.currency`
+
+## 為替レート
+
+### `/kerria rate set <fromCurrency> <toCurrency> <rate>`
+
+通貨ペアの為替レートを設定します。
+例えば、`/kerria rate set JPY USD 0.0067` とすると、1 JPY = 0.0067 USD になります。
+
+- **パーミッション:** `kerria.admin.currency`

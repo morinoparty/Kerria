@@ -1,0 +1,9 @@
+{
+    "title": "Administrator",
+    "icon": "Settings",
+    "pages": [
+        "commands",
+        "permissions",
+        "...format"
+    ]
+}

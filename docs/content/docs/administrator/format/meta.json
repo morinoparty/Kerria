@@ -1,5 +1,6 @@
 {
     "title": "フォーマット",
+    "icon": "FileJson",
     "pages": [
         "database"
     ]

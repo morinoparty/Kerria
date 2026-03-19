@@ -1,0 +1,7 @@
+{
+    "title": "Player",
+    "icon": "User",
+    "pages": [
+        "commands"
+    ]
+}
