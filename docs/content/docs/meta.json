@@ -1,10 +1,12 @@
 {
     "pages": [
+        "---Introduction---",
         "index",
-        "commands",
-        "permissions",
-        "api",
-        "---",
-        "...format"
+        "---Player---",
+        "...player",
+        "---Administrator---",
+        "...administrator",
+        "---Developer---",
+        "...developer"
     ]
 }
