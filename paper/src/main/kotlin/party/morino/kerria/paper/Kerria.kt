@@ -17,6 +17,7 @@ import party.morino.kerria.api.log.LogManager
 import party.morino.kerria.paper.account.AccountManagerImpl
 import party.morino.kerria.paper.commands.AdminEconomyCommand
 import party.morino.kerria.paper.commands.BalanceCommand
+import party.morino.kerria.paper.commands.ConvertCommand
 import party.morino.kerria.paper.commands.CurrencyCommand
 import party.morino.kerria.paper.commands.LogCommand
 import party.morino.kerria.paper.commands.PayCommand
@@ -25,8 +26,11 @@ import party.morino.kerria.paper.currency.CurrencyManagerImpl
 import party.morino.kerria.paper.database.DatabaseManager
 import party.morino.kerria.paper.database.repository.AccountRepository
 import party.morino.kerria.paper.database.repository.CurrencyRepository
+import party.morino.kerria.paper.database.repository.ExchangeRateRepository
 import party.morino.kerria.paper.database.repository.TransactionLogRepository
+import party.morino.kerria.api.economy.ExchangeRateManager
 import party.morino.kerria.paper.economy.EconomyManagerImpl
+import party.morino.kerria.paper.economy.ExchangeRateManagerImpl
 import party.morino.kerria.paper.economy.VaultEconomy
 import party.morino.kerria.paper.files.ConfigManagerImpl
 import party.morino.kerria.paper.log.LogManagerImpl
@@ -99,6 +103,7 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
             single { AccountRepository() }
             single { CurrencyRepository() }
             single { TransactionLogRepository() }
+            single { ExchangeRateRepository() }
 
             // DB管理
             single { DatabaseManager(this@Kerria) }
@@ -108,6 +113,7 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
             single<CurrencyManager> { CurrencyManagerImpl() }
             single<LogManager> { LogManagerImpl() }
             single<EconomyManager> { EconomyManagerImpl() }
+            single<ExchangeRateManager> { ExchangeRateManagerImpl() }
         }
 
         // 既存の Koin がある場合はモジュールを追加、なければ新規開始
@@ -148,6 +154,7 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
             TopCommand(),
             LogCommand(),
             CurrencyCommand(),
+            ConvertCommand(),
         )
     }
 }
