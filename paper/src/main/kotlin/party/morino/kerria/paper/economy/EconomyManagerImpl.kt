@@ -3,6 +3,7 @@ package party.morino.kerria.paper.economy
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import org.bukkit.Bukkit
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -11,6 +12,7 @@ import party.morino.kerria.api.economy.EconomyManager
 import party.morino.kerria.api.error.KerriaError
 import party.morino.kerria.api.log.LogManager
 import party.morino.kerria.paper.database.repository.AccountRepository
+import party.morino.kerria.paper.event.KerriaTransactionEvent
 import java.math.BigDecimal
 import java.util.UUID
 
@@ -38,6 +40,16 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
         }
         // 通貨が存在するか確認
         currencyManager.getCurrency(currencyId).onLeft { return it.left() }
+
+        // イベント発火（キャンセル可能）
+        val event = KerriaTransactionEvent(
+            KerriaTransactionEvent.TransactionType.DEPOSIT,
+            accountId, accountId, currencyId, amount, treatePluginName,
+        )
+        Bukkit.getPluginManager().callEvent(event)
+        if (event.isCancelled) {
+            return KerriaError.InvalidAmount(amount, "Transaction cancelled by event").left()
+        }
 
         return runCatching {
             transaction {
@@ -77,6 +89,16 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
         }
         // 通貨が存在するか確認
         currencyManager.getCurrency(currencyId).onLeft { return it.left() }
+
+        // イベント発火（キャンセル可能）
+        val event = KerriaTransactionEvent(
+            KerriaTransactionEvent.TransactionType.WITHDRAW,
+            accountId, accountId, currencyId, amount, treatePluginName,
+        )
+        Bukkit.getPluginManager().callEvent(event)
+        if (event.isCancelled) {
+            return KerriaError.InvalidAmount(amount, "Transaction cancelled by event").left()
+        }
 
         return runCatching {
             transaction {
@@ -123,6 +145,16 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
         // 通貨が存在するか確認
         currencyManager.getCurrency(currencyId).onLeft { return it.left() }
 
+        // イベント発火（キャンセル可能）
+        val event = KerriaTransactionEvent(
+            KerriaTransactionEvent.TransactionType.SET_BALANCE,
+            accountId, accountId, currencyId, amount, treatePluginName,
+        )
+        Bukkit.getPluginManager().callEvent(event)
+        if (event.isCancelled) {
+            return KerriaError.InvalidAmount(amount, "Transaction cancelled by event").left()
+        }
+
         return runCatching {
             transaction {
                 // アカウントの存在確認
@@ -155,12 +187,26 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
         message: String?,
         treatePluginName: String?,
     ): Either<KerriaError, Unit> {
+        // 自分自身への送金チェック
+        if (fromAccountId == toAccountId) {
+            return KerriaError.TransferToSelf().left()
+        }
         // 金額バリデーション
         if (amount <= BigDecimal.ZERO) {
             return KerriaError.InvalidAmount(amount, "Amount must be positive").left()
         }
         // 通貨が存在するか確認
         currencyManager.getCurrency(currencyId).onLeft { return it.left() }
+
+        // イベント発火（キャンセル可能）
+        val event = KerriaTransactionEvent(
+            KerriaTransactionEvent.TransactionType.TRANSFER,
+            fromAccountId, toAccountId, currencyId, amount, treatePluginName,
+        )
+        Bukkit.getPluginManager().callEvent(event)
+        if (event.isCancelled) {
+            return KerriaError.InvalidAmount(amount, "Transaction cancelled by event").left()
+        }
 
         return runCatching {
             transaction {

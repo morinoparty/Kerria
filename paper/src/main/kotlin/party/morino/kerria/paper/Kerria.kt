@@ -17,6 +17,7 @@ import party.morino.kerria.api.log.LogManager
 import party.morino.kerria.paper.account.AccountManagerImpl
 import party.morino.kerria.paper.commands.AdminEconomyCommand
 import party.morino.kerria.paper.commands.BalanceCommand
+import party.morino.kerria.paper.commands.CurrencyCommand
 import party.morino.kerria.paper.commands.LogCommand
 import party.morino.kerria.paper.commands.PayCommand
 import party.morino.kerria.paper.commands.TopCommand
@@ -58,6 +59,14 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
 
         // コマンドの登録
         registerCommands()
+
+        // Kerria API サービスの登録（外部プラグイン向け）
+        server.servicesManager.register<KerriaAPI>(
+            KerriaAPI::class.java,
+            this,
+            this,
+            ServicePriority.Normal,
+        )
 
         // Vault Economy サービスの登録
         server.servicesManager.register<Economy>(
@@ -138,6 +147,7 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
             AdminEconomyCommand(),
             TopCommand(),
             LogCommand(),
+            CurrencyCommand(),
         )
     }
 }
