@@ -103,11 +103,19 @@ export const commandList = [
     },
     {
         command: "/kerria convert <amount> <fromCurrency> <toCurrency>",
-        description: "通貨を変換します。",
+        description: "為替レートに基づいて通貨を変換します。",
         tags: ["player"],
         aliases: [],
         permission: "kerria.convert",
-        status: "proposal"
+        status: "newly"
+    },
+    {
+        command: "/kerria rate set <fromCurrency> <toCurrency> <rate>",
+        description: "通貨ペアの為替レートを設定します。",
+        tags: ["admin"],
+        aliases: [],
+        permission: "kerria.admin.currency",
+        status: "newly"
     }
 ];
 

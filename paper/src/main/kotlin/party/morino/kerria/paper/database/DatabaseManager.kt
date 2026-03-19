@@ -14,6 +14,7 @@ import party.morino.kerria.api.files.DatabaseConfig
 import party.morino.kerria.paper.database.table.AccountBalanceTable
 import party.morino.kerria.paper.database.table.AccountTable
 import party.morino.kerria.paper.database.table.CurrencyTable
+import party.morino.kerria.paper.database.table.ExchangeRateTable
 import party.morino.kerria.paper.database.table.TransactionLogTable
 
 /**
@@ -71,7 +72,7 @@ class DatabaseManager(private val plugin: JavaPlugin) : KoinComponent {
      * 全テーブルを作成し、既存テーブルに不足カラムがあれば追加する
      */
     private fun createTables() {
-        val tables = arrayOf(AccountTable, CurrencyTable, AccountBalanceTable, TransactionLogTable)
+        val tables = arrayOf(AccountTable, CurrencyTable, AccountBalanceTable, TransactionLogTable, ExchangeRateTable)
         transaction {
             // テーブルが存在しなければ作成
             SchemaUtils.create(*tables)
