@@ -1,5 +1,7 @@
 package party.morino.kerria.paper.database
 
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import org.bukkit.plugin.java.JavaPlugin
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -22,6 +24,7 @@ import party.morino.kerria.paper.database.table.TransactionLogTable
  */
 class DatabaseManager(private val plugin: JavaPlugin) : KoinComponent {
     private val configManager: ConfigManager by inject()
+    private var dataSource: HikariDataSource? = null
 
     /**
      * データベースを初期化する
@@ -38,8 +41,17 @@ class DatabaseManager(private val plugin: JavaPlugin) : KoinComponent {
     }
 
     /**
+     * データベース接続を安全に閉じる
+     */
+    fun shutdown() {
+        dataSource?.close()
+        dataSource = null
+    }
+
+    /**
      * DB接続を確立する
      *
+     * SQLiteは直接接続、PostgreSQLはHikariCP接続プールを使用する。
      * @return 接続成功なら true、失敗なら false
      */
     private fun connect(config: DatabaseConfig): Boolean {
@@ -52,13 +64,25 @@ class DatabaseManager(private val plugin: JavaPlugin) : KoinComponent {
                 plugin.logger.info("SQLite database connected!")
             }
             "postgresql" -> {
-                Database.connect(
-                    url = "jdbc:postgresql://${config.host}:${config.port}/${config.database}",
-                    driver = "org.postgresql.Driver",
-                    user = config.username,
-                    password = config.password,
+                val poolConfig = config.pool
+                val hikariConfig = HikariConfig().apply {
+                    jdbcUrl = "jdbc:postgresql://${config.host}:${config.port}/${config.database}"
+                    driverClassName = "org.postgresql.Driver"
+                    username = config.username
+                    password = config.password
+                    maximumPoolSize = poolConfig.maximumPoolSize
+                    minimumIdle = poolConfig.minimumIdle
+                    connectionTimeout = poolConfig.connectionTimeout
+                    idleTimeout = poolConfig.idleTimeout
+                    maxLifetime = poolConfig.maxLifetime
+                    poolName = "kerria-pool"
+                }
+                val ds = HikariDataSource(hikariConfig)
+                dataSource = ds
+                Database.connect(ds)
+                plugin.logger.info(
+                    "PostgreSQL database connected with HikariCP! (pool: ${poolConfig.maximumPoolSize} max, ${poolConfig.minimumIdle} idle)",
                 )
-                plugin.logger.info("PostgreSQL database connected!")
             }
             else -> {
                 plugin.logger.severe("Invalid database type: ${config.mode}. Plugin will not function correctly.")

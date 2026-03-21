@@ -35,7 +35,31 @@ data class DatabaseConfig(
     val port : Int = 5432,
     val database : String = "kerria",
     val username : String = "user",
-    val password : String = "password"
+    val password : String = "password",
+    val pool : ConnectionPoolConfig = ConnectionPoolConfig()
+)
+
+/**
+ * HikariCP接続プールの設定（PostgreSQL使用時に有効）
+ *
+ * @property maximumPoolSize 最大コネクション数
+ * @property minimumIdle 最小アイドルコネクション数
+ * @property connectionTimeout 接続タイムアウト（ミリ秒）
+ * @property idleTimeout アイドルタイムアウト（ミリ秒）
+ * @property maxLifetime コネクションの最大生存時間（ミリ秒）
+ */
+@Serializable
+data class ConnectionPoolConfig(
+    @YamlComment("最大コネクション数")
+    val maximumPoolSize : Int = 10,
+    @YamlComment("最小アイドルコネクション数")
+    val minimumIdle : Int = 2,
+    @YamlComment("接続タイムアウト（ミリ秒）")
+    val connectionTimeout : Long = 30000,
+    @YamlComment("アイドルタイムアウト（ミリ秒）")
+    val idleTimeout : Long = 600000,
+    @YamlComment("コネクションの最大生存時間（ミリ秒）")
+    val maxLifetime : Long = 1800000,
 )
 
 

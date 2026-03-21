@@ -84,6 +84,9 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
     }
 
     override suspend fun onDisableAsync() {
+        // HikariCP接続プールを安全に閉じる
+        val databaseManager: DatabaseManager = GlobalContext.get().get()
+        databaseManager.shutdown()
         logger.info("${pluginMeta.name} has been disabled!")
     }
 
