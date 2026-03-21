@@ -73,6 +73,11 @@ jobs:
         continue-on-error: true
         run: ./gradlew build
 
+      - name: Generate Allure report
+        if: success() || failure()
+        continue-on-error: true
+        run: ./gradlew :paper:allureReport
+
       - name: Publish test results
         id: publish-test-results
         uses: mikepenz/action-junit-report@e08919a3b1fb83a78393dfb775a9c37f17d8eea6 # v6.0.1
@@ -85,6 +90,7 @@ jobs:
           mkdir -p ./gradle-artifacts/jars
           mkdir -p ./gradle-artifacts/junit
           mkdir -p ./gradle-artifacts/detekt
+          mkdir -p ./gradle-artifacts/allure
           mv ./paper/build/libs/paper-*-all.jar ./gradle-artifacts/jars/${{ env.PROJECT_NAME }}-paper-${{ env.COMMIT_SHORT_SHA }}.jar
           # sourcesJARを除外してメインJARのみ移動
           api_jar=$(find ./api/build/libs/ -name "api-*.jar" ! -name "*-sources.jar" | head -1)
@@ -92,6 +98,7 @@ jobs:
 
           cp -r ./paper/build/reports/tests/test/* ./gradle-artifacts/junit/ || echo "No JUnit reports found"
           cp -r ./build/reports/detekt/* ./gradle-artifacts/detekt/
+          cp -r ./paper/build/reports/allure-report/* ./gradle-artifacts/allure/ || echo "No Allure reports found"
 
       # GitHub Attestations で署名
       - name: Attest JAR artifacts
@@ -226,6 +233,7 @@ jobs:
           mkdir -p ./upload
           cp -r ./artifacts/gradle-artifacts/junit ./upload/ || echo "No JUnit reports"
           cp -r ./artifacts/gradle-artifacts/detekt ./upload/ || echo "No Detekt reports"
+          cp -r ./artifacts/gradle-artifacts/allure ./upload/ || echo "No Allure reports"
           mkdir -p ./upload/docs
           mv ./artifacts/docs-artifacts/* ./upload/docs/
 
@@ -240,6 +248,7 @@ jobs:
           # Docs と レポートを並列でアップロード
           aws s3 cp ./upload/junit $S3_BASE/junit $S3_OPTS --recursive &
           aws s3 cp ./upload/detekt $S3_BASE/detekt $S3_OPTS --recursive &
+          aws s3 cp ./upload/allure $S3_BASE/allure $S3_OPTS --recursive &
           aws s3 cp ./upload/docs $S3_BASE/docs $S3_OPTS --recursive &
 
           # 全ての並列アップロードを待機
@@ -273,6 +282,7 @@ jobs:
           RELEASE_URL: "${{ needs.upload-release.outputs.release_url }}"
           RELEASE_DOWNLOAD_BASE: "https://github.com/${{ github.repository }}/releases/download/preview-pr${{ github.event.pull_request.number }}-${{ env.COMMIT_SHORT_SHA }}"
           JUNIT_REPORT_URL: "${{ env.PREVIEW_BASE_URL }}/${{ env.PROJECT_NAME }}/${{ env.COMMIT_SHORT_SHA }}/junit/index.html"
+          ALLURE_REPORT_URL: "${{ env.PREVIEW_BASE_URL }}/${{ env.PROJECT_NAME }}/${{ env.COMMIT_SHORT_SHA }}/allure/index.html"
           DETEKT_REPORT_URL: "${{ env.PREVIEW_BASE_URL }}/${{ env.PROJECT_NAME }}/${{ env.COMMIT_SHORT_SHA }}/detekt/detekt.html"
           DOCS_PREVIEW_URL: "${{ env.PREVIEW_BASE_URL }}/${{ env.PROJECT_NAME }}/${{ env.COMMIT_SHORT_SHA }}/docs/index.html"
           DOKKA_URL: "${{ env.PREVIEW_BASE_URL }}/${{ env.PROJECT_NAME }}/${{ env.COMMIT_SHORT_SHA }}/docs/dokka/index.html"
@@ -295,6 +305,7 @@ jobs:
           |----------|------|
           | 📖 Documentation | [Preview]($DOCS_PREVIEW_URL) |
           | 📖 Dokka API | [Preview]($DOKKA_URL) |
+          | 🧪 Allure Report | [Report]($ALLURE_REPORT_URL) |
           | 🧪 JUnit Report | [Report]($JUNIT_REPORT_URL) |
           | 🔍 Detekt Report | [Report]($DETEKT_REPORT_URL) |
 
