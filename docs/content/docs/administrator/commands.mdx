@@ -10,65 +10,102 @@ description: サーバー管理者向けコマンドの一覧
 
 プレイヤーの残高を直接操作するコマンドです。
 
-### `/kerria set <player> <amount> [currencyId]`
+<CommandLine command={{
+  command: "/kerria set <player> <amount> [currencyId]",
+  description: "指定したプレイヤーの残高を直接設定します。",
+  tags: ["admin"],
+  aliases: [],
+  permission: "kerria.admin.economy",
+  status: "stable"
+}} />
 
-指定したプレイヤーの残高を直接設定します。
+<CommandLine command={{
+  command: "/kerria give <player> <amount> [currencyId]",
+  description: "指定したプレイヤーに金額を付与します。",
+  tags: ["admin"],
+  aliases: [],
+  permission: "kerria.admin.economy",
+  status: "stable"
+}} />
 
-- **パーミッション:** `kerria.admin.economy`
+<CommandLine command={{
+  command: "/kerria take <player> <amount> [currencyId]",
+  description: "指定したプレイヤーから金額を徴収します。",
+  tags: ["admin"],
+  aliases: [],
+  permission: "kerria.admin.economy",
+  status: "stable"
+}} />
 
-### `/kerria give <player> <amount> [currencyId]`
-
-指定したプレイヤーに金額を付与します。
-
-- **パーミッション:** `kerria.admin.economy`
-
-### `/kerria take <player> <amount> [currencyId]`
-
-指定したプレイヤーから金額を徴収します。残高が不足している場合はエラーになります。
-
-- **パーミッション:** `kerria.admin.economy`
+残高が不足している場合、takeコマンドはエラーになります。
 
 ## 取引履歴の閲覧
 
-### `/kerria log player <player> [page]`
-
-指定したプレイヤーの取引履歴を表示します。
-
-- **パーミッション:** `kerria.admin.log`
+<CommandLine command={{
+  command: "/kerria log player <player> [page]",
+  description: "指定したプレイヤーの取引履歴を表示します。",
+  tags: ["admin"],
+  aliases: [],
+  permission: "kerria.admin.log",
+  status: "stable"
+}} />
 
 ## 通貨管理
 
-### `/kerria currency create <name> <symbol> [decimals]`
+<CommandLine command={{
+  command: "/kerria currency create <name> <symbol> [decimals]",
+  description: "新しい通貨を登録します。",
+  tags: ["admin"],
+  aliases: [],
+  permission: "kerria.admin.currency",
+  status: "stable"
+}} />
 
-新しい通貨を登録します。
 `decimals` は小数点以下の桁数で、省略時は 2 になります。
 フォーマットはデフォルトで `%amount% <name>` が設定されます。
 
-- **パーミッション:** `kerria.admin.currency`
+<CommandLine command={{
+  command: "/kerria currency delete <name>",
+  description: "通貨を削除します。",
+  tags: ["admin"],
+  aliases: [],
+  permission: "kerria.admin.currency",
+  status: "stable"
+}} />
 
-### `/kerria currency delete <name>`
+デフォルト通貨は削除できません。
 
-通貨を削除します。デフォルト通貨は削除できません。
+<CommandLine command={{
+  command: "/kerria currency list",
+  description: "登録されている全通貨の一覧を表示します。",
+  tags: ["admin"],
+  aliases: [],
+  permission: "kerria.admin.currency",
+  status: "stable"
+}} />
 
-- **パーミッション:** `kerria.admin.currency`
+ID・名前・記号・小数桁数が確認できます。
 
-### `/kerria currency list`
+<CommandLine command={{
+  command: "/kerria currency info <name>",
+  description: "指定した通貨の詳細情報を表示します。",
+  tags: ["admin"],
+  aliases: [],
+  permission: "kerria.admin.currency",
+  status: "stable"
+}} />
 
-登録されている全通貨の一覧を表示します。ID・名前・記号・小数桁数が確認できます。
-
-- **パーミッション:** `kerria.admin.currency`
-
-### `/kerria currency info <name>`
-
-指定した通貨の詳細情報を表示します。フォーマット設定や表示例も確認できます。
-
-- **パーミッション:** `kerria.admin.currency`
+フォーマット設定や表示例も確認できます。
 
 ## 為替レート
 
-### `/kerria rate set <fromCurrency> <toCurrency> <rate>`
+<CommandLine command={{
+  command: "/kerria rate set <fromCurrency> <toCurrency> <rate>",
+  description: "通貨ペアの為替レートを設定します。",
+  tags: ["admin"],
+  aliases: [],
+  permission: "kerria.admin.currency",
+  status: "stable"
+}} />
 
-通貨ペアの為替レートを設定します。
 例えば、`/kerria rate set JPY USD 0.0067` とすると、1 JPY = 0.0067 USD になります。
-
-- **パーミッション:** `kerria.admin.currency`
