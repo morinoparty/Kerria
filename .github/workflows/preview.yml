@@ -104,7 +104,7 @@ jobs:
 
           cp -r ./paper/build/reports/tests/test/* ./gradle-artifacts/junit/ || echo "No JUnit reports found"
           cp -r ./build/reports/detekt/* ./gradle-artifacts/detekt/
-          cp -r ./paper/build/reports/allure-report/* ./gradle-artifacts/allure/ || echo "No Allure reports found"
+          cp -r ./paper/build/allure-report/* ./gradle-artifacts/allure/ || echo "No Allure reports found"
 
       # GitHub Attestations で署名
       - name: Attest JAR artifacts
