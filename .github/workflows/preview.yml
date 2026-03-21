@@ -73,10 +73,16 @@ jobs:
         continue-on-error: true
         run: ./gradlew build
 
+      - name: Install Allure CLI
+        if: success() || failure()
+        run: |
+          curl -sL https://github.com/allure-framework/allure2/releases/download/2.32.2/allure-2.32.2.tgz | tar -xz
+          echo "$PWD/allure-2.32.2/bin" >> $GITHUB_PATH
+
       - name: Generate Allure report
         if: success() || failure()
         continue-on-error: true
-        run: ./gradlew :paper:allureReport
+        run: allure generate ./paper/build/allure-results -o ./paper/build/allure-report --clean
 
       - name: Publish test results
         id: publish-test-results

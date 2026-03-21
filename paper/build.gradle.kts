@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.shadow)
     alias(libs.plugins.run.paper)
     alias(libs.plugins.resource.factory)
-    alias(libs.plugins.allure)
 }
 
 group = "party.morino"
