@@ -1,11 +1,6 @@
 "use client";
 
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
-import {
     Check,
     CircleAlert,
     CircleCheckBig,
@@ -35,85 +30,45 @@ export const CommandLine: React.FC<CommandLineProps> = ({ command }) => {
 
     const getBadgeStyle = (status: string): string => {
         const styles: { [key: string]: string } = {
-            proposal: "mr-12 text-gray-700",
-            beta: "mr-12 text-orange-800",
-            newly: "mr-12 text-blue-800",
-            stable: "mr-12 text-green-800",
-            deprecated: "mr-12 text-red-800",
+            proposal: "mr-4 text-gray-700",
+            beta: "mr-4 text-orange-800",
+            newly: "mr-4 text-blue-800",
+            stable: "mr-4 text-green-800",
+            deprecated: "mr-4 text-red-800",
         };
         return styles[status] || "";
     };
 
+    // ステータスに対応するアイコンを返す
+    const StatusIcon = () => {
+        const iconProps = { className: getBadgeStyle(command.status) };
+        switch (command.status) {
+            case "proposal":
+                return <HandHelping {...iconProps} />;
+            case "beta":
+                return <CircleAlert {...iconProps} />;
+            case "newly":
+                return <Check {...iconProps} />;
+            case "stable":
+                return <CircleCheckBig {...iconProps} />;
+            case "deprecated":
+                return <CircleX {...iconProps} />;
+            default:
+                return null;
+        }
+    };
+
     return (
-        <>
-            <Popover>
-                <PopoverTrigger className={getCommandLineStyle(command.status)}>
-                    <div
-                        className={`flex items-center ${getCommandLineStyle(command.status)}`}
-                    >
-                        <div className="flex items-center ml-8">
-                            {command.status === "proposal" && (
-                                <HandHelping
-                                    className={getBadgeStyle(command.status)}
-                                />
-                            )}
-                            {command.status === "beta" && (
-                                <CircleAlert
-                                    className={getBadgeStyle(command.status)}
-                                />
-                            )}
-                            {command.status === "newly" && (
-                                <Check
-                                    className={getBadgeStyle(command.status)}
-                                />
-                            )}
-                            {command.status === "stable" && (
-                                <CircleCheckBig
-                                    className={getBadgeStyle(command.status)}
-                                />
-                            )}
-                            {command.status === "deprecated" && (
-                                <CircleX
-                                    className={getBadgeStyle(command.status)}
-                                />
-                            )}
-                            <span className="text-black">
-                                {command.command}
-                            </span>
-                        </div>
-                    </div>
-                </PopoverTrigger>
-                <PopoverContent className="text-fd-foreground bg-fd-popover">
-                    <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                            <span className="font-medium">
-                                {command.status === "proposal" &&
-                                    "提案中のコマンド"}
-                                {command.status === "beta" &&
-                                    "ベータ版のコマンド"}
-                                {command.status === "newly" && "新しいコマンド"}
-                                {command.status === "stable" &&
-                                    "安定版のコマンド"}
-                                {command.status === "deprecated" &&
-                                    "非推奨のコマンド"}
-                            </span>
-                        </div>
-                        <div className="h-px bg-fd-border" />
-                        <div className="flex flex-col gap-1">
-                            <p className="text-sm">
-                                エイリアス: {command.aliases.join(", ")}
-                            </p>
-                            <p className="text-sm mb-0">
-                                パーミッション: {command.permission}
-                            </p>
-                        </div>
-                    </div>
-                </PopoverContent>
-            </Popover>
-            <p className="pt-2 pl-8 text-fd-foreground">
-                説明: {command.description}{" "}
-                {command.tags.includes("player") ? "" : "(管理者向け)"}
-            </p>
-        </>
+        <div className={`flex items-center ${getCommandLineStyle(command.status)}`}>
+            <div className="flex items-center ml-8">
+                <StatusIcon />
+                <span className="text-black">{command.command}</span>
+                {command.aliases.length > 0 && (
+                    <span className="ml-4 text-black/60 text-sm">
+                        ({command.aliases.join(", ")})
+                    </span>
+                )}
+            </div>
+        </div>
     );
 };

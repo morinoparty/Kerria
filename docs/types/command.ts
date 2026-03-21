@@ -13,24 +13,9 @@ export interface Command {
     command: string;
 
     /**
-     * コマンドの説明
-     */
-    description: string;
-
-    /**
-     * コマンドのタグ
-     */
-    tags: string[];
-
-    /**
      * コマンドのエイリアス
      */
     aliases: string[];
-
-    /**
-     * コマンドのパーミッション
-     */
-    permission: string;
 
     /**
      * コマンドのステータス

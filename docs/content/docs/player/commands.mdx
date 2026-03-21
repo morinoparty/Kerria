@@ -8,7 +8,11 @@ description: プレイヤー向けコマンドの一覧
 
 ## 残高確認
 
-### `/kerria balance [currencyId]`
+<CommandLine command={{
+  command: "/kerria balance [currencyId]",
+  aliases: [],
+  status: "stable"
+}} />
 
 自分の残高を確認します。
 通貨IDを指定すると、その通貨の残高を表示します。省略時はデフォルト通貨（ID: 1）が使用されます。
@@ -17,7 +21,11 @@ description: プレイヤー向けコマンドの一覧
 
 ## 送金
 
-### `/kerria pay <player> <amount> [currencyId]`
+<CommandLine command={{
+  command: "/kerria pay <player> <amount> [currencyId]",
+  aliases: [],
+  status: "stable"
+}} />
 
 指定したプレイヤーに送金します。
 自分自身への送金はできません。残高が不足している場合はエラーになります。
@@ -26,7 +34,11 @@ description: プレイヤー向けコマンドの一覧
 
 ## ランキング
 
-### `/kerria top [currencyId] [page]`
+<CommandLine command={{
+  command: "/kerria top [currencyId] [page]",
+  aliases: [],
+  status: "stable"
+}} />
 
 残高ランキングを表示します。
 通貨やページ番号を指定してフィルタリングできます。1ページあたり10件表示され、次ページへのクリック可能なリンクが表示されます。
@@ -35,7 +47,11 @@ description: プレイヤー向けコマンドの一覧
 
 ## 取引履歴
 
-### `/kerria log [page]`
+<CommandLine command={{
+  command: "/kerria log [page]",
+  aliases: [],
+  status: "stable"
+}} />
 
 自分の取引履歴をページ送りで表示します。
 各エントリには日時・金額・取引を実行したプラグイン名が含まれます。
@@ -44,7 +60,11 @@ description: プレイヤー向けコマンドの一覧
 
 ## 通貨変換
 
-### `/kerria convert <amount> <fromCurrency> <toCurrency>`
+<CommandLine command={{
+  command: "/kerria convert <amount> <fromCurrency> <toCurrency>",
+  aliases: [],
+  status: "stable"
+}} />
 
 為替レートに基づいて通貨を変換します。
 変換元通貨の残高から引き落とし、レートに基づいた金額を変換先通貨に入金します。
