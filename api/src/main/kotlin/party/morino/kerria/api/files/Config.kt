@@ -67,6 +67,8 @@ data class ConnectionPoolConfig(
 data class EconomyConfig(
     @YamlComment("小数点以下の桁数")
     val fractionalDigits : Int = 2,
+    @YamlComment("新規プレイヤーの初期残高（デフォルト通貨）")
+    val initialBalance : Double = 0.0,
     val currency : CurrencyConfig = CurrencyConfig()
 )
 
