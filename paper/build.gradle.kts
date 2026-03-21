@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.shadow)
     alias(libs.plugins.run.paper)
     alias(libs.plugins.resource.factory)
+    alias(libs.plugins.allure)
 }
 
 group = "party.morino"
@@ -37,6 +38,7 @@ dependencies {
     testImplementation(libs.bundles.koin.test)
     testImplementation(libs.mockk)
     testImplementation(libs.mock.bukkit)
+    testImplementation(libs.allure.junit5)
 }
 
 tasks {
