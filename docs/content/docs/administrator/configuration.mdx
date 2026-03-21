@@ -1,0 +1,58 @@
+---
+title: 設定ファイル
+description: Kerriaの設定ファイル (config.yml) の解説
+---
+
+Kerriaの設定は `plugins/Kerria/config.yml` に記述します。
+
+## 設定項目
+
+```yaml
+# デバッグモード
+debug: false
+
+economy:
+  # 小数点以下の桁数
+  fractionalDigits: 2
+  # 新規プレイヤーの初期残高（デフォルト通貨）
+  initialBalance: 0.0
+  currency:
+    # 通貨ID
+    id: 1
+    # 通貨名
+    name: JPY
+    # 通貨記号
+    symbol: "¥"
+    # 通貨複数形
+    plural: 円
+    # 通貨フォーマット
+    format: "%amount% %plural%"
+    # 小数点以下の桁数
+    fractionalDigits: 2
+
+database:
+  # データベースの種類 (sqlite | postgresql)
+  mode: sqlite
+  host: localhost
+  port: 5432
+  database: kerria
+  username: user
+  password: password
+```
+
+## economy
+
+### initialBalance
+
+新規プレイヤーがサーバーに初めて参加した際に、デフォルト通貨で付与される初期残高です。
+デフォルト値は `0.0` で、初期残高は付与されません。
+
+例えば `1000.0` に設定すると、新規プレイヤーはアカウント作成時に自動で 1000 が付与されます。
+
+### currency
+
+デフォルト通貨の設定です。プラグイン初回起動時にこの設定を元に通貨が作成されます。
+
+## database
+
+データベースの接続設定です。`sqlite` と `postgresql` をサポートしています。

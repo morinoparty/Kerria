@@ -3,6 +3,7 @@
     "icon": "Settings",
     "pages": [
         "commands",
+        "configuration",
         "permissions",
         "...format"
     ]

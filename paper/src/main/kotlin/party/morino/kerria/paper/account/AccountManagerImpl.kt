@@ -10,6 +10,7 @@ import party.morino.kerria.api.account.Account
 import party.morino.kerria.api.account.AccountManager
 import party.morino.kerria.api.account.AccountType
 import party.morino.kerria.api.error.KerriaError
+import party.morino.kerria.api.files.ConfigManager
 import party.morino.kerria.paper.database.repository.AccountRepository
 import java.math.BigDecimal
 import java.util.UUID
@@ -22,6 +23,7 @@ import java.util.UUID
  */
 class AccountManagerImpl : AccountManager, KoinComponent {
     private val accountRepository: AccountRepository by inject()
+    private val configManager: ConfigManager by inject()
 
     override fun getAccount(playerUniqueId: UUID): Either<KerriaError, Account> = runCatching {
         transaction {
@@ -42,7 +44,16 @@ class AccountManagerImpl : AccountManager, KoinComponent {
                 }
                 // 新規作成を試みる（競合時は制約例外が発生する）
                 try {
-                    accountRepository.create(playerUniqueId, playerName).right()
+                    val account = accountRepository.create(playerUniqueId, playerName)
+                    // 初期残高が設定されていればデフォルト通貨で残高を付与
+                    val config = configManager.getConfig()
+                    val initialBalance = BigDecimal.valueOf(config.economy.initialBalance)
+                    if (initialBalance > BigDecimal.ZERO) {
+                        val currencyId = config.economy.currency.id
+                        accountRepository.ensureBalanceRow(account.accountId, currencyId)
+                        accountRepository.setBalance(account.accountId, currencyId, initialBalance)
+                    }
+                    account.right()
                 } catch (_: Exception) {
                     // 制約例外 = 並行で作成済み → 再取得する
                     accountRepository.findByPlayerUniqueId(playerUniqueId)?.right()
