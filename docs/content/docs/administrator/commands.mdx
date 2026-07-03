@@ -178,3 +178,18 @@ Vault 連携でもこの通貨が使用されるため、`id` だけでなく名
 設定されている全ての為替レートを一覧表示します。通貨ペアと設定されたレートが確認できます。
 
 - **パーミッション:** `kerria.admin.currency`
+
+## プラグイン管理
+
+### 再読み込み
+
+<CommandLine command={{
+  command: "/kerria reload",
+  aliases: [],
+  status: "stable"
+}} />
+
+サーバーを再起動せずに、設定ファイル (`config.yaml`) とメッセージファイル (`messages.yml`) をディスクから再読み込みします。
+不正な内容の場合は再読み込みがスキップされ、直前の正常な内容が維持されます。
+
+- **パーミッション:** `kerria.admin.reload`

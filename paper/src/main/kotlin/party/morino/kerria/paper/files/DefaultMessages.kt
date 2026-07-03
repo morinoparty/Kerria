@@ -14,6 +14,8 @@ object DefaultMessages {
     val DEFAULT: Map<String, String> = linkedMapOf(
         // --- 共通 ---
         "common.player-only" to "<red>このコマンドはプレイヤーのみが使用できます。",
+        "reload.success" to "<green>設定とメッセージを再読み込みしました。",
+        "reload.failed" to "<red>再読み込みに失敗しました: <error>",
         "common.account-not-found" to "<red>アカウントが見つかりません。",
         "common.target-account-not-found" to "<red>対象のアカウントが見つかりません。",
         "common.currency-not-found" to "<red>通貨が見つかりません。",
