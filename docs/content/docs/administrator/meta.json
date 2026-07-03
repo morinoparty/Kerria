@@ -6,6 +6,7 @@
         "configuration",
         "messages",
         "permissions",
+        "placeholders",
         "...format"
     ]
 }
