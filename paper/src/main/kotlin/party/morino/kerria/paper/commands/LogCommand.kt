@@ -9,6 +9,7 @@ import org.incendo.cloud.annotations.Permission
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.KerriaAPI
+import party.morino.kerria.api.files.MessageManager
 import java.time.format.DateTimeFormatter
 
 /**
@@ -21,6 +22,7 @@ import java.time.format.DateTimeFormatter
 class LogCommand : KoinComponent {
 
     private val api: KerriaAPI by inject()
+    private val messages: MessageManager by inject()
 
     // 1ページあたりの表示件数
     private val pageSize = 10
@@ -34,13 +36,13 @@ class LogCommand : KoinComponent {
     fun logSelf(stack: CommandSourceStack, @Default("1") page: Int) {
         val sender = stack.sender
         if (sender !is Player) {
-            sender.sendRichMessage("<red>このコマンドはプレイヤーのみが使用できます。")
+            sender.sendRichMessage(messages.get("common.player-only"))
             return
         }
 
         // 自分のアカウントを取得
         val account = api.getAccountManager().getAccount(sender.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage("<red>アカウントが見つかりません。")
+            sender.sendRichMessage(messages.get("common.account-not-found"))
             return
         }
 
@@ -56,13 +58,13 @@ class LogCommand : KoinComponent {
         // 対象プレイヤーを検索
         val targetPlayer = Bukkit.getOfflinePlayerIfCached(player)
         if (targetPlayer == null) {
-            sender.sendRichMessage("<red>プレイヤー <yellow>$player</yellow> が見つかりません。")
+            sender.sendRichMessage(messages.get("common.player-not-found", "player" to player))
             return
         }
 
         // 対象のアカウントを取得
         val account = api.getAccountManager().getAccount(targetPlayer.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage("<red>対象のアカウントが見つかりません。")
+            sender.sendRichMessage(messages.get("common.target-account-not-found"))
             return
         }
 
@@ -84,17 +86,19 @@ class LogCommand : KoinComponent {
 
         // 取引ログを取得
         val logs = api.getLogManager().getTransactionHistory(accountId, pageSize, offset).getOrNull() ?: run {
-            sender.sendRichMessage("<red>取引履歴の取得に失敗しました。")
+            sender.sendRichMessage(messages.get("log.fetch-failed"))
             return
         }
 
         if (logs.isEmpty()) {
-            sender.sendRichMessage("<yellow>表示する取引履歴がありません。")
+            sender.sendRichMessage(messages.get("log.empty"))
             return
         }
 
         // ヘッダー表示
-        sender.sendRichMessage("<gold>===== ${playerName}の取引履歴 - ページ $safePage =====")
+        sender.sendRichMessage(
+            messages.get("log.header", "player" to playerName, "page" to safePage.toString()),
+        )
 
         // 各ログを表示
         logs.forEach { log ->
@@ -102,27 +106,29 @@ class LogCommand : KoinComponent {
             val currency = api.getCurrencyManager().getCurrency(log.currencyId).getOrNull()
             val amountStr = currency?.format(log.amount) ?: log.amount.toPlainString()
 
-            // 送金方向の表示
-            val direction = if (log.fromAccountId == accountId) {
-                "<red>-$amountStr"
-            } else {
-                "<green>+$amountStr"
-            }
+            // 送金方向で色分けするテンプレートを選ぶ（出金=赤マイナス、入金=緑プラス）
+            val key = if (log.fromAccountId == accountId) "log.entry.outgoing" else "log.entry.incoming"
 
-            // プラグイン名の表示
-            val pluginInfo = log.treatePluginName?.let { " <gray>[$it]" } ?: ""
+            // プラグイン名・メッセージは色をテンプレート側に持たせ、値はプレーンで渡す
+            val pluginText = log.treatePluginName?.let { "[$it]" } ?: ""
+            val messageText = log.message ?: ""
 
-            // メッセージの表示
-            val messageInfo = log.message?.let { " <gray>$it" } ?: ""
-
-            sender.sendRichMessage("<gray>$time $direction$pluginInfo$messageInfo")
+            sender.sendRichMessage(
+                messages.get(
+                    key,
+                    "time" to time,
+                    "amount" to amountStr,
+                    "plugin" to pluginText,
+                    "message" to messageText,
+                ),
+            )
         }
 
         // フッター表示
         if (logs.size == pageSize) {
             val nextPage = safePage + 1
             sender.sendRichMessage(
-                "<gray>次のページ: <click:run_command:'/kerria log $nextPage'><aqua>[ページ $nextPage]</click>",
+                messages.get("log.next-page", "nextPage" to nextPage.toString()),
             )
         }
     }

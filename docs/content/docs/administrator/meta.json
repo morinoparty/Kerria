@@ -4,6 +4,7 @@
     "pages": [
         "commands",
         "configuration",
+        "messages",
         "permissions",
         "...format"
     ]

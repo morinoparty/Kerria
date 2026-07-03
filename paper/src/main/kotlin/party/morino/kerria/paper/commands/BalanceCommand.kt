@@ -8,6 +8,7 @@ import org.incendo.cloud.annotations.Permission
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.KerriaAPI
+import party.morino.kerria.api.files.MessageManager
 
 /**
  * 残高確認コマンド
@@ -18,6 +19,7 @@ import party.morino.kerria.api.KerriaAPI
 class BalanceCommand : KoinComponent {
 
     private val api: KerriaAPI by inject()
+    private val messages: MessageManager by inject()
 
     @Command("balance [currencyId]")
     @Permission("kerria.balance")
@@ -25,30 +27,30 @@ class BalanceCommand : KoinComponent {
     fun balance(stack: CommandSourceStack, @Default("1") currencyId: Int) {
         val sender = stack.sender
         if (sender !is Player) {
-            sender.sendRichMessage("<red>このコマンドはプレイヤーのみが使用できます。")
+            sender.sendRichMessage(messages.get("common.player-only"))
             return
         }
 
         // プレイヤーのアカウントを取得
         val account = api.getAccountManager().getAccount(sender.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage("<red>アカウントが見つかりません。")
+            sender.sendRichMessage(messages.get("common.account-not-found"))
             return
         }
 
         // 通貨を取得
         val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
-            sender.sendRichMessage("<red>通貨が見つかりません。")
+            sender.sendRichMessage(messages.get("common.currency-not-found"))
             return
         }
 
         // 残高を取得
         val balance = api.getAccountManager().getBalance(account.accountId, currency.id).getOrNull() ?: run {
-            sender.sendRichMessage("<red>残高の取得に失敗しました。")
+            sender.sendRichMessage(messages.get("balance.fetch-failed"))
             return
         }
 
         // フォーマットして表示
         val formatted = currency.format(balance)
-        sender.sendRichMessage("<green>あなたの残高は${formatted}です。")
+        sender.sendRichMessage(messages.get("balance.result", "amount" to formatted))
     }
 }

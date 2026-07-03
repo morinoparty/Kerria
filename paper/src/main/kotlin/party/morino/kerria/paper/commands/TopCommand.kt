@@ -7,6 +7,7 @@ import org.incendo.cloud.annotations.Permission
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.KerriaAPI
+import party.morino.kerria.api.files.MessageManager
 
 /**
  * 残高ランキングコマンド
@@ -17,6 +18,7 @@ import party.morino.kerria.api.KerriaAPI
 class TopCommand : KoinComponent {
 
     private val api: KerriaAPI by inject()
+    private val messages: MessageManager by inject()
 
     // 1ページあたりの表示件数
     private val pageSize = 10
@@ -33,7 +35,7 @@ class TopCommand : KoinComponent {
 
         // 通貨を取得
         val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
-            sender.sendRichMessage("<red>通貨が見つかりません。")
+            sender.sendRichMessage(messages.get("common.currency-not-found"))
             return
         }
 
@@ -43,31 +45,44 @@ class TopCommand : KoinComponent {
 
         // ランキングデータを取得
         val entries = api.getAccountManager().getTopBalances(currencyId, pageSize, offset).getOrNull() ?: run {
-            sender.sendRichMessage("<red>ランキングの取得に失敗しました。")
+            sender.sendRichMessage(messages.get("top.fetch-failed"))
             return
         }
 
         if (entries.isEmpty()) {
-            sender.sendRichMessage("<yellow>表示するデータがありません。")
+            sender.sendRichMessage(messages.get("top.empty"))
             return
         }
 
         // ヘッダー表示
-        sender.sendRichMessage("<gold>===== 残高ランキング (${currency.name}) - ページ $safePage =====")
+        sender.sendRichMessage(
+            messages.get("top.header", "currency" to currency.name, "page" to safePage.toString()),
+        )
 
         // ランキング表示
         entries.forEachIndexed { index, (account, balance) ->
             val rank = offset + index + 1
             val name = account.name ?: "Unknown"
             val formatted = currency.format(balance)
-            sender.sendRichMessage("<yellow>#$rank <white>$name <green>$formatted")
+            sender.sendRichMessage(
+                messages.get(
+                    "top.entry",
+                    "rank" to rank.toString(),
+                    "name" to name,
+                    "amount" to formatted,
+                ),
+            )
         }
 
         // フッター表示（次ページへのヒント）
         if (entries.size == pageSize) {
             val nextPage = safePage + 1
             sender.sendRichMessage(
-                "<gray>次のページ: <click:run_command:'/kerria top $currencyId $nextPage'><aqua>[ページ $nextPage]</click>",
+                messages.get(
+                    "top.next-page",
+                    "currencyId" to currencyId.toString(),
+                    "nextPage" to nextPage.toString(),
+                ),
             )
         }
     }

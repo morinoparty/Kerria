@@ -8,6 +8,7 @@ import org.incendo.cloud.annotations.Permission
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.KerriaAPI
+import party.morino.kerria.api.files.MessageManager
 import java.math.BigDecimal
 
 /**
@@ -21,6 +22,7 @@ import java.math.BigDecimal
 class AdminEconomyCommand : KoinComponent {
 
     private val api: KerriaAPI by inject()
+    private val messages: MessageManager by inject()
 
     @Command("set <player> <amount> [currencyId]")
     @Permission("kerria.admin.economy")
@@ -36,19 +38,19 @@ class AdminEconomyCommand : KoinComponent {
         // 対象プレイヤーを検索
         val targetPlayer = Bukkit.getOfflinePlayerIfCached(player)
         if (targetPlayer == null) {
-            sender.sendRichMessage("<red>プレイヤー <yellow>$player</yellow> が見つかりません。")
+            sender.sendRichMessage(messages.get("common.player-not-found", "player" to player))
             return
         }
 
         // 通貨を取得
         val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
-            sender.sendRichMessage("<red>通貨が見つかりません。")
+            sender.sendRichMessage(messages.get("common.currency-not-found"))
             return
         }
 
         // 対象アカウントを取得
         val account = api.getAccountManager().getAccount(targetPlayer.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage("<red>対象のアカウントが見つかりません。")
+            sender.sendRichMessage(messages.get("common.target-account-not-found"))
             return
         }
 
@@ -62,12 +64,12 @@ class AdminEconomyCommand : KoinComponent {
             treatePluginName = "Kerria",
         ).fold(
             ifLeft = { error ->
-                sender.sendRichMessage("<red>残高の設定に失敗しました: ${error.message}")
+                sender.sendRichMessage(messages.get("admin.set.failed", "error" to (error.message ?: "")))
             },
             ifRight = { newBalance ->
                 val formatted = currency.format(newBalance)
                 sender.sendRichMessage(
-                    "<green><yellow>${targetPlayer.name}</yellow> の残高を ${formatted} に設定しました。",
+                    messages.get("admin.set.success", "player" to (targetPlayer.name ?: player), "amount" to formatted),
                 )
             },
         )
@@ -87,19 +89,19 @@ class AdminEconomyCommand : KoinComponent {
         // 対象プレイヤーを検索
         val targetPlayer = Bukkit.getOfflinePlayerIfCached(player)
         if (targetPlayer == null) {
-            sender.sendRichMessage("<red>プレイヤー <yellow>$player</yellow> が見つかりません。")
+            sender.sendRichMessage(messages.get("common.player-not-found", "player" to player))
             return
         }
 
         // 通貨を取得
         val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
-            sender.sendRichMessage("<red>通貨が見つかりません。")
+            sender.sendRichMessage(messages.get("common.currency-not-found"))
             return
         }
 
         // 対象アカウントを取得
         val account = api.getAccountManager().getAccount(targetPlayer.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage("<red>対象のアカウントが見つかりません。")
+            sender.sendRichMessage(messages.get("common.target-account-not-found"))
             return
         }
 
@@ -113,12 +115,16 @@ class AdminEconomyCommand : KoinComponent {
             treatePluginName = "Kerria",
         ).fold(
             ifLeft = { error ->
-                sender.sendRichMessage("<red>入金に失敗しました: ${error.message}")
+                sender.sendRichMessage(messages.get("admin.give.failed", "error" to (error.message ?: "")))
             },
             ifRight = { newBalance ->
-                val formatted = currency.format(newBalance)
                 sender.sendRichMessage(
-                    "<green><yellow>${targetPlayer.name}</yellow> に ${currency.format(bigAmount)} を付与しました。残高: ${formatted}",
+                    messages.get(
+                        "admin.give.success",
+                        "player" to (targetPlayer.name ?: player),
+                        "given" to currency.format(bigAmount),
+                        "balance" to currency.format(newBalance),
+                    ),
                 )
             },
         )
@@ -138,19 +144,19 @@ class AdminEconomyCommand : KoinComponent {
         // 対象プレイヤーを検索
         val targetPlayer = Bukkit.getOfflinePlayerIfCached(player)
         if (targetPlayer == null) {
-            sender.sendRichMessage("<red>プレイヤー <yellow>$player</yellow> が見つかりません。")
+            sender.sendRichMessage(messages.get("common.player-not-found", "player" to player))
             return
         }
 
         // 通貨を取得
         val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
-            sender.sendRichMessage("<red>通貨が見つかりません。")
+            sender.sendRichMessage(messages.get("common.currency-not-found"))
             return
         }
 
         // 対象アカウントを取得
         val account = api.getAccountManager().getAccount(targetPlayer.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage("<red>対象のアカウントが見つかりません。")
+            sender.sendRichMessage(messages.get("common.target-account-not-found"))
             return
         }
 
@@ -164,12 +170,16 @@ class AdminEconomyCommand : KoinComponent {
             treatePluginName = "Kerria",
         ).fold(
             ifLeft = { error ->
-                sender.sendRichMessage("<red>出金に失敗しました: ${error.message}")
+                sender.sendRichMessage(messages.get("admin.take.failed", "error" to (error.message ?: "")))
             },
             ifRight = { newBalance ->
-                val formatted = currency.format(newBalance)
                 sender.sendRichMessage(
-                    "<green><yellow>${targetPlayer.name}</yellow> から ${currency.format(bigAmount)} を徴収しました。残高: ${formatted}",
+                    messages.get(
+                        "admin.take.success",
+                        "player" to (targetPlayer.name ?: player),
+                        "taken" to currency.format(bigAmount),
+                        "balance" to currency.format(newBalance),
+                    ),
                 )
             },
         )
