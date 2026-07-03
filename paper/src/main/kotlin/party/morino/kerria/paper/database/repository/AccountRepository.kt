@@ -5,6 +5,7 @@ import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greaterEq
+import org.jetbrains.exposed.v1.core.lowerCase
 import org.jetbrains.exposed.v1.core.minus
 import org.jetbrains.exposed.v1.core.plus
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -42,6 +43,23 @@ class AccountRepository {
         return AccountTable
             .selectAll()
             .where { AccountTable.name eq name }
+            .map { it.toAccount() }
+            .firstOrNull()
+    }
+
+    /**
+     * プレイヤー名からPLAYERアカウントを検索する（大文字小文字を区別しない）
+     *
+     * Bukkit のプロファイルキャッシュに依存せず、Kerria が保持するアカウント名から
+     * オフラインプレイヤーを解決するために使用する。
+     */
+    fun findPlayerByName(name: String): Account? {
+        return AccountTable
+            .selectAll()
+            .where {
+                (AccountTable.accountType eq AccountType.PLAYER.name) and
+                    (AccountTable.name.lowerCase() eq name.lowercase())
+            }
             .map { it.toAccount() }
             .firstOrNull()
     }

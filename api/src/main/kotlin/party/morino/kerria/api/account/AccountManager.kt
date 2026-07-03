@@ -23,6 +23,17 @@ interface AccountManager {
     fun getAccount(playerUniqueId: UUID): Either<KerriaError, Account>
 
     /**
+     * プレイヤー名からアカウントを取得します（大文字小文字を区別しません）
+     *
+     * Bukkit のプロファイルキャッシュに依存せずに解決するため、
+     * サーバーにキャッシュされていないオフラインプレイヤーでも取得できます。
+     *
+     * @param playerName プレイヤー名
+     * @return アカウントの取得結果。成功時は[Account]、失敗時は[KerriaError]を返します
+     */
+    fun getAccountByPlayerName(playerName: String): Either<KerriaError, Account>
+
+    /**
      * プレイヤーのUUIDからアカウントを取得し、存在しない場合は作成します
      *
      * @param playerUniqueId プレイヤーのUUID

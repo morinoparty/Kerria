@@ -67,4 +67,24 @@ class AccountManagerImplTest : KoinTest {
         assertTrue(result.isLeft())
         assertTrue(result.leftOrNull() is KerriaError.AccountNotFound)
     }
+
+    @Test
+    @DisplayName("Resolve account by player name is case-insensitive")
+    fun getAccountByPlayerNameCaseInsensitive() {
+        val uuid = UUID.randomUUID()
+        val created = accountManager.getOrCreateAccount(uuid, "OfflineNamer").getOrNull()!!
+
+        // Bukkit のキャッシュに依存せず、名前（大文字小文字を無視）で解決できる
+        val result = accountManager.getAccountByPlayerName("offlinenamer")
+        assertTrue(result.isRight())
+        assertEquals(created.accountId, result.getOrNull()!!.accountId)
+    }
+
+    @Test
+    @DisplayName("Resolve account by unknown player name returns error")
+    fun getAccountByPlayerNameUnknownReturnsError() {
+        val result = accountManager.getAccountByPlayerName("NoSuchPlayer")
+        assertTrue(result.isLeft())
+        assertTrue(result.leftOrNull() is KerriaError.AccountNotFound)
+    }
 }

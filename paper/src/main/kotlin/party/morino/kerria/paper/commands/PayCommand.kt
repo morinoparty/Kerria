@@ -44,15 +44,14 @@ class PayCommand : KoinComponent {
             return
         }
 
-        // 送金先プレイヤーの検索
-        val targetPlayer = Bukkit.getOfflinePlayerIfCached(player)
-        if (targetPlayer == null) {
+        // 送金先アカウントを解決（キャッシュ非依存でオフラインプレイヤーも解決可能）
+        val toAccount = TargetAccountResolver.resolve(api, player) ?: run {
             sender.sendRichMessage(messages.get("common.player-not-found", "player" to player))
             return
         }
 
         // 自分自身への送金チェック
-        if (targetPlayer.uniqueId == sender.uniqueId) {
+        if (toAccount.playerUniqueId == sender.uniqueId) {
             sender.sendRichMessage(messages.get("pay.self"))
             return
         }
@@ -66,12 +65,6 @@ class PayCommand : KoinComponent {
         // 送金元アカウントを取得
         val fromAccount = api.getAccountManager().getAccount(sender.uniqueId).getOrNull() ?: run {
             sender.sendRichMessage(messages.get("pay.sender-account-not-found"))
-            return
-        }
-
-        // 送金先アカウントを取得
-        val toAccount = api.getAccountManager().getAccount(targetPlayer.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("pay.target-account-not-found"))
             return
         }
 
@@ -90,10 +83,10 @@ class PayCommand : KoinComponent {
             ifRight = {
                 val formatted = currency.format(bigAmount)
                 sender.sendRichMessage(
-                    messages.get("pay.success", "player" to (targetPlayer.name ?: player), "amount" to formatted),
+                    messages.get("pay.success", "player" to (toAccount.name ?: player), "amount" to formatted),
                 )
                 // 送金先がオンラインならメッセージを送信
-                targetPlayer.player?.sendRichMessage(
+                toAccount.playerUniqueId?.let { Bukkit.getPlayer(it) }?.sendRichMessage(
                     messages.get("pay.received", "player" to (sender.name), "amount" to formatted),
                 )
             },
