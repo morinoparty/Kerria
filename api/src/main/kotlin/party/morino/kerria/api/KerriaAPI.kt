@@ -1,6 +1,7 @@
 package party.morino.kerria.api
 
 import party.morino.kerria.api.account.AccountManager
+import party.morino.kerria.api.account.BankManager
 import party.morino.kerria.api.currency.CurrencyManager
 import party.morino.kerria.api.economy.EconomyManager
 import party.morino.kerria.api.log.LogManager
@@ -40,4 +41,11 @@ interface KerriaAPI {
      * @return [LogManager]のインスタンス
      */
     fun getLogManager(): LogManager
+
+    /**
+     * 銀行管理機能へのアクセスを提供します
+     *
+     * @return [BankManager]のインスタンス
+     */
+    fun getBankManager(): BankManager
 }

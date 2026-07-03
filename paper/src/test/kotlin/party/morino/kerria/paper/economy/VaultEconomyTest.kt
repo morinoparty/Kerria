@@ -54,10 +54,22 @@ class VaultEconomyTest : KoinTest {
     }
 
     @Test
-    @DisplayName("Bank methods return NOT_IMPLEMENTED")
-    fun bankMethodsReturnNotImplemented() {
-        val response = economy.createBank("test", "player")
-        assertEquals(EconomyResponse.ResponseType.NOT_IMPLEMENTED, response.type)
+    @DisplayName("Bank support is enabled and bank operations work")
+    fun bankOperationsWork() {
+        assertTrue(economy.hasBankSupport())
+
+        // プレイヤーを所有者に銀行を作成する
+        val create = economy.createBank("VaultBank", player.name)
+        assertEquals(EconomyResponse.ResponseType.SUCCESS, create.type)
+
+        // 入金して残高を確認する
+        val deposit = economy.bankDeposit("VaultBank", 500.0)
+        assertEquals(EconomyResponse.ResponseType.SUCCESS, deposit.type)
+        assertEquals(500.0, economy.bankBalance("VaultBank").balance)
+
+        // 所有者判定と一覧を確認する
+        assertEquals(EconomyResponse.ResponseType.SUCCESS, economy.isBankOwner("VaultBank", player.name).type)
+        assertTrue(economy.getBanks().contains("VaultBank"))
     }
 
     @Test

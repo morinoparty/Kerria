@@ -20,6 +20,16 @@ sealed class KerriaError(message: String) : Exception(message) {
     class PlayerAlreadyExists(val uuid: String) :
         KerriaError("Player already exists: $uuid")
 
+    // --- Bank ---
+
+    /** 指定された名前の銀行が見つからない */
+    class BankNotFound(val name: String) :
+        KerriaError("Bank not found: $name")
+
+    /** 同名の銀行が既に存在する */
+    class BankAlreadyExists(val name: String) :
+        KerriaError("Bank already exists: $name")
+
     // --- Economy ---
 
     /** 残高不足 */

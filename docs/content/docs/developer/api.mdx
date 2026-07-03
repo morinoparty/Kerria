@@ -33,6 +33,11 @@ val currencies = currencyManager.getAllCurrencies()
 // 取引ログ
 val logManager = kerriaAPI.getLogManager()
 val history = logManager.getTransactionHistory(accountId, limit = 10)
+
+// 銀行管理（ギルド・町の金庫など共有残高）
+val bankManager = kerriaAPI.getBankManager()
+bankManager.createBank("guild_bank", ownerUuid)
+bankManager.deposit("guild_bank", currencyId, BigDecimal("1000.00"))
 ```
 
 :::note
@@ -57,6 +62,31 @@ economy.withdrawPlayer(player, 50.0);
 :::info
 Vault経由の取引では、呼び出し元プラグインが自動的に検出され、取引ログに記録されます。
 :::
+
+### 銀行機能（Bank）
+
+Kerria は Vault の Bank API に対応しています（`hasBankSupport()` は `true` を返します）。
+ギルドや町の金庫のような、複数プレイヤーで共有する残高を扱えます。銀行残高はデフォルト通貨で管理されます。
+
+```java
+Economy economy = server.getServicesManager()
+    .getRegistration(Economy.class).getProvider();
+
+// 銀行の作成（第2引数は所有者のプレイヤー名）
+economy.createBank("guild_bank", "Notch");
+
+// 入金・出金・残高照会
+economy.bankDeposit("guild_bank", 1000.0);
+economy.bankWithdraw("guild_bank", 200.0);
+double balance = economy.bankBalance("guild_bank").balance;
+
+// 所有者・メンバー判定
+boolean isOwner = economy.isBankOwner("guild_bank", "Notch").transactionSuccess();
+```
+
+銀行の残高操作はプレイヤーの残高と同じアトミックな経路を通り、取引ログにも記録されます。
+より細かい制御（メンバーの追加・削除など）が必要な場合は、`KerriaAPI#getBankManager()` から取得できる
+`BankManager` を利用してください。`BankManager` の各メソッドは `Either<KerriaError, T>` を返します。
 
 ## カスタムイベント
 
