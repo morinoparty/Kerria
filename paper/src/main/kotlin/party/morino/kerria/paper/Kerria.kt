@@ -10,12 +10,14 @@ import org.koin.core.context.GlobalContext.getOrNull
 import org.koin.dsl.module
 import party.morino.kerria.api.KerriaAPI
 import party.morino.kerria.api.account.AccountManager
+import party.morino.kerria.api.account.BankManager
 import party.morino.kerria.api.currency.CurrencyManager
 import party.morino.kerria.api.economy.EconomyManager
 import party.morino.kerria.api.files.ConfigManager
 import party.morino.kerria.api.files.MessageManager
 import party.morino.kerria.api.log.LogManager
 import party.morino.kerria.paper.account.AccountManagerImpl
+import party.morino.kerria.paper.account.BankManagerImpl
 import party.morino.kerria.paper.commands.AdminEconomyCommand
 import party.morino.kerria.paper.commands.BalanceCommand
 import party.morino.kerria.paper.commands.ConvertCommand
@@ -27,6 +29,7 @@ import party.morino.kerria.paper.commands.TopCommand
 import party.morino.kerria.paper.currency.CurrencyManagerImpl
 import party.morino.kerria.paper.database.DatabaseManager
 import party.morino.kerria.paper.database.repository.AccountRepository
+import party.morino.kerria.paper.database.repository.BankRepository
 import party.morino.kerria.paper.database.repository.CurrencyRepository
 import party.morino.kerria.paper.database.repository.ExchangeRateRepository
 import party.morino.kerria.paper.database.repository.TransactionLogRepository
@@ -50,6 +53,7 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
     private lateinit var currencyManager: CurrencyManager
     private lateinit var economyManager: EconomyManager
     private lateinit var logManager: LogManager
+    private lateinit var bankManager: BankManager
 
     override suspend fun onEnableAsync() {
         // DI設定
@@ -60,6 +64,7 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
         currencyManager = GlobalContext.get().get()
         economyManager = GlobalContext.get().get()
         logManager = GlobalContext.get().get()
+        bankManager = GlobalContext.get().get()
 
         // データベースの初期化
         val databaseManager: DatabaseManager = GlobalContext.get().get()
@@ -117,6 +122,7 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
             single { CurrencyRepository() }
             single { TransactionLogRepository() }
             single { ExchangeRateRepository() }
+            single { BankRepository() }
 
             // DB管理
             single { DatabaseManager(this@Kerria) }
@@ -127,6 +133,7 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
             single<LogManager> { LogManagerImpl() }
             single<EconomyManager> { EconomyManagerImpl() }
             single<ExchangeRateManager> { ExchangeRateManagerImpl() }
+            single<BankManager> { BankManagerImpl() }
         }
 
         // 既存の Koin がある場合はモジュールを追加、なければ新規開始
@@ -164,6 +171,7 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
     override fun getCurrencyManager(): CurrencyManager = currencyManager
     override fun getEconomyManager(): EconomyManager = economyManager
     override fun getLogManager(): LogManager = logManager
+    override fun getBankManager(): BankManager = bankManager
 
     /**
      * Cloud Annotations を使ってコマンドを登録する

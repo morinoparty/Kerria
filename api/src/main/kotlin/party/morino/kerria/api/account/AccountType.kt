@@ -17,4 +17,7 @@ enum class AccountType {
 
     /** システム内部で使用するアカウント（税金・手数料など） */
     SYSTEM,
+
+    /** 共有の銀行アカウント（ギルド・町の金庫など。Vault の Bank API に対応） */
+    BANK,
 }

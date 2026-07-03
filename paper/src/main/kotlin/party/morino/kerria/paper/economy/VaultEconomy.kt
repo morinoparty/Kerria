@@ -6,6 +6,7 @@ import org.bukkit.Bukkit
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.account.AccountManager
+import party.morino.kerria.api.account.BankManager
 import party.morino.kerria.api.currency.CurrencyManager
 import party.morino.kerria.api.economy.EconomyManager
 import party.morino.kerria.api.files.ConfigManager
@@ -25,6 +26,7 @@ class VaultEconomy : AbstractEconomy(), KoinComponent {
     private val economyManager: EconomyManager by inject()
     private val currencyManager: CurrencyManager by inject()
     private val configManager: ConfigManager by inject()
+    private val bankManager: BankManager by inject()
 
     /** デフォルト通貨IDを取得するヘルパー */
     private val defaultCurrencyId: Int
@@ -34,8 +36,7 @@ class VaultEconomy : AbstractEconomy(), KoinComponent {
 
     override fun getName(): String = plugin.pluginMeta.name
 
-    // 銀行機能は未対応
-    override fun hasBankSupport(): Boolean = false
+    override fun hasBankSupport(): Boolean = true
 
     override fun fractionalDigits(): Int = configManager.getConfig().economy.fractionalDigits
 
@@ -135,35 +136,103 @@ class VaultEconomy : AbstractEconomy(), KoinComponent {
     override fun createPlayerAccount(player: org.bukkit.OfflinePlayer, worldName: String?): Boolean =
         createPlayerAccount(player)
 
-    // --- 銀行機能（未対応） ---
+    // --- 銀行機能 ---
+    // BankManager に委譲する。残高操作はデフォルト通貨に対して行われる。
 
-    override fun createBank(name: String?, player: String?): EconomyResponse =
-        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+    override fun createBank(name: String?, player: String?): EconomyResponse {
+        if (name == null || player == null) {
+            return failure("Bank name or owner is null")
+        }
+        val owner = Bukkit.getOfflinePlayerIfCached(player)
+            ?: return failure("Owner not found")
+        return bankManager.createBank(name, owner.uniqueId).fold(
+            ifLeft = { failure(it.message) },
+            ifRight = { success(0.0, 0.0) },
+        )
+    }
 
     override fun deleteBank(name: String): EconomyResponse =
-        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+        bankManager.deleteBank(name).fold(
+            ifLeft = { failure(it.message) },
+            ifRight = { success(0.0, 0.0) },
+        )
 
     override fun bankBalance(name: String): EconomyResponse =
-        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+        bankManager.bankBalance(name, defaultCurrencyId).fold(
+            ifLeft = { failure(it.message) },
+            ifRight = { balance -> success(0.0, scaled(balance)) },
+        )
 
     override fun bankHas(name: String, amount: Double): EconomyResponse =
-        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+        bankManager.bankBalance(name, defaultCurrencyId).fold(
+            ifLeft = { failure(it.message) },
+            ifRight = { balance ->
+                val current = scaled(balance)
+                if (current >= amount) {
+                    success(amount, current)
+                } else {
+                    EconomyResponse(amount, current, EconomyResponse.ResponseType.FAILURE, "Insufficient bank funds")
+                }
+            },
+        )
 
-    override fun bankWithdraw(name: String, amount: Double): EconomyResponse =
-        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+    override fun bankWithdraw(name: String, amount: Double): EconomyResponse {
+        val caller = CallerPluginIdentifier.identify() ?: "Vault"
+        return bankManager.withdraw(name, defaultCurrencyId, BigDecimal.valueOf(amount), caller).fold(
+            ifLeft = { failure(it.message) },
+            ifRight = { newBalance -> success(amount, newBalance.toDouble()) },
+        )
+    }
 
-    override fun bankDeposit(name: String, amount: Double): EconomyResponse =
-        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+    override fun bankDeposit(name: String, amount: Double): EconomyResponse {
+        val caller = CallerPluginIdentifier.identify() ?: "Vault"
+        return bankManager.deposit(name, defaultCurrencyId, BigDecimal.valueOf(amount), caller).fold(
+            ifLeft = { failure(it.message) },
+            ifRight = { newBalance -> success(amount, newBalance.toDouble()) },
+        )
+    }
 
-    override fun isBankOwner(name: String, playerName: String?): EconomyResponse =
-        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+    override fun isBankOwner(name: String, playerName: String?): EconomyResponse {
+        if (playerName == null) {
+            return failure("Player name is null")
+        }
+        val player = Bukkit.getOfflinePlayerIfCached(playerName)
+            ?: return failure("Player not found")
+        return bankManager.isOwner(name, player.uniqueId).fold(
+            ifLeft = { failure(it.message) },
+            ifRight = { owner ->
+                if (owner) success(0.0, 0.0) else failure("Not the bank owner")
+            },
+        )
+    }
 
-    override fun isBankMember(name: String, playerName: String): EconomyResponse =
-        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Bank not supported")
+    override fun isBankMember(name: String, playerName: String): EconomyResponse {
+        val player = Bukkit.getOfflinePlayerIfCached(playerName)
+            ?: return failure("Player not found")
+        return bankManager.isMember(name, player.uniqueId).fold(
+            ifLeft = { failure(it.message) },
+            ifRight = { member ->
+                if (member) success(0.0, 0.0) else failure("Not a bank member")
+            },
+        )
+    }
 
-    override fun getBanks(): List<String> = emptyList()
+    override fun getBanks(): List<String> =
+        bankManager.listBanks().getOrNull()?.map { it.name } ?: emptyList()
 
     // --- 内部ヘルパーメソッド ---
+
+    /** 成功レスポンスを生成する */
+    private fun success(amount: Double, balance: Double): EconomyResponse =
+        EconomyResponse(amount, balance, EconomyResponse.ResponseType.SUCCESS, null)
+
+    /** 失敗レスポンスを生成する */
+    private fun failure(message: String?): EconomyResponse =
+        EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, message)
+
+    /** 残高を通貨の小数桁数で丸めて Double に変換する */
+    private fun scaled(balance: BigDecimal): Double =
+        balance.setScale(fractionalDigits(), RoundingMode.HALF_UP).toDouble()
 
     /** UUID からアカウントの残高を取得する */
     private fun getBalanceByUuid(uuid: java.util.UUID): Double {
