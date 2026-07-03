@@ -53,6 +53,26 @@ class CurrencyManagerImpl : CurrencyManager, KoinComponent {
         KerriaError.DatabaseError("Failed to create currency: ${e.message}", e).left()
     }
 
+    override fun updateCurrency(currency: Currency): Either<KerriaError, Currency> = runCatching {
+        transaction {
+            // 別の通貨が同名を使っていないか確認する（自分自身は除外）
+            val sameName = currencyRepository.findByName(currency.name)
+            if (sameName != null && sameName.id != currency.id) {
+                return@transaction KerriaError.CurrencyAlreadyExists(currency.name).left()
+            }
+
+            // 対象が存在しなければ更新行数は 0 になる
+            val updated = currencyRepository.update(currency)
+            if (updated == 0) {
+                KerriaError.CurrencyNotFound(currency.id.toString()).left()
+            } else {
+                currency.right()
+            }
+        }
+    }.getOrElse { e ->
+        KerriaError.DatabaseError("Failed to update currency: ${e.message}", e).left()
+    }
+
     override fun getAllCurrencies(): Either<KerriaError, List<Currency>> = runCatching {
         transaction {
             currencyRepository.findAll().right()

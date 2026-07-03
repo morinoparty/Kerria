@@ -76,6 +76,33 @@ description: サーバー管理者向けコマンドの一覧
 
 - **パーミッション:** `kerria.admin.currency`
 
+### 通貨編集
+
+<CommandLine command={{
+  command: "/kerria currency edit <name> <property> <newValue>",
+  aliases: [],
+  status: "stable"
+}} />
+
+既存の通貨のプロパティを、削除・再作成せずに変更します。
+
+編集できるプロパティは以下の通りです。
+
+| プロパティ | 説明 |
+|-----------|------|
+| `name` | 通貨名 |
+| `plural` | 通貨の複数形 |
+| `symbol` | 通貨記号 |
+| `format` | フォーマットパターン |
+| `fractionalDigits` | 小数点以下の桁数（0 以上の整数） |
+| `thousandsSeparator` | 桁区切り文字 |
+| `decimalSeparator` | 小数点記号 |
+
+例えば `/kerria currency edit JPY symbol ￥` とすると、JPY の記号を変更できます。
+別の通貨と同じ名前には変更できません。
+
+- **パーミッション:** `kerria.admin.currency`
+
 ### 通貨削除
 
 <CommandLine command={{
