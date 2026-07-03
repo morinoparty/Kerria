@@ -7,11 +7,14 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.dokka)
     alias(libs.plugins.ktlint)
-    id("io.gitlab.arturbosch.detekt") version "1.23.8"
+    alias(libs.plugins.detekt)
 }
 
 val version: String by project
 group = "party.morino"
+
+// バージョンカタログで管理する Java バージョン（toolchain / jvmTarget で共有）
+val javaVersion = libs.versions.java.get()
 
 buildscript {
     repositories {
@@ -42,9 +45,9 @@ allprojects {
 
     kotlin {
         jvmToolchain {
-            (this).languageVersion.set(JavaLanguageVersion.of(21))
+            (this).languageVersion.set(JavaLanguageVersion.of(javaVersion.toInt()))
         }
-        jvmToolchain(21)
+        jvmToolchain(javaVersion.toInt())
     }
 
     tasks {
@@ -62,12 +65,12 @@ allprojects {
             }
         }
         compileKotlin {
-            compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+            compilerOptions.jvmTarget.set(JvmTarget.fromTarget(javaVersion))
             compilerOptions.javaParameters = true
             compilerOptions.languageVersion.set(KotlinVersion.KOTLIN_2_0)
         }
         compileTestKotlin {
-            compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+            compilerOptions.jvmTarget.set(JvmTarget.fromTarget(javaVersion))
         }
 
         withType<JavaCompile>().configureEach {
@@ -83,7 +86,7 @@ repositories {
     mavenCentral()
 }
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(javaVersion.toInt())
 }
 
 dependencies {
@@ -100,7 +103,7 @@ dokka {
     }
 }
 detekt {
-    toolVersion = "1.23.8"
+    toolVersion = libs.versions.detekt.get()
     source.setFrom(
         "api/src/main/java",
         "api/src/main/kotlin",
