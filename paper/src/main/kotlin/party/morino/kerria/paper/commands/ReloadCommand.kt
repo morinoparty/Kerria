@@ -32,10 +32,10 @@ class ReloadCommand : KoinComponent {
             .flatMap { messages.reloadMessages() }
             .fold(
                 ifLeft = { error ->
-                    sender.sendRichMessage(messages.get("reload.failed", "error" to (error.message ?: "")))
+                    sender.sendMessage(messages.get("reload.failed", "error" to (error.message ?: "")))
                 },
                 ifRight = {
-                    sender.sendRichMessage(messages.get("reload.success"))
+                    sender.sendMessage(messages.get("reload.success"))
                 },
             )
     }

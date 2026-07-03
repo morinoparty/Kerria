@@ -1,6 +1,7 @@
 package party.morino.kerria.paper.commands
 
 import io.papermc.paper.command.brigadier.CommandSourceStack
+import net.kyori.adventure.text.event.ClickEvent
 import org.bukkit.entity.Player
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Default
@@ -35,13 +36,13 @@ class LogCommand : KoinComponent {
     fun logSelf(stack: CommandSourceStack, @Default("1") page: Int) {
         val sender = stack.sender
         if (sender !is Player) {
-            sender.sendRichMessage(messages.get("common.player-only"))
+            sender.sendMessage(messages.get("common.player-only"))
             return
         }
 
         // 自分のアカウントを取得
         val account = api.getAccountManager().getAccount(sender.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("common.account-not-found"))
+            sender.sendMessage(messages.get("common.account-not-found"))
             return
         }
 
@@ -56,7 +57,7 @@ class LogCommand : KoinComponent {
 
         // 対象アカウントを解決（キャッシュ非依存でオフラインプレイヤーも解決可能）
         val account = TargetAccountResolver.resolve(api, player) ?: run {
-            sender.sendRichMessage(messages.get("common.player-not-found", "player" to player))
+            sender.sendMessage(messages.get("common.player-not-found", "player" to player))
             return
         }
 
@@ -78,17 +79,17 @@ class LogCommand : KoinComponent {
 
         // 取引ログを取得
         val logs = api.getLogManager().getTransactionHistory(accountId, pageSize, offset).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("log.fetch-failed"))
+            sender.sendMessage(messages.get("log.fetch-failed"))
             return
         }
 
         if (logs.isEmpty()) {
-            sender.sendRichMessage(messages.get("log.empty"))
+            sender.sendMessage(messages.get("log.empty"))
             return
         }
 
         // ヘッダー表示
-        sender.sendRichMessage(
+        sender.sendMessage(
             messages.get("log.header", "player" to playerName, "page" to safePage.toString()),
         )
 
@@ -105,7 +106,7 @@ class LogCommand : KoinComponent {
             val pluginText = log.treatePluginName?.let { "[$it]" } ?: ""
             val messageText = log.message ?: ""
 
-            sender.sendRichMessage(
+            sender.sendMessage(
                 messages.get(
                     key,
                     "time" to time,
@@ -119,8 +120,10 @@ class LogCommand : KoinComponent {
         // フッター表示
         if (logs.size == pageSize) {
             val nextPage = safePage + 1
-            sender.sendRichMessage(
-                messages.get("log.next-page", "nextPage" to nextPage.toString()),
+            // クリックコマンドはコード側で組み立てる（テンプレート内のタグ引数は解決されないため）
+            sender.sendMessage(
+                messages.get("log.next-page", "page" to nextPage.toString())
+                    .clickEvent(ClickEvent.runCommand("/kerria log $nextPage")),
             )
         }
     }

@@ -11,8 +11,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class Config(
-    @YamlComment("Comment")
+    @YamlComment("デバッグモード")
     val debug: Boolean = false,
+    @YamlComment("既定の言語ロケール（例: ja, en）。プレイヤーのクライアントロケールに対応する翻訳が無い場合や、コンソール宛のメッセージで使用する")
+    val defaultLocale: String = "ja",
     val economy: EconomyConfig = EconomyConfig(),
     val database: DatabaseConfig = DatabaseConfig(),
 )

@@ -1,5 +1,8 @@
 package party.morino.kerria.paper.files
 
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import net.kyori.adventure.translation.GlobalTranslator
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -8,6 +11,8 @@ import org.koin.test.inject
 import party.morino.kerria.api.files.MessageManager
 import party.morino.kerria.paper.KerriaTest
 import java.io.File
+import java.util.Locale
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @ExtendWith(KerriaTest::class)
@@ -15,64 +20,64 @@ class MessageManagerImplTest : KoinTest {
 
     private val messageManager: MessageManager by inject()
 
-    /** MockBukkit のデータフォルダ上の messages.yml */
-    private val messagesFile: File
-        get() = File(KerriaTest.plugin.dataFolder, "messages.yml")
+    /** データフォルダ上の日本語バンドル */
+    private val jaFile: File
+        get() = File(File(KerriaTest.plugin.dataFolder, "translation"), "ja_JP.properties")
+
+    /** Component を指定ロケールで解決し、プレーンテキストへ変換する */
+    private fun render(component: Component, locale: Locale): String =
+        PlainTextComponentSerializer.plainText().serialize(GlobalTranslator.render(component, locale))
 
     @Test
-    @DisplayName("Get returns formatted default message")
-    fun getReturnsFormattedDefault() {
-        val result = messageManager.get("pay.success", "player" to "Steve", "amount" to "100 円")
-        assertTrue(result.contains("Steve"))
-        assertTrue(result.contains("100 円"))
-        assertTrue(!result.contains("<player>"))
+    @DisplayName("Message renders in the requested locale")
+    fun rendersInRequestedLocale() {
+        val component = messageManager.get("pay.success", "player" to "Steve", "amount" to "100")
+
+        val ja = render(component, Locale.JAPAN)
+        assertTrue(ja.contains("Steve"))
+        assertTrue(ja.contains("送金"))
+
+        val en = render(component, Locale.US)
+        assertTrue(en.contains("Steve"))
+        assertTrue(en.contains("Sent"))
     }
 
     @Test
-    @DisplayName("Missing key returns marker without throwing")
+    @DisplayName("Unknown locale falls back to the default locale")
+    fun unknownLocaleFallsBackToDefault() {
+        val component = messageManager.get("balance.fetch-failed")
+        // バンドルの無いロケール（フランス語）はデフォルトロケール（ja）へフォールバックする
+        assertEquals(render(component, Locale.JAPAN), render(component, Locale.FRENCH))
+    }
+
+    @Test
+    @DisplayName("Missing key returns visible marker without throwing")
     fun missingKeyReturnsMarker() {
-        val result = messageManager.get("no.such.key")
+        val result = render(messageManager.get("no.such.key"), Locale.JAPAN)
         assertTrue(result.contains("no.such.key"))
     }
 
     @Test
-    @DisplayName("Placeholder values are escaped against tag injection")
-    fun placeholderValuesAreEscaped() {
-        // 値に含まれる <red> はエスケープされ、MiniMessage として解釈されない
-        val result = messageManager.get("balance.result", "amount" to "<red>hack")
-        assertTrue(result.contains("\\<red>"))
+    @DisplayName("Placeholder values are not parsed as MiniMessage")
+    fun placeholderValuesAreNotParsed() {
+        // 値に含まれる <red> は文字列として扱われ、MiniMessage タグにならない
+        val result = render(messageManager.get("balance.result", "amount" to "<red>hack"), Locale.JAPAN)
+        assertTrue(result.contains("<red>hack"))
     }
 
     @Test
-    @DisplayName("Reload picks up on-disk edits then restores")
-    fun reloadPicksUpEdits() {
-        val original = messagesFile.readText()
+    @DisplayName("Malformed bundle keeps previous messages and returns error")
+    fun malformedBundleRetainsPrevious() {
+        val original = jaFile.readText()
         try {
-            // balance.result を書き換えて再読み込みし、反映されることを確認
-            messagesFile.writeText("balance.result: \"<green>CHANGED <amount>\"\n")
-            val reloaded = messageManager.reloadMessages()
-            assertTrue(reloaded.isRight())
-            assertTrue(messageManager.get("balance.result", "amount" to "1").contains("CHANGED"))
-        } finally {
-            // 他テストに影響しないよう元の内容へ戻す
-            messagesFile.writeText(original)
-            messageManager.reloadMessages()
-        }
-    }
-
-    @Test
-    @DisplayName("Malformed YAML returns error and keeps previous messages")
-    fun malformedYamlReturnsError() {
-        val original = messagesFile.readText()
-        try {
-            // 不正なYAMLを書き込むとLeftを返し、既存メッセージは維持される
-            messagesFile.writeText(":\n  - not: valid: yaml: [")
+            // 不正なユニコードエスケープを書き込むと Properties.load が例外を投げる
+            jaFile.writeText("bad=\\uZZZZ\n")
             val result = messageManager.reloadMessages()
             assertTrue(result.isLeft())
-            // 直前の正常なメッセージが引き続き使えることを確認
-            assertTrue(messageManager.get("pay.self").isNotEmpty())
+            // 直前に読み込まれていたメッセージが引き続き解決できることを確認
+            assertTrue(render(messageManager.get("pay.self"), Locale.JAPAN).isNotEmpty())
         } finally {
-            messagesFile.writeText(original)
+            jaFile.writeText(original)
             messageManager.reloadMessages()
         }
     }

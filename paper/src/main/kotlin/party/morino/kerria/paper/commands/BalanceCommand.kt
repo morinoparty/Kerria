@@ -27,30 +27,30 @@ class BalanceCommand : KoinComponent {
     fun balance(stack: CommandSourceStack, @Default("1") currencyId: Int) {
         val sender = stack.sender
         if (sender !is Player) {
-            sender.sendRichMessage(messages.get("common.player-only"))
+            sender.sendMessage(messages.get("common.player-only"))
             return
         }
 
         // プレイヤーのアカウントを取得
         val account = api.getAccountManager().getAccount(sender.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("common.account-not-found"))
+            sender.sendMessage(messages.get("common.account-not-found"))
             return
         }
 
         // 通貨を取得
         val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("common.currency-not-found"))
+            sender.sendMessage(messages.get("common.currency-not-found"))
             return
         }
 
         // 残高を取得
         val balance = api.getAccountManager().getBalance(account.accountId, currency.id).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("balance.fetch-failed"))
+            sender.sendMessage(messages.get("balance.fetch-failed"))
             return
         }
 
         // フォーマットして表示
         val formatted = currency.format(balance)
-        sender.sendRichMessage(messages.get("balance.result", "amount" to formatted))
+        sender.sendMessage(messages.get("balance.result", "amount" to formatted))
     }
 }

@@ -10,6 +10,8 @@ Kerriaの設定は `plugins/Kerria/config.yaml` に記述します。
 ```yaml
 # デバッグモード
 debug: false
+# 既定の言語ロケール（例: ja, en）
+defaultLocale: ja
 
 economy:
   # 小数点以下の桁数
@@ -43,6 +45,12 @@ database:
   username: user
   password: password
 ```
+
+## defaultLocale
+
+プレイヤーへ送信するメッセージの既定の言語ロケールです（例: `ja`, `en`）。
+プレイヤーのクライアント言語に対応する翻訳が無い場合や、コンソール宛のメッセージでこのロケールが使用されます。
+メッセージの多言語対応については[メッセージ設定](/docs/administrator/messages)を参照してください。
 
 ## economy
 
