@@ -2,6 +2,8 @@
     "pages": [
         "---Introduction---",
         "index",
+        "---Getting Started---",
+        "getting-started",
         "---Player---",
         "...player",
         "---Administrator---",
