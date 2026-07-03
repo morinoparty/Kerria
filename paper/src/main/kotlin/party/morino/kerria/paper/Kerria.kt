@@ -16,7 +16,7 @@ import party.morino.kerria.api.economy.EconomyManager
 import party.morino.kerria.api.files.ConfigManager
 import party.morino.kerria.api.files.MessageManager
 import party.morino.kerria.api.log.LogManager
-import party.morino.kerria.paper.account.AccountManagerImpl
+import party.morino.kerria.common.account.AccountManagerImpl
 import party.morino.kerria.paper.account.BankManagerImpl
 import party.morino.kerria.paper.commands.AdminEconomyCommand
 import party.morino.kerria.paper.commands.BalanceCommand
@@ -26,13 +26,13 @@ import party.morino.kerria.paper.commands.LogCommand
 import party.morino.kerria.paper.commands.PayCommand
 import party.morino.kerria.paper.commands.ReloadCommand
 import party.morino.kerria.paper.commands.TopCommand
-import party.morino.kerria.paper.currency.CurrencyManagerImpl
+import party.morino.kerria.common.currency.CurrencyManagerImpl
 import party.morino.kerria.paper.database.DatabaseManager
-import party.morino.kerria.paper.database.repository.AccountRepository
-import party.morino.kerria.paper.database.repository.BankRepository
-import party.morino.kerria.paper.database.repository.CurrencyRepository
-import party.morino.kerria.paper.database.repository.ExchangeRateRepository
-import party.morino.kerria.paper.database.repository.TransactionLogRepository
+import party.morino.kerria.common.database.repository.AccountRepository
+import party.morino.kerria.common.database.repository.BankRepository
+import party.morino.kerria.common.database.repository.CurrencyRepository
+import party.morino.kerria.common.database.repository.ExchangeRateRepository
+import party.morino.kerria.common.database.repository.TransactionLogRepository
 import party.morino.kerria.api.economy.ExchangeRateManager
 import party.morino.kerria.paper.economy.EconomyManagerImpl
 import party.morino.kerria.paper.economy.ExchangeRateManagerImpl
@@ -40,7 +40,7 @@ import party.morino.kerria.paper.economy.VaultEconomy
 import party.morino.kerria.paper.files.ConfigManagerImpl
 import party.morino.kerria.paper.files.MessageManagerImpl
 import party.morino.kerria.paper.integration.placeholder.KerriaExpansion
-import party.morino.kerria.paper.log.LogManagerImpl
+import party.morino.kerria.common.log.LogManagerImpl
 
 /**
  * Kerriaプラグインのメインクラス

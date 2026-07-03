@@ -14,6 +14,7 @@ version = project.version.toString()
 
 dependencies {
     implementation(project(":api"))
+    implementation(project(":common"))
     compileOnly(libs.paper.api)
 
     implementation(libs.arrow.core)

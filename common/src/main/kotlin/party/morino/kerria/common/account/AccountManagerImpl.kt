@@ -1,4 +1,4 @@
-package party.morino.kerria.paper.account
+package party.morino.kerria.common.account
 
 import arrow.core.Either
 import arrow.core.left
@@ -11,7 +11,7 @@ import party.morino.kerria.api.account.AccountManager
 import party.morino.kerria.api.account.AccountType
 import party.morino.kerria.api.error.KerriaError
 import party.morino.kerria.api.files.ConfigManager
-import party.morino.kerria.paper.database.repository.AccountRepository
+import party.morino.kerria.common.database.repository.AccountRepository
 import java.math.BigDecimal
 import java.util.UUID
 

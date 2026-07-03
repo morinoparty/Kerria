@@ -12,7 +12,7 @@ import party.morino.kerria.api.account.Bank
 import party.morino.kerria.api.account.BankManager
 import party.morino.kerria.api.economy.EconomyManager
 import party.morino.kerria.api.error.KerriaError
-import party.morino.kerria.paper.database.repository.BankRepository
+import party.morino.kerria.common.database.repository.BankRepository
 import java.math.BigDecimal
 import java.util.UUID
 

@@ -1,4 +1,4 @@
-package party.morino.kerria.paper.database.repository
+package party.morino.kerria.common.database.repository
 
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.and
@@ -11,9 +11,9 @@ import org.jetbrains.exposed.v1.jdbc.insertIgnore
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import party.morino.kerria.api.account.AccountType
 import party.morino.kerria.api.account.Bank
-import party.morino.kerria.paper.database.table.AccountBalanceTable
-import party.morino.kerria.paper.database.table.AccountTable
-import party.morino.kerria.paper.database.table.BankMemberTable
+import party.morino.kerria.common.database.table.AccountBalanceTable
+import party.morino.kerria.common.database.table.AccountTable
+import party.morino.kerria.common.database.table.BankMemberTable
 import java.util.UUID
 
 /**

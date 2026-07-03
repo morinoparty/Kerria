@@ -1,0 +1,62 @@
+---
+title: クロスサーバー対応
+description: Velocity プロキシと共有データベースによるサーバー横断の残高共有
+---
+
+🌐 Kerria は Velocity プロキシ環境で、サーバーをまたいで残高を共有できます。
+
+## 仕組み
+
+Kerria の残高はすべてデータベースに保存されます。複数の Paper サーバーと Velocity プロキシが**同じ PostgreSQL データベース**を共有することで、どのサーバーからでも同じ残高を参照・更新できます。
+
+Kerria はモジュールごとに役割が分かれています。
+
+| モジュール | 役割 |
+|-----------|------|
+| `common` | データベースのテーブル・共有ロジック |
+| `paper` | Paper サーバー用プラグイン |
+| `velocity` | Velocity プロキシ用プラグイン |
+
+`common` モジュールがデータベースアクセスを担うため、Paper と Velocity は同じスキーマ・同じ残高を扱います。
+
+:::info[設計方針]
+クロスサーバーの残高共有は、**共有データベース**方式を採用しています。残高の正本はデータベースにあり、各サーバーは都度データベースを参照します。プラグインメッセージや Redis などのメッセージング方式は採用していません。
+:::
+
+## 必要環境
+
+- **PostgreSQL**（SQLite はファイルベースのため共有できません）
+- Kerria を導入したすべての Paper サーバーと Velocity プロキシが、同じ PostgreSQL に接続していること
+
+## 導入手順
+
+1. Paper サーバー側の Kerria で、データベースを PostgreSQL に設定します（[設定ファイル](/docs/administrator/configuration)を参照）。
+2. Velocity プロキシの `plugins/` に Velocity 版の Kerria を配置します。
+3. プロキシを起動すると、`plugins/kerria/config.yaml` が生成されます。Paper 側と**同じ PostgreSQL** を指定してください。
+
+```yaml
+database:
+  mode: postgresql
+  host: localhost
+  port: 5432
+  database: kerria
+  username: user
+  password: password
+# 既定の通貨ID
+defaultCurrencyId: 1
+```
+
+## プロキシコマンド
+
+Velocity 上では、次のコマンドが利用できます。
+
+| コマンド | 説明 |
+|---------|------|
+| `/kerria balance` | 自分の残高を表示します |
+| `/kerria pay <player> <amount>` | 他のプレイヤーへ送金します |
+
+これらはプロキシ上で動作するため、送金相手が別のサーバーにいても送金できます。
+
+:::note
+Velocity 版は現在、残高照会と送金の基本機能を提供します。通貨管理や取引履歴などの管理コマンドは Paper 側で操作してください。
+:::

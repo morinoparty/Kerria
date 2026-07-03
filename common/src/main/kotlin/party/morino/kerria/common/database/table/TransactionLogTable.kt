@@ -1,4 +1,4 @@
-package party.morino.kerria.paper.database.table
+package party.morino.kerria.common.database.table
 
 import org.jetbrains.exposed.v1.core.dao.id.LongIdTable
 import org.jetbrains.exposed.v1.javatime.datetime

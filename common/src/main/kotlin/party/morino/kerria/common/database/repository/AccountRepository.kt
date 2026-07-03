@@ -1,4 +1,4 @@
-package party.morino.kerria.paper.database.repository
+package party.morino.kerria.common.database.repository
 
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
@@ -15,8 +15,8 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 import party.morino.kerria.api.account.Account
 import party.morino.kerria.api.account.AccountType
-import party.morino.kerria.paper.database.table.AccountBalanceTable
-import party.morino.kerria.paper.database.table.AccountTable
+import party.morino.kerria.common.database.table.AccountBalanceTable
+import party.morino.kerria.common.database.table.AccountTable
 import java.math.BigDecimal
 import java.util.UUID
 

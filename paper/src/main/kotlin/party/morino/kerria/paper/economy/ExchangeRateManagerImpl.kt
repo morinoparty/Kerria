@@ -12,8 +12,8 @@ import party.morino.kerria.api.economy.ExchangeRate
 import party.morino.kerria.api.economy.ExchangeRateManager
 import party.morino.kerria.api.error.KerriaError
 import party.morino.kerria.api.log.LogManager
-import party.morino.kerria.paper.database.repository.AccountRepository
-import party.morino.kerria.paper.database.repository.ExchangeRateRepository
+import party.morino.kerria.common.database.repository.AccountRepository
+import party.morino.kerria.common.database.repository.ExchangeRateRepository
 import party.morino.kerria.paper.event.KerriaTransactionEvent
 import java.math.BigDecimal
 import java.math.RoundingMode
