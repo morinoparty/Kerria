@@ -13,6 +13,7 @@ import party.morino.kerria.api.account.AccountManager
 import party.morino.kerria.api.currency.CurrencyManager
 import party.morino.kerria.api.economy.EconomyManager
 import party.morino.kerria.api.files.ConfigManager
+import party.morino.kerria.api.files.MessageManager
 import party.morino.kerria.api.log.LogManager
 import party.morino.kerria.paper.account.AccountManagerImpl
 import party.morino.kerria.paper.commands.AdminEconomyCommand
@@ -33,6 +34,7 @@ import party.morino.kerria.paper.economy.EconomyManagerImpl
 import party.morino.kerria.paper.economy.ExchangeRateManagerImpl
 import party.morino.kerria.paper.economy.VaultEconomy
 import party.morino.kerria.paper.files.ConfigManagerImpl
+import party.morino.kerria.paper.files.MessageManagerImpl
 import party.morino.kerria.paper.log.LogManagerImpl
 
 /**
@@ -101,6 +103,9 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
 
             // 設定
             single<ConfigManager> { ConfigManagerImpl(this@Kerria) }
+
+            // メッセージ
+            single<MessageManager> { MessageManagerImpl(this@Kerria) }
 
             // リポジトリ
             single { AccountRepository() }

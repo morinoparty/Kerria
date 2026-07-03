@@ -9,6 +9,7 @@ import org.incendo.cloud.annotations.Permission
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.KerriaAPI
+import party.morino.kerria.api.files.MessageManager
 import java.math.BigDecimal
 
 /**
@@ -20,6 +21,7 @@ import java.math.BigDecimal
 class PayCommand : KoinComponent {
 
     private val api: KerriaAPI by inject()
+    private val messages: MessageManager by inject()
 
     @Command("pay <player> <amount> [currencyId]")
     @Permission("kerria.pay")
@@ -32,44 +34,44 @@ class PayCommand : KoinComponent {
     ) {
         val sender = stack.sender
         if (sender !is Player) {
-            sender.sendRichMessage("<red>このコマンドはプレイヤーのみが使用できます。")
+            sender.sendRichMessage(messages.get("common.player-only"))
             return
         }
 
         // 金額バリデーション
         if (amount <= 0) {
-            sender.sendRichMessage("<red>金額は正の数を指定してください。")
+            sender.sendRichMessage(messages.get("common.invalid-amount"))
             return
         }
 
         // 送金先プレイヤーの検索
         val targetPlayer = Bukkit.getOfflinePlayerIfCached(player)
         if (targetPlayer == null) {
-            sender.sendRichMessage("<red>プレイヤー <yellow>$player</yellow> が見つかりません。")
+            sender.sendRichMessage(messages.get("common.player-not-found", "player" to player))
             return
         }
 
         // 自分自身への送金チェック
         if (targetPlayer.uniqueId == sender.uniqueId) {
-            sender.sendRichMessage("<red>自分自身に送金することはできません。")
+            sender.sendRichMessage(messages.get("pay.self"))
             return
         }
 
         // 通貨を取得
         val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
-            sender.sendRichMessage("<red>通貨が見つかりません。")
+            sender.sendRichMessage(messages.get("common.currency-not-found"))
             return
         }
 
         // 送金元アカウントを取得
         val fromAccount = api.getAccountManager().getAccount(sender.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage("<red>あなたのアカウントが見つかりません。")
+            sender.sendRichMessage(messages.get("pay.sender-account-not-found"))
             return
         }
 
         // 送金先アカウントを取得
         val toAccount = api.getAccountManager().getAccount(targetPlayer.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage("<red>相手のアカウントが見つかりません。")
+            sender.sendRichMessage(messages.get("pay.target-account-not-found"))
             return
         }
 
@@ -83,14 +85,16 @@ class PayCommand : KoinComponent {
             treatePluginName = "Kerria",
         ).fold(
             ifLeft = { error ->
-                sender.sendRichMessage("<red>送金に失敗しました: ${error.message}")
+                sender.sendRichMessage(messages.get("pay.failed", "error" to (error.message ?: "")))
             },
             ifRight = {
                 val formatted = currency.format(bigAmount)
-                sender.sendRichMessage("<green><yellow>${targetPlayer.name}</yellow> に ${formatted} を送金しました。")
+                sender.sendRichMessage(
+                    messages.get("pay.success", "player" to (targetPlayer.name ?: player), "amount" to formatted),
+                )
                 // 送金先がオンラインならメッセージを送信
                 targetPlayer.player?.sendRichMessage(
-                    "<green><yellow>${sender.name}</yellow> から ${formatted} を受け取りました。",
+                    messages.get("pay.received", "player" to (sender.name), "amount" to formatted),
                 )
             },
         )
