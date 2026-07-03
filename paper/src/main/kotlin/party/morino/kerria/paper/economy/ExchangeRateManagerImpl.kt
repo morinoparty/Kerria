@@ -8,6 +8,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.currency.CurrencyManager
 import party.morino.kerria.api.economy.EconomyManager
+import party.morino.kerria.api.economy.ExchangeRate
 import party.morino.kerria.api.economy.ExchangeRateManager
 import party.morino.kerria.api.error.KerriaError
 import party.morino.kerria.paper.database.repository.AccountRepository
@@ -60,6 +61,17 @@ class ExchangeRateManagerImpl : ExchangeRateManager, KoinComponent {
         }.getOrElse { e ->
             KerriaError.DatabaseError("Failed to set exchange rate: ${e.message}", e).left()
         }
+    }
+
+    override fun getAllRates(): Either<KerriaError, List<ExchangeRate>> = runCatching {
+        transaction {
+            // リポジトリの Triple 表現を API のデータクラスへ変換する
+            exchangeRateRepository.findAll()
+                .map { (from, to, rate) -> ExchangeRate(from, to, rate) }
+                .right()
+        }
+    }.getOrElse { e ->
+        KerriaError.DatabaseError("Failed to get exchange rates: ${e.message}", e).left()
     }
 
     override fun convert(

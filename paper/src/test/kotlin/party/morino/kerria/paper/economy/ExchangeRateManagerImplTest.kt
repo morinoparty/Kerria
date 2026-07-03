@@ -72,6 +72,19 @@ class ExchangeRateManagerImplTest : KoinTest {
     }
 
     @Test
+    @DisplayName("Get all rates returns configured pairs")
+    fun getAllRatesReturnsConfiguredPairs() {
+        val usdId = createSecondCurrency()
+        exchangeRateManager.setRate(1, usdId, BigDecimal("0.0067"))
+
+        val result = exchangeRateManager.getAllRates()
+        assertTrue(result.isRight())
+        val rates = result.getOrNull()!!
+        // 設定した JPY -> USD のペアが含まれることを確認する
+        assertTrue(rates.any { it.fromCurrencyId == 1 && it.toCurrencyId == usdId })
+    }
+
+    @Test
     @DisplayName("Convert currency between accounts")
     fun convertCurrency() {
         val usdId = createSecondCurrency()

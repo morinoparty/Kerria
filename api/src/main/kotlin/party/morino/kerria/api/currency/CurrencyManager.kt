@@ -33,6 +33,8 @@ interface CurrencyManager {
      * @param format 通貨のフォーマット
      * @param decimals 小数点以下の桁数
      * @param plural 通貨の複数形
+     * @param thousandsSeparator 3桁ごとの桁区切り文字
+     * @param decimalSeparator 小数点記号
      * @return 作成された通貨、もしくはエラー
      */
     fun createCurrency(
@@ -41,6 +43,8 @@ interface CurrencyManager {
         format: String,
         decimals: Int,
         plural: String,
+        thousandsSeparator: String = ",",
+        decimalSeparator: String = ".",
     ): Either<KerriaError, Currency>
 
     /**

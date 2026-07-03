@@ -108,4 +108,36 @@ class ConvertCommand : KoinComponent {
             },
         )
     }
+
+    @Command("rate list")
+    @Permission("kerria.admin.currency")
+    @Suppress("UnstableApiUsage")
+    fun listRates(stack: CommandSourceStack) {
+        val sender = stack.sender
+
+        // 設定済みの全レートを取得
+        val rates = exchangeRateManager.getAllRates().getOrNull() ?: run {
+            sender.sendRichMessage("<red>為替レートの取得に失敗しました。")
+            return
+        }
+        if (rates.isEmpty()) {
+            sender.sendRichMessage("<gray>設定されている為替レートはありません。")
+            return
+        }
+
+        // 通貨IDから通貨名を引くためのマップを構築（毎行のDBアクセスを避ける）
+        val currencyNameById = api.getCurrencyManager().getAllCurrencies().getOrNull()
+            .orEmpty()
+            .associate { it.id to it.name }
+
+        sender.sendRichMessage("<gold>為替レート一覧 (全 ${rates.size} 件)")
+        rates.forEach { rate ->
+            // 通貨が削除済みの場合は ID をそのまま表示する
+            val fromName = currencyNameById[rate.fromCurrencyId] ?: "#${rate.fromCurrencyId}"
+            val toName = currencyNameById[rate.toCurrencyId] ?: "#${rate.toCurrencyId}"
+            sender.sendRichMessage(
+                "<white>${fromName} <gray>→</gray> <white>${toName}</white> <yellow>${rate.rate.toPlainString()}",
+            )
+        }
+    }
 }

@@ -120,6 +120,9 @@ gradle-app.setting
 # Common working directory
 run/
 
+# Allure test report output
+allure-results/
+
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
 

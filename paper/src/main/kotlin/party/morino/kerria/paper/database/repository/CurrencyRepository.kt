@@ -27,13 +27,23 @@ class CurrencyRepository {
     /**
      * 新しい通貨を作成する
      */
-    fun create(name: String, symbol: String, format: String, decimals: Int, plural: String): Currency {
+    fun create(
+        name: String,
+        symbol: String,
+        format: String,
+        decimals: Int,
+        plural: String,
+        thousandsSeparator: String = ",",
+        decimalSeparator: String = ".",
+    ): Currency {
         val id = CurrencyTable.insertAndGetId {
             it[CurrencyTable.name] = name
             it[CurrencyTable.symbol] = symbol
             it[CurrencyTable.format] = format
             it[CurrencyTable.fractionalDigits] = decimals
             it[CurrencyTable.plural] = plural
+            it[CurrencyTable.thousandsSeparator] = thousandsSeparator
+            it[CurrencyTable.decimalSeparator] = decimalSeparator
         }
         return Currency(
             id = id.value,
@@ -42,6 +52,8 @@ class CurrencyRepository {
             symbol = symbol,
             format = format,
             fractionalDigits = decimals,
+            thousandsSeparator = thousandsSeparator,
+            decimalSeparator = decimalSeparator,
         )
     }
 
@@ -85,6 +97,8 @@ class CurrencyRepository {
             symbol = this[CurrencyTable.symbol],
             format = this[CurrencyTable.format],
             fractionalDigits = this[CurrencyTable.fractionalDigits],
+            thousandsSeparator = this[CurrencyTable.thousandsSeparator],
+            decimalSeparator = this[CurrencyTable.decimalSeparator],
         )
     }
 }
