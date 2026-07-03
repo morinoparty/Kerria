@@ -1,4 +1,4 @@
-package party.morino.kerria.paper.database.repository
+package party.morino.kerria.common.database.repository
 
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
@@ -7,7 +7,7 @@ import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import party.morino.kerria.api.log.TransactionLog
-import party.morino.kerria.paper.database.table.TransactionLogTable
+import party.morino.kerria.common.database.table.TransactionLogTable
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID

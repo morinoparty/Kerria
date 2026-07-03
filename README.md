@@ -6,15 +6,15 @@ morinoparty の Minecraft 経済プラグインです。Paper / Velocity 両対�
 
 | モジュール | 説明 |
 |-----------|------|
-| `common` | Paper/Velocity 共通コード |
+| `api` | 外部プラグイン向け公開 API（インターフェース・ドメイン型） |
+| `common` | Paper/Velocity 共通コード（DBテーブル・リポジトリ・共有マネージャー・DB初期化） |
 | `paper` | Paper (Bukkit) プラグイン |
-| `velocity` | Velocity プロキシプラグイン |
-| `api` | 外部プラグイン向け公開 API |
+| `velocity` | Velocity プロキシプラグイン（共有DBによるクロスサーバー残高・送金） |
 
 ## 技術スタック
 
 - **Kotlin** - 言語
-- **Paper API** 1.21.8 - Minecraft サーバー API
+- **Paper API** 1.21.11 - Minecraft サーバー API
 - **Velocity API** 3.4.0 - Minecraft プロキシ API
 - **Cloud** - コマンドフレームワーク (Incendo)
 - **Koin** - 依存性注入
@@ -24,7 +24,7 @@ morinoparty の Minecraft 経済プラグインです。Paper / Velocity 両対�
 
 ## 必要環境
 
-- **Java** 21 (Temurin 推奨)
+- **Java** 25 (Temurin 推奨)
 - **Gradle** 9.x (Wrapper 同梱)
 - **Node.js** 22+ / **pnpm** 10+ (ドキュメントビルド用)
 - **[Task](https://taskfile.dev/)** (タスクランナー、任意)

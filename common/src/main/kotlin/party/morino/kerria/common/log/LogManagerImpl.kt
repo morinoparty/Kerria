@@ -1,4 +1,4 @@
-package party.morino.kerria.paper.log
+package party.morino.kerria.common.log
 
 import arrow.core.Either
 import arrow.core.left
@@ -9,7 +9,7 @@ import org.koin.core.component.inject
 import party.morino.kerria.api.error.KerriaError
 import party.morino.kerria.api.log.LogManager
 import party.morino.kerria.api.log.TransactionLog
-import party.morino.kerria.paper.database.repository.TransactionLogRepository
+import party.morino.kerria.common.database.repository.TransactionLogRepository
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID

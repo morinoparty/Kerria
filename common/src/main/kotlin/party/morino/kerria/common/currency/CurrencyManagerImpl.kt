@@ -1,4 +1,4 @@
-package party.morino.kerria.paper.currency
+package party.morino.kerria.common.currency
 
 import arrow.core.Either
 import arrow.core.left
@@ -10,7 +10,7 @@ import party.morino.kerria.api.currency.Currency
 import party.morino.kerria.api.currency.CurrencyManager
 import party.morino.kerria.api.error.KerriaError
 import party.morino.kerria.api.files.ConfigManager
-import party.morino.kerria.paper.database.repository.CurrencyRepository
+import party.morino.kerria.common.database.repository.CurrencyRepository
 
 /**
  * 通貨管理機能の実装クラス

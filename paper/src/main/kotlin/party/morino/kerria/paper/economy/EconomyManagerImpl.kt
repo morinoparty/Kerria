@@ -11,7 +11,7 @@ import party.morino.kerria.api.currency.CurrencyManager
 import party.morino.kerria.api.economy.EconomyManager
 import party.morino.kerria.api.error.KerriaError
 import party.morino.kerria.api.log.LogManager
-import party.morino.kerria.paper.database.repository.AccountRepository
+import party.morino.kerria.common.database.repository.AccountRepository
 import party.morino.kerria.paper.event.KerriaTransactionCompletedEvent
 import party.morino.kerria.paper.event.KerriaTransactionEvent
 import java.math.BigDecimal
