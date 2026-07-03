@@ -11,6 +11,13 @@ on:
 permissions:
   contents: write
 
+# 同時に複数のデプロイが GitHub Pages API に送られると
+# "Deployment failed, try again later." で失敗するため、
+# デプロイを直列化してキューイングさせる
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   # Dokka 生成ジョブ
   generate-dokka:
