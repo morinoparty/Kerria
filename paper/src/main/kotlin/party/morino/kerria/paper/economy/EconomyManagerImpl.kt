@@ -12,6 +12,7 @@ import party.morino.kerria.api.economy.EconomyManager
 import party.morino.kerria.api.error.KerriaError
 import party.morino.kerria.api.log.LogManager
 import party.morino.kerria.paper.database.repository.AccountRepository
+import party.morino.kerria.paper.event.KerriaTransactionCompletedEvent
 import party.morino.kerria.paper.event.KerriaTransactionEvent
 import java.math.BigDecimal
 import java.util.UUID
@@ -26,6 +27,29 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
     private val accountRepository: AccountRepository by inject()
     private val logManager: LogManager by inject()
     private val currencyManager: CurrencyManager by inject()
+
+    /**
+     * 取引確定後のイベントを発火する
+     *
+     * DB トランザクションの外側（コミット成功後）で呼び出すことで、
+     * リスナーがコミット済みの変更をロールバックできないようにする。
+     */
+    private fun fireCompleted(
+        type: KerriaTransactionEvent.TransactionType,
+        fromAccountId: UUID,
+        toAccountId: UUID,
+        currencyId: Int,
+        amount: BigDecimal,
+        callerPluginName: String?,
+        fromBalance: BigDecimal,
+        toBalance: BigDecimal,
+    ) {
+        Bukkit.getPluginManager().callEvent(
+            KerriaTransactionCompletedEvent(
+                type, fromAccountId, toAccountId, currencyId, amount, callerPluginName, fromBalance, toBalance,
+            ),
+        )
+    }
 
     override fun deposit(
         accountId: UUID,
@@ -73,6 +97,12 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
                 is KerriaError -> e.left()
                 else -> KerriaError.DatabaseError("Deposit failed: ${e.message}", e).left()
             }
+        }.onRight { newBalance ->
+            // コミット成功後に確定イベントを発火する（入金は from == to）
+            fireCompleted(
+                KerriaTransactionEvent.TransactionType.DEPOSIT,
+                accountId, accountId, currencyId, amount, treatePluginName, newBalance, newBalance,
+            )
         }
     }
 
@@ -128,6 +158,12 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
                 is KerriaError -> e.left()
                 else -> KerriaError.DatabaseError("Withdraw failed: ${e.message}", e).left()
             }
+        }.onRight { newBalance ->
+            // コミット成功後に確定イベントを発火する（出金は from == to）
+            fireCompleted(
+                KerriaTransactionEvent.TransactionType.WITHDRAW,
+                accountId, accountId, currencyId, amount, treatePluginName, newBalance, newBalance,
+            )
         }
     }
 
@@ -176,6 +212,12 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
                 is KerriaError -> e.left()
                 else -> KerriaError.DatabaseError("Set balance failed: ${e.message}", e).left()
             }
+        }.onRight { newBalance ->
+            // コミット成功後に確定イベントを発火する（残高設定は from == to）
+            fireCompleted(
+                KerriaTransactionEvent.TransactionType.SET_BALANCE,
+                accountId, accountId, currencyId, amount, treatePluginName, newBalance, newBalance,
+            )
         }
     }
 
@@ -235,13 +277,22 @@ class EconomyManagerImpl : EconomyManager, KoinComponent {
                 logManager.logTransaction(fromAccountId, toAccountId, currencyId, amount, message, treatePluginName)
                     .onLeft { throw it }
 
-                Unit.right()
+                // 確定後の両アカウントの残高を取得してイベントに載せる
+                val fromBalance = accountRepository.getBalance(fromAccountId, currencyId)
+                val toBalance = accountRepository.getBalance(toAccountId, currencyId)
+                Pair(fromBalance, toBalance).right()
             }
         }.getOrElse { e ->
             when (e) {
                 is KerriaError -> e.left()
                 else -> KerriaError.DatabaseError("Transfer failed: ${e.message}", e).left()
             }
-        }
+        }.onRight { (fromBalance, toBalance) ->
+            // コミット成功後に確定イベントを発火する
+            fireCompleted(
+                KerriaTransactionEvent.TransactionType.TRANSFER,
+                fromAccountId, toAccountId, currencyId, amount, treatePluginName, fromBalance, toBalance,
+            )
+        }.map { }
     }
 }
