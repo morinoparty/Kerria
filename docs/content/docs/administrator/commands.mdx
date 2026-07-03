@@ -124,3 +124,15 @@ description: サーバー管理者向けコマンドの一覧
 例えば、`/kerria rate set JPY USD 0.0067` とすると、1 JPY = 0.0067 USD になります。
 
 - **パーミッション:** `kerria.admin.currency`
+
+### 為替レート一覧
+
+<CommandLine command={{
+  command: "/kerria rate list",
+  aliases: [],
+  status: "stable"
+}} />
+
+設定されている全ての為替レートを一覧表示します。通貨ペアと設定されたレートが確認できます。
+
+- **パーミッション:** `kerria.admin.currency`
