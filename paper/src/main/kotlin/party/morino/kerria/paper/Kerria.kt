@@ -22,6 +22,7 @@ import party.morino.kerria.paper.commands.ConvertCommand
 import party.morino.kerria.paper.commands.CurrencyCommand
 import party.morino.kerria.paper.commands.LogCommand
 import party.morino.kerria.paper.commands.PayCommand
+import party.morino.kerria.paper.commands.ReloadCommand
 import party.morino.kerria.paper.commands.TopCommand
 import party.morino.kerria.paper.currency.CurrencyManagerImpl
 import party.morino.kerria.paper.database.DatabaseManager
@@ -163,6 +164,7 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
             LogCommand(),
             CurrencyCommand(),
             ConvertCommand(),
+            ReloadCommand(),
         )
     }
 }
