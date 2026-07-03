@@ -12,6 +12,8 @@ import java.math.RoundingMode
  * @property symbol 通貨の記号
  * @property format 通貨のフォーマットパターン（例: "%amount% %plural%"）
  * @property fractionalDigits 小数点以下の桁数
+ * @property thousandsSeparator 3桁ごとの桁区切り文字（空文字なら桁区切りしない）
+ * @property decimalSeparator 小数点記号
  */
 data class Currency(
     val id: Int,
@@ -20,18 +22,34 @@ data class Currency(
     val symbol: String,
     val format: String,
     val fractionalDigits: Int,
+    val thousandsSeparator: String = ",",
+    val decimalSeparator: String = ".",
 ) {
     /**
      * 金額をこの通貨のフォーマットで文字列に変換する
+     *
+     * フォーマットパターンで利用できるプレースホルダ:
+     * - `%amount%` : 桁区切り済みの金額（例: `1,234.56`）
+     * - `%plural%` : 通貨の複数形
+     * - `%symbol%` : 通貨の記号
+     * - `%name%` : 通貨の名前
      *
      * @param amount フォーマットする金額
      * @return フォーマットされた金額文字列
      */
     fun format(amount: BigDecimal): String {
-        val rounded = round(amount)
+        // 桁区切り・小数点記号を適用した数値文字列を生成する
+        val formattedAmount = CurrencyFormatter.format(
+            amount = amount,
+            fractionalDigits = fractionalDigits,
+            thousandsSeparator = thousandsSeparator,
+            decimalSeparator = decimalSeparator,
+        )
         return format
-            .replace("%amount%", rounded.toPlainString())
+            .replace("%amount%", formattedAmount)
             .replace("%plural%", plural)
+            .replace("%symbol%", symbol)
+            .replace("%name%", name)
     }
 
     /**

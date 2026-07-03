@@ -16,4 +16,8 @@ object CurrencyTable : IntIdTable("currencies") {
     val format = varchar("format", 100)
     // 小数点以下の桁数
     val fractionalDigits = integer("fractional_digits")
+    // 3桁ごとの桁区切り文字（既存行にはデフォルト値を適用）
+    val thousandsSeparator = varchar("thousands_separator", 8).default(",")
+    // 小数点記号（既存行にはデフォルト値を適用）
+    val decimalSeparator = varchar("decimal_separator", 8).default(".")
 }

@@ -29,6 +29,10 @@ economy:
     format: "%amount% %plural%"
     # 小数点以下の桁数
     fractionalDigits: 2
+    # 3桁ごとの桁区切り文字（空文字なら桁区切りしない）
+    thousandsSeparator: ","
+    # 小数点記号
+    decimalSeparator: "."
 
 database:
   # データベースの種類 (sqlite | postgresql)
@@ -52,6 +56,23 @@ database:
 ### currency
 
 デフォルト通貨の設定です。プラグイン初回起動時にこの設定を元に通貨が作成されます。
+
+`format` には次のプレースホルダを使用できます。
+
+| プレースホルダ | 置換される内容 |
+|--------------|--------------|
+| `%amount%` | 桁区切り済みの金額（例: `1,234.56`） |
+| `%plural%` | 通貨の複数形 |
+| `%symbol%` | 通貨記号 |
+| `%name%` | 通貨名 |
+
+`thousandsSeparator` と `decimalSeparator` を組み合わせることで、表示スタイルを地域ごとに変更できます。
+
+| 設定例 | フォーマット | 表示結果 |
+|-------|------------|---------|
+| `symbol: "$"`, 区切り `,` / `.` | `%symbol%%amount%` | `$1,234.56` |
+| `symbol: "€"`, 区切り `.` / `,` | `%amount%%symbol%` | `1.234,56€` |
+| `symbol: "¥"`, `fractionalDigits: 0` | `%symbol%%amount%` | `¥1,234` |
 
 ## database
 

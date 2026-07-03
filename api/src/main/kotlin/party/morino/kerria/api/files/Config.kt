@@ -85,5 +85,9 @@ data class CurrencyConfig(
     @YamlComment("通貨フォーマット")
     val format : String = "%amount% %plural%",
     @YamlComment("小数点以下の桁数")
-    val fractionalDigits : Int = 2
+    val fractionalDigits : Int = 2,
+    @YamlComment("3桁ごとの桁区切り文字（空文字なら桁区切りしない）")
+    val thousandsSeparator : String = ",",
+    @YamlComment("小数点記号")
+    val decimalSeparator : String = "."
 )

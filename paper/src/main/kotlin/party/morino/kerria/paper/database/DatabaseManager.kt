@@ -126,6 +126,8 @@ class DatabaseManager(private val plugin: JavaPlugin) : KoinComponent {
                 it[plural] = currencyConfig.plural
                 it[format] = currencyConfig.format
                 it[fractionalDigits] = currencyConfig.fractionalDigits
+                it[thousandsSeparator] = currencyConfig.thousandsSeparator
+                it[decimalSeparator] = currencyConfig.decimalSeparator
             }
             plugin.logger.info("Default currency '${currencyConfig.name}' created with id=${generatedId.value}.")
         }

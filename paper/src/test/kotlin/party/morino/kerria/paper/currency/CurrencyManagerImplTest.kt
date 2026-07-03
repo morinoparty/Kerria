@@ -89,6 +89,17 @@ class CurrencyManagerImplTest : KoinTest {
     }
 
     @Test
+    @DisplayName("Created currency formats amount with grouping")
+    fun createdCurrencyFormatsWithGrouping() {
+        val created = currencyManager.createCurrency(
+            "USD", "$", "%symbol%%amount%", 2, "Dollars",
+        )
+        assertTrue(created.isRight())
+        // 桁区切りが適用され、記号が接頭辞として表示されることを確認する
+        assertEquals("$1,234.56", created.getOrNull()!!.format(java.math.BigDecimal("1234.56")))
+    }
+
+    @Test
     @DisplayName("Create and delete currency")
     fun createAndDeleteCurrency() {
         val created = currencyManager.createCurrency(

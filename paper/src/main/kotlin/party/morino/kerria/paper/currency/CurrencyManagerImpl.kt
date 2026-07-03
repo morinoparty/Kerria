@@ -41,9 +41,13 @@ class CurrencyManagerImpl : CurrencyManager, KoinComponent {
         format: String,
         decimals: Int,
         plural: String,
+        thousandsSeparator: String,
+        decimalSeparator: String,
     ): Either<KerriaError, Currency> = runCatching {
         transaction {
-            currencyRepository.create(name, symbol, format, decimals, plural).right()
+            currencyRepository.create(
+                name, symbol, format, decimals, plural, thousandsSeparator, decimalSeparator,
+            ).right()
         }
     }.getOrElse { e ->
         KerriaError.DatabaseError("Failed to create currency: ${e.message}", e).left()
