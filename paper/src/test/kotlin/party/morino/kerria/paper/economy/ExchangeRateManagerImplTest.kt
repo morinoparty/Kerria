@@ -1,5 +1,8 @@
 package party.morino.kerria.paper.economy
 
+import org.bukkit.event.EventHandler
+import org.bukkit.event.HandlerList
+import org.bukkit.event.Listener
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -11,6 +14,7 @@ import party.morino.kerria.api.economy.EconomyManager
 import party.morino.kerria.api.economy.ExchangeRateManager
 import party.morino.kerria.api.error.KerriaError
 import party.morino.kerria.paper.KerriaTest
+import party.morino.kerria.paper.event.KerriaTransactionEvent
 import java.math.BigDecimal
 import java.util.UUID
 import kotlin.test.assertEquals
@@ -122,5 +126,39 @@ class ExchangeRateManagerImplTest : KoinTest {
         val accountId = createAccount("SameConvert")
         val result = exchangeRateManager.convert(accountId, 1, 1, BigDecimal("100"))
         assertTrue(result.isLeft())
+    }
+
+    @Test
+    @DisplayName("Cancelled convert event rolls back both balances")
+    fun cancelledConvertRollsBack() {
+        val usdId = createSecondCurrency()
+        val accountId = createAccount("CancelConvert")
+
+        economyManager.deposit(accountId, 1, BigDecimal("10000"))
+        exchangeRateManager.setRate(1, usdId, BigDecimal("0.01"))
+
+        // CONVERT イベントをキャンセルするリスナーを登録し、変換を失敗させる
+        val listener = object : Listener {
+            @EventHandler
+            fun onConvert(event: KerriaTransactionEvent) {
+                if (event.type == KerriaTransactionEvent.TransactionType.CONVERT) {
+                    event.isCancelled = true
+                }
+            }
+        }
+        KerriaTest.server.pluginManager.registerEvents(listener, KerriaTest.plugin)
+        try {
+            val result = exchangeRateManager.convert(accountId, 1, usdId, BigDecimal("5000"))
+            assertTrue(result.isLeft())
+        } finally {
+            HandlerList.unregisterAll(listener)
+        }
+
+        // 出金・入金いずれも確定していないことを確認する（資金消失が起きない）。
+        // 残高行が作られていない場合はスケール0で返るため、値の比較で検証する。
+        val jpyBalance = accountManager.getBalance(accountId, 1).getOrNull()!!
+        val usdBalance = accountManager.getBalance(accountId, usdId).getOrNull()!!
+        assertEquals(0, jpyBalance.compareTo(BigDecimal("10000")))
+        assertEquals(0, usdBalance.compareTo(BigDecimal.ZERO))
     }
 }
