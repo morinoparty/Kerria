@@ -31,6 +31,13 @@ interface ExchangeRateManager {
     fun setRate(fromCurrencyId: Int, toCurrencyId: Int, rate: BigDecimal): Either<KerriaError, Unit>
 
     /**
+     * 設定されている全ての為替レートを取得する
+     *
+     * @return 為替レートのリスト、もしくはエラー
+     */
+    fun getAllRates(): Either<KerriaError, List<ExchangeRate>>
+
+    /**
      * 通貨変換を実行する
      *
      * 変換元通貨から出金し、レートに基づいて変換先通貨に入金する。
