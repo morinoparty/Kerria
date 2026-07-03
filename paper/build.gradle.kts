@@ -1,3 +1,5 @@
+import xyz.jpenilla.resourcefactory.paper.PaperPluginYaml
+
 plugins {
     java
     alias(libs.plugins.kotlin.jvm)
@@ -29,10 +31,13 @@ dependencies {
     implementation(libs.koin.core)
 
     compileOnly(libs.vault.api)
+    // PlaceholderAPI 連携（存在する場合のみ利用する softdepend）
+    compileOnly(libs.placeholderapi)
 
     // テスト依存関係
     testImplementation(libs.paper.api)
     testImplementation(libs.vault.api)
+    testImplementation(libs.placeholderapi)
     testImplementation(libs.bundles.junit.jupiter)
     testImplementation(libs.bundles.koin.test)
     testImplementation(libs.mockk)
@@ -76,6 +81,10 @@ sourceSets.main {
             bootstrapper = "$group.kerria.paper.KerriaBootstrap"
             loader = "$group.kerria.paper.KerriaLoader"
             apiVersion = "1.21"
+            // PlaceholderAPI は任意依存（存在すれば連携する）
+            dependencies {
+                server("PlaceholderAPI", PaperPluginYaml.Load.BEFORE, required = false)
+            }
         }
     }
 }

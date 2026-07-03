@@ -36,6 +36,7 @@ import party.morino.kerria.paper.economy.ExchangeRateManagerImpl
 import party.morino.kerria.paper.economy.VaultEconomy
 import party.morino.kerria.paper.files.ConfigManagerImpl
 import party.morino.kerria.paper.files.MessageManagerImpl
+import party.morino.kerria.paper.integration.placeholder.KerriaExpansion
 import party.morino.kerria.paper.log.LogManagerImpl
 
 /**
@@ -82,6 +83,9 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
             this,
             ServicePriority.Highest,
         )
+
+        // PlaceholderAPI 連携の登録（存在する場合のみ）
+        registerPlaceholders()
 
         logger.info("${pluginMeta.name} v${pluginMeta.version} has been enabled!")
     }
@@ -133,6 +137,26 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
             GlobalContext.startKoin {
                 modules(appModule)
             }
+        }
+    }
+
+    /**
+     * PlaceholderAPI が存在する場合に Kerria の Expansion を登録する
+     *
+     * PlaceholderAPI は任意依存（softdepend）のため、未導入でもプラグインは正常に動作する。
+     */
+    private fun registerPlaceholders() {
+        // PlaceholderAPI が無い環境では KerriaExpansion をクラスロードしないよう、
+        // 参照はこのガードの内側に閉じ込める
+        if (!server.pluginManager.isPluginEnabled("PlaceholderAPI")) {
+            return
+        }
+        try {
+            KerriaExpansion().register()
+            logger.info("Registered PlaceholderAPI expansion.")
+        } catch (e: Exception) {
+            // 連携の失敗は致命的ではないため、警告のみで続行する
+            logger.warning("Failed to register PlaceholderAPI expansion: ${e.message}")
         }
     }
 
