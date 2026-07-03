@@ -34,6 +34,15 @@ class AccountManagerImpl : AccountManager, KoinComponent {
         KerriaError.DatabaseError("Failed to get account: ${e.message}", e).left()
     }
 
+    override fun getAccountByPlayerName(playerName: String): Either<KerriaError, Account> = runCatching {
+        transaction {
+            accountRepository.findPlayerByName(playerName)?.right()
+                ?: KerriaError.AccountNotFound(playerName).left()
+        }
+    }.getOrElse { e ->
+        KerriaError.DatabaseError("Failed to get account: ${e.message}", e).left()
+    }
+
     override fun getOrCreateAccount(playerUniqueId: UUID, playerName: String): Either<KerriaError, Account> =
         runCatching {
             transaction {

@@ -1,7 +1,6 @@
 package party.morino.kerria.paper.commands
 
 import io.papermc.paper.command.brigadier.CommandSourceStack
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Default
@@ -55,20 +54,13 @@ class LogCommand : KoinComponent {
     fun logOther(stack: CommandSourceStack, player: String, @Default("1") page: Int) {
         val sender = stack.sender
 
-        // 対象プレイヤーを検索
-        val targetPlayer = Bukkit.getOfflinePlayerIfCached(player)
-        if (targetPlayer == null) {
+        // 対象アカウントを解決（キャッシュ非依存でオフラインプレイヤーも解決可能）
+        val account = TargetAccountResolver.resolve(api, player) ?: run {
             sender.sendRichMessage(messages.get("common.player-not-found", "player" to player))
             return
         }
 
-        // 対象のアカウントを取得
-        val account = api.getAccountManager().getAccount(targetPlayer.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("common.target-account-not-found"))
-            return
-        }
-
-        showLogs(sender, targetPlayer.name ?: player, account.accountId, page)
+        showLogs(sender, account.name ?: player, account.accountId, page)
     }
 
     /**

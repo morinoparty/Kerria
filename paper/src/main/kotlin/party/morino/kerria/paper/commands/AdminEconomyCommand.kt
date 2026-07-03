@@ -1,7 +1,6 @@
 package party.morino.kerria.paper.commands
 
 import io.papermc.paper.command.brigadier.CommandSourceStack
-import org.bukkit.Bukkit
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Default
 import org.incendo.cloud.annotations.Permission
@@ -35,9 +34,8 @@ class AdminEconomyCommand : KoinComponent {
     ) {
         val sender = stack.sender
 
-        // 対象プレイヤーを検索
-        val targetPlayer = Bukkit.getOfflinePlayerIfCached(player)
-        if (targetPlayer == null) {
+        // 対象アカウントを解決（キャッシュ非依存でオフラインプレイヤーも解決可能）
+        val account = TargetAccountResolver.resolve(api, player) ?: run {
             sender.sendRichMessage(messages.get("common.player-not-found", "player" to player))
             return
         }
@@ -45,12 +43,6 @@ class AdminEconomyCommand : KoinComponent {
         // 通貨を取得
         val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
             sender.sendRichMessage(messages.get("common.currency-not-found"))
-            return
-        }
-
-        // 対象アカウントを取得
-        val account = api.getAccountManager().getAccount(targetPlayer.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("common.target-account-not-found"))
             return
         }
 
@@ -69,7 +61,7 @@ class AdminEconomyCommand : KoinComponent {
             ifRight = { newBalance ->
                 val formatted = currency.format(newBalance)
                 sender.sendRichMessage(
-                    messages.get("admin.set.success", "player" to (targetPlayer.name ?: player), "amount" to formatted),
+                    messages.get("admin.set.success", "player" to (account.name ?: player), "amount" to formatted),
                 )
             },
         )
@@ -86,9 +78,8 @@ class AdminEconomyCommand : KoinComponent {
     ) {
         val sender = stack.sender
 
-        // 対象プレイヤーを検索
-        val targetPlayer = Bukkit.getOfflinePlayerIfCached(player)
-        if (targetPlayer == null) {
+        // 対象アカウントを解決（キャッシュ非依存でオフラインプレイヤーも解決可能）
+        val account = TargetAccountResolver.resolve(api, player) ?: run {
             sender.sendRichMessage(messages.get("common.player-not-found", "player" to player))
             return
         }
@@ -96,12 +87,6 @@ class AdminEconomyCommand : KoinComponent {
         // 通貨を取得
         val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
             sender.sendRichMessage(messages.get("common.currency-not-found"))
-            return
-        }
-
-        // 対象アカウントを取得
-        val account = api.getAccountManager().getAccount(targetPlayer.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("common.target-account-not-found"))
             return
         }
 
@@ -121,7 +106,7 @@ class AdminEconomyCommand : KoinComponent {
                 sender.sendRichMessage(
                     messages.get(
                         "admin.give.success",
-                        "player" to (targetPlayer.name ?: player),
+                        "player" to (account.name ?: player),
                         "given" to currency.format(bigAmount),
                         "balance" to currency.format(newBalance),
                     ),
@@ -141,9 +126,8 @@ class AdminEconomyCommand : KoinComponent {
     ) {
         val sender = stack.sender
 
-        // 対象プレイヤーを検索
-        val targetPlayer = Bukkit.getOfflinePlayerIfCached(player)
-        if (targetPlayer == null) {
+        // 対象アカウントを解決（キャッシュ非依存でオフラインプレイヤーも解決可能）
+        val account = TargetAccountResolver.resolve(api, player) ?: run {
             sender.sendRichMessage(messages.get("common.player-not-found", "player" to player))
             return
         }
@@ -151,12 +135,6 @@ class AdminEconomyCommand : KoinComponent {
         // 通貨を取得
         val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
             sender.sendRichMessage(messages.get("common.currency-not-found"))
-            return
-        }
-
-        // 対象アカウントを取得
-        val account = api.getAccountManager().getAccount(targetPlayer.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("common.target-account-not-found"))
             return
         }
 
@@ -176,7 +154,7 @@ class AdminEconomyCommand : KoinComponent {
                 sender.sendRichMessage(
                     messages.get(
                         "admin.take.success",
-                        "player" to (targetPlayer.name ?: player),
+                        "player" to (account.name ?: player),
                         "taken" to currency.format(bigAmount),
                         "balance" to currency.format(newBalance),
                     ),
