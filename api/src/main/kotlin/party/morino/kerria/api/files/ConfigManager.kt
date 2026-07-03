@@ -29,4 +29,15 @@ interface ConfigManager {
      * @throws DatabaseError 設定ファイルの読み込みに失敗した場合
      */
     fun reloadConfig(): Either<KerriaError, Unit>
+
+    /**
+     * 設定を更新し、ディスクへ永続化します
+     *
+     * 現在の設定を指定した[config]で置き換え、設定ファイルへ書き出します。
+     * ランタイムでの設定変更（例: デフォルト通貨の切り替え）に使用します。
+     *
+     * @param config 新しい設定
+     * @return 更新の結果。成功時はUnit、失敗時は[KerriaError]を返します
+     */
+    fun updateConfig(config: Config): Either<KerriaError, Unit>
 }

@@ -50,6 +50,15 @@ class ConfigManagerImpl(private val plugin: JavaPlugin) : ConfigManager {
         KerriaError.ConfigLoadError(e.message ?: "Unknown error").left()
     }
 
+    override fun updateConfig(config: Config): Either<KerriaError, Unit> = try {
+        // 現在の設定を差し替えてからディスクへ書き出す
+        currentConfig = config
+        saveConfig()
+        Unit.right()
+    } catch (e: Exception) {
+        KerriaError.ConfigLoadError(e.message ?: "Unknown error").left()
+    }
+
     private fun saveConfig() {
         val yaml = Yaml.default.encodeToString<Config>(currentConfig)
         configFile.writeText(yaml)
