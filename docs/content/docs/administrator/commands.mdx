@@ -103,6 +103,21 @@ description: サーバー管理者向けコマンドの一覧
 
 - **パーミッション:** `kerria.admin.currency`
 
+### デフォルト通貨の変更
+
+<CommandLine command={{
+  command: "/kerria currency default <name>",
+  aliases: [],
+  status: "stable"
+}} />
+
+デフォルト通貨を、設定ファイルを直接編集せずに実行時に変更します。
+指定した通貨の情報が設定ファイルの `economy.currency` に書き込まれ、以降のデフォルト通貨として使用されます。
+
+Vault 連携でもこの通貨が使用されるため、`id` だけでなく名前・記号・フォーマット等もあわせて更新されます。
+
+- **パーミッション:** `kerria.admin.currency`
+
 ### 通貨削除
 
 <CommandLine command={{

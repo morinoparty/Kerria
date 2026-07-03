@@ -7,6 +7,7 @@ import org.incendo.cloud.annotations.Permission
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.KerriaAPI
+import party.morino.kerria.api.files.ConfigManager
 import party.morino.kerria.api.files.MessageManager
 
 /**
@@ -14,6 +15,7 @@ import party.morino.kerria.api.files.MessageManager
  *
  * /kerria currency create <name> <symbol> [decimals]
  * /kerria currency edit <name> <property> <newValue>
+ * /kerria currency default <name>
  * /kerria currency delete <name>
  * /kerria currency list
  * /kerria currency info <name>
@@ -23,6 +25,7 @@ class CurrencyCommand : KoinComponent {
 
     private val api: KerriaAPI by inject()
     private val messages: MessageManager by inject()
+    private val configManager: ConfigManager by inject()
 
     @Command("create <name> <symbol> [decimals]")
     @Permission("kerria.admin.currency")
@@ -103,6 +106,45 @@ class CurrencyCommand : KoinComponent {
                 sender.sendRichMessage(
                     messages.get("currency.edit.example", "example" to result.format(java.math.BigDecimal("1234.56"))),
                 )
+            },
+        )
+    }
+
+    @Command("default <name>")
+    @Permission("kerria.admin.currency")
+    @Suppress("UnstableApiUsage")
+    fun default(stack: CommandSourceStack, name: String) {
+        val sender = stack.sender
+
+        // 変更先の通貨を名前から取得する
+        val currency = api.getCurrencyManager().getCurrencyByName(name).getOrNull() ?: run {
+            sender.sendRichMessage(messages.get("currency.not-found", "name" to name))
+            return
+        }
+
+        // デフォルト通貨は economy.currency に保持されるため、選んだ通貨の全項目を反映する。
+        // id だけでなく name/plural/symbol 等も更新するのは、VaultEconomy がこれらをVault APIへ
+        // 直接返しており、id のみだと古い通貨情報が表示され続けるため。
+        val config = configManager.getConfig()
+        val newCurrencyConfig = config.economy.currency.copy(
+            id = currency.id,
+            name = currency.name,
+            symbol = currency.symbol,
+            plural = currency.plural,
+            format = currency.format,
+            fractionalDigits = currency.fractionalDigits,
+            thousandsSeparator = currency.thousandsSeparator,
+            decimalSeparator = currency.decimalSeparator,
+        )
+        val newConfig = config.copy(economy = config.economy.copy(currency = newCurrencyConfig))
+
+        // 永続化して結果を通知する
+        configManager.updateConfig(newConfig).fold(
+            ifLeft = { error ->
+                sender.sendRichMessage(messages.get("currency.default.failed", "error" to (error.message ?: "")))
+            },
+            ifRight = {
+                sender.sendRichMessage(messages.get("currency.default.success", "name" to currency.name))
             },
         )
     }
