@@ -1,6 +1,6 @@
 [versions]
 java = "25"
-paper = "1.21.11-R0.1-SNAPSHOT"
+paper = "26.1.2.build.72-stable"
 kotlin = "2.4.0"
 detekt = "2.0.0-alpha.5"
 mccoroutine = "2.22.0"
