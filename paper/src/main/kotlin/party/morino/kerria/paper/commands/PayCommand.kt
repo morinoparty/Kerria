@@ -34,37 +34,37 @@ class PayCommand : KoinComponent {
     ) {
         val sender = stack.sender
         if (sender !is Player) {
-            sender.sendRichMessage(messages.get("common.player-only"))
+            sender.sendMessage(messages.get("common.player-only"))
             return
         }
 
         // 金額バリデーション
         if (amount <= 0) {
-            sender.sendRichMessage(messages.get("common.invalid-amount"))
+            sender.sendMessage(messages.get("common.invalid-amount"))
             return
         }
 
         // 送金先アカウントを解決（キャッシュ非依存でオフラインプレイヤーも解決可能）
         val toAccount = TargetAccountResolver.resolve(api, player) ?: run {
-            sender.sendRichMessage(messages.get("common.player-not-found", "player" to player))
+            sender.sendMessage(messages.get("common.player-not-found", "player" to player))
             return
         }
 
         // 自分自身への送金チェック
         if (toAccount.playerUniqueId == sender.uniqueId) {
-            sender.sendRichMessage(messages.get("pay.self"))
+            sender.sendMessage(messages.get("pay.self"))
             return
         }
 
         // 通貨を取得
         val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("common.currency-not-found"))
+            sender.sendMessage(messages.get("common.currency-not-found"))
             return
         }
 
         // 送金元アカウントを取得
         val fromAccount = api.getAccountManager().getAccount(sender.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("pay.sender-account-not-found"))
+            sender.sendMessage(messages.get("pay.sender-account-not-found"))
             return
         }
 
@@ -78,15 +78,15 @@ class PayCommand : KoinComponent {
             treatePluginName = "Kerria",
         ).fold(
             ifLeft = { error ->
-                sender.sendRichMessage(messages.get("pay.failed", "error" to (error.message ?: "")))
+                sender.sendMessage(messages.get("pay.failed", "error" to (error.message ?: "")))
             },
             ifRight = {
                 val formatted = currency.format(bigAmount)
-                sender.sendRichMessage(
+                sender.sendMessage(
                     messages.get("pay.success", "player" to (toAccount.name ?: player), "amount" to formatted),
                 )
                 // 送金先がオンラインならメッセージを送信
-                toAccount.playerUniqueId?.let { Bukkit.getPlayer(it) }?.sendRichMessage(
+                toAccount.playerUniqueId?.let { Bukkit.getPlayer(it) }?.sendMessage(
                     messages.get("pay.received", "player" to (sender.name), "amount" to formatted),
                 )
             },

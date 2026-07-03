@@ -34,31 +34,31 @@ class ConvertCommand : KoinComponent {
     ) {
         val sender = stack.sender
         if (sender !is Player) {
-            sender.sendRichMessage(messages.get("common.player-only"))
+            sender.sendMessage(messages.get("common.player-only"))
             return
         }
 
         // 金額バリデーション
         if (amount <= 0) {
-            sender.sendRichMessage(messages.get("common.invalid-amount"))
+            sender.sendMessage(messages.get("common.invalid-amount"))
             return
         }
 
         // 変換元通貨を名前から取得
         val from = api.getCurrencyManager().getCurrencyByName(fromCurrency).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("currency.not-found", "name" to fromCurrency))
+            sender.sendMessage(messages.get("currency.not-found", "name" to fromCurrency))
             return
         }
 
         // 変換先通貨を名前から取得
         val to = api.getCurrencyManager().getCurrencyByName(toCurrency).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("currency.not-found", "name" to toCurrency))
+            sender.sendMessage(messages.get("currency.not-found", "name" to toCurrency))
             return
         }
 
         // アカウントを取得
         val account = api.getAccountManager().getAccount(sender.uniqueId).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("common.account-not-found"))
+            sender.sendMessage(messages.get("common.account-not-found"))
             return
         }
 
@@ -66,12 +66,12 @@ class ConvertCommand : KoinComponent {
         val bigAmount = BigDecimal.valueOf(amount)
         exchangeRateManager.convert(account.accountId, from.id, to.id, bigAmount).fold(
             ifLeft = { error ->
-                sender.sendRichMessage(messages.get("convert.failed", "error" to (error.message ?: "")))
+                sender.sendMessage(messages.get("convert.failed", "error" to (error.message ?: "")))
             },
             ifRight = { convertedAmount ->
                 val fromFormatted = from.format(bigAmount)
                 val toFormatted = to.format(convertedAmount)
-                sender.sendRichMessage(
+                sender.sendMessage(
                     messages.get("convert.success", "from" to fromFormatted, "to" to toFormatted),
                 )
             },
@@ -91,11 +91,11 @@ class ConvertCommand : KoinComponent {
 
         // 通貨を名前から取得
         val from = api.getCurrencyManager().getCurrencyByName(fromCurrency).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("currency.not-found", "name" to fromCurrency))
+            sender.sendMessage(messages.get("currency.not-found", "name" to fromCurrency))
             return
         }
         val to = api.getCurrencyManager().getCurrencyByName(toCurrency).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("currency.not-found", "name" to toCurrency))
+            sender.sendMessage(messages.get("currency.not-found", "name" to toCurrency))
             return
         }
 
@@ -103,10 +103,10 @@ class ConvertCommand : KoinComponent {
         val bigRate = BigDecimal.valueOf(rate)
         exchangeRateManager.setRate(from.id, to.id, bigRate).fold(
             ifLeft = { error ->
-                sender.sendRichMessage(messages.get("rate.set.failed", "error" to (error.message ?: "")))
+                sender.sendMessage(messages.get("rate.set.failed", "error" to (error.message ?: "")))
             },
             ifRight = {
-                sender.sendRichMessage(
+                sender.sendMessage(
                     messages.get(
                         "rate.set.success",
                         "from" to from.name,
@@ -126,11 +126,11 @@ class ConvertCommand : KoinComponent {
 
         // 設定済みの全レートを取得
         val rates = exchangeRateManager.getAllRates().getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("rate.list.failed"))
+            sender.sendMessage(messages.get("rate.list.failed"))
             return
         }
         if (rates.isEmpty()) {
-            sender.sendRichMessage(messages.get("rate.list.empty"))
+            sender.sendMessage(messages.get("rate.list.empty"))
             return
         }
 
@@ -139,12 +139,12 @@ class ConvertCommand : KoinComponent {
             .orEmpty()
             .associate { it.id to it.name }
 
-        sender.sendRichMessage(messages.get("rate.list.header", "count" to rates.size.toString()))
+        sender.sendMessage(messages.get("rate.list.header", "count" to rates.size.toString()))
         rates.forEach { rate ->
             // 通貨が削除済みの場合は ID をそのまま表示する
             val fromName = currencyNameById[rate.fromCurrencyId] ?: "#${rate.fromCurrencyId}"
             val toName = currencyNameById[rate.toCurrencyId] ?: "#${rate.toCurrencyId}"
-            sender.sendRichMessage(
+            sender.sendMessage(
                 messages.get(
                     "rate.list.entry",
                     "from" to fromName,

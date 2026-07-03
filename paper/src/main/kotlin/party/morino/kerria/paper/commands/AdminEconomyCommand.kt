@@ -36,13 +36,13 @@ class AdminEconomyCommand : KoinComponent {
 
         // 対象アカウントを解決（キャッシュ非依存でオフラインプレイヤーも解決可能）
         val account = TargetAccountResolver.resolve(api, player) ?: run {
-            sender.sendRichMessage(messages.get("common.player-not-found", "player" to player))
+            sender.sendMessage(messages.get("common.player-not-found", "player" to player))
             return
         }
 
         // 通貨を取得
         val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("common.currency-not-found"))
+            sender.sendMessage(messages.get("common.currency-not-found"))
             return
         }
 
@@ -56,11 +56,11 @@ class AdminEconomyCommand : KoinComponent {
             treatePluginName = "Kerria",
         ).fold(
             ifLeft = { error ->
-                sender.sendRichMessage(messages.get("admin.set.failed", "error" to (error.message ?: "")))
+                sender.sendMessage(messages.get("admin.set.failed", "error" to (error.message ?: "")))
             },
             ifRight = { newBalance ->
                 val formatted = currency.format(newBalance)
-                sender.sendRichMessage(
+                sender.sendMessage(
                     messages.get("admin.set.success", "player" to (account.name ?: player), "amount" to formatted),
                 )
             },
@@ -80,13 +80,13 @@ class AdminEconomyCommand : KoinComponent {
 
         // 対象アカウントを解決（キャッシュ非依存でオフラインプレイヤーも解決可能）
         val account = TargetAccountResolver.resolve(api, player) ?: run {
-            sender.sendRichMessage(messages.get("common.player-not-found", "player" to player))
+            sender.sendMessage(messages.get("common.player-not-found", "player" to player))
             return
         }
 
         // 通貨を取得
         val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("common.currency-not-found"))
+            sender.sendMessage(messages.get("common.currency-not-found"))
             return
         }
 
@@ -100,10 +100,10 @@ class AdminEconomyCommand : KoinComponent {
             treatePluginName = "Kerria",
         ).fold(
             ifLeft = { error ->
-                sender.sendRichMessage(messages.get("admin.give.failed", "error" to (error.message ?: "")))
+                sender.sendMessage(messages.get("admin.give.failed", "error" to (error.message ?: "")))
             },
             ifRight = { newBalance ->
-                sender.sendRichMessage(
+                sender.sendMessage(
                     messages.get(
                         "admin.give.success",
                         "player" to (account.name ?: player),
@@ -128,13 +128,13 @@ class AdminEconomyCommand : KoinComponent {
 
         // 対象アカウントを解決（キャッシュ非依存でオフラインプレイヤーも解決可能）
         val account = TargetAccountResolver.resolve(api, player) ?: run {
-            sender.sendRichMessage(messages.get("common.player-not-found", "player" to player))
+            sender.sendMessage(messages.get("common.player-not-found", "player" to player))
             return
         }
 
         // 通貨を取得
         val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("common.currency-not-found"))
+            sender.sendMessage(messages.get("common.currency-not-found"))
             return
         }
 
@@ -148,10 +148,10 @@ class AdminEconomyCommand : KoinComponent {
             treatePluginName = "Kerria",
         ).fold(
             ifLeft = { error ->
-                sender.sendRichMessage(messages.get("admin.take.failed", "error" to (error.message ?: "")))
+                sender.sendMessage(messages.get("admin.take.failed", "error" to (error.message ?: "")))
             },
             ifRight = { newBalance ->
-                sender.sendRichMessage(
+                sender.sendMessage(
                     messages.get(
                         "admin.take.success",
                         "player" to (account.name ?: player),

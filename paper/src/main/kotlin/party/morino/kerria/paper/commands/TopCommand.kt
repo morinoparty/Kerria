@@ -1,6 +1,7 @@
 package party.morino.kerria.paper.commands
 
 import io.papermc.paper.command.brigadier.CommandSourceStack
+import net.kyori.adventure.text.event.ClickEvent
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Default
 import org.incendo.cloud.annotations.Permission
@@ -35,7 +36,7 @@ class TopCommand : KoinComponent {
 
         // 通貨を取得
         val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("common.currency-not-found"))
+            sender.sendMessage(messages.get("common.currency-not-found"))
             return
         }
 
@@ -45,17 +46,17 @@ class TopCommand : KoinComponent {
 
         // ランキングデータを取得
         val entries = api.getAccountManager().getTopBalances(currencyId, pageSize, offset).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("top.fetch-failed"))
+            sender.sendMessage(messages.get("top.fetch-failed"))
             return
         }
 
         if (entries.isEmpty()) {
-            sender.sendRichMessage(messages.get("top.empty"))
+            sender.sendMessage(messages.get("top.empty"))
             return
         }
 
         // ヘッダー表示
-        sender.sendRichMessage(
+        sender.sendMessage(
             messages.get("top.header", "currency" to currency.name, "page" to safePage.toString()),
         )
 
@@ -64,7 +65,7 @@ class TopCommand : KoinComponent {
             val rank = offset + index + 1
             val name = account.name ?: "Unknown"
             val formatted = currency.format(balance)
-            sender.sendRichMessage(
+            sender.sendMessage(
                 messages.get(
                     "top.entry",
                     "rank" to rank.toString(),
@@ -77,12 +78,10 @@ class TopCommand : KoinComponent {
         // フッター表示（次ページへのヒント）
         if (entries.size == pageSize) {
             val nextPage = safePage + 1
-            sender.sendRichMessage(
-                messages.get(
-                    "top.next-page",
-                    "currencyId" to currencyId.toString(),
-                    "nextPage" to nextPage.toString(),
-                ),
+            // クリックコマンドはコード側で組み立てる（テンプレート内のタグ引数は解決されないため）
+            sender.sendMessage(
+                messages.get("top.next-page", "page" to nextPage.toString())
+                    .clickEvent(ClickEvent.runCommand("/kerria top $currencyId $nextPage")),
             )
         }
     }

@@ -44,10 +44,10 @@ class CurrencyCommand : KoinComponent {
 
         api.getCurrencyManager().createCurrency(name, symbol, format, decimals, plural).fold(
             ifLeft = { error ->
-                sender.sendRichMessage(messages.get("currency.create.failed", "error" to (error.message ?: "")))
+                sender.sendMessage(messages.get("currency.create.failed", "error" to (error.message ?: "")))
             },
             ifRight = { currency ->
-                sender.sendRichMessage(
+                sender.sendMessage(
                     messages.get(
                         "currency.create.success",
                         "name" to currency.name,
@@ -67,7 +67,7 @@ class CurrencyCommand : KoinComponent {
 
         // 対象の通貨を名前から取得する
         val currency = api.getCurrencyManager().getCurrencyByName(name).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("currency.not-found", "name" to name))
+            sender.sendMessage(messages.get("currency.not-found", "name" to name))
             return
         }
 
@@ -81,7 +81,7 @@ class CurrencyCommand : KoinComponent {
                 // 小数桁数は 0 以上の整数のみ許可する
                 val digits = newValue.toIntOrNull()
                 if (digits == null || digits < 0) {
-                    sender.sendRichMessage(messages.get("currency.edit.invalid-decimals"))
+                    sender.sendMessage(messages.get("currency.edit.invalid-decimals"))
                     return
                 }
                 currency.copy(fractionalDigits = digits)
@@ -89,21 +89,21 @@ class CurrencyCommand : KoinComponent {
             "thousandsseparator" -> currency.copy(thousandsSeparator = newValue)
             "decimalseparator" -> currency.copy(decimalSeparator = newValue)
             else -> {
-                sender.sendRichMessage(messages.get("currency.edit.unknown-property", "property" to property))
-                sender.sendRichMessage(messages.get("currency.edit.available-properties"))
+                sender.sendMessage(messages.get("currency.edit.unknown-property", "property" to property))
+                sender.sendMessage(messages.get("currency.edit.available-properties"))
                 return
             }
         }
 
         api.getCurrencyManager().updateCurrency(updated).fold(
             ifLeft = { error ->
-                sender.sendRichMessage(messages.get("currency.edit.failed", "error" to (error.message ?: "")))
+                sender.sendMessage(messages.get("currency.edit.failed", "error" to (error.message ?: "")))
             },
             ifRight = { result ->
-                sender.sendRichMessage(
+                sender.sendMessage(
                     messages.get("currency.edit.success", "name" to result.name, "property" to property),
                 )
-                sender.sendRichMessage(
+                sender.sendMessage(
                     messages.get("currency.edit.example", "example" to result.format(java.math.BigDecimal("1234.56"))),
                 )
             },
@@ -118,7 +118,7 @@ class CurrencyCommand : KoinComponent {
 
         // 変更先の通貨を名前から取得する
         val currency = api.getCurrencyManager().getCurrencyByName(name).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("currency.not-found", "name" to name))
+            sender.sendMessage(messages.get("currency.not-found", "name" to name))
             return
         }
 
@@ -141,10 +141,10 @@ class CurrencyCommand : KoinComponent {
         // 永続化して結果を通知する
         configManager.updateConfig(newConfig).fold(
             ifLeft = { error ->
-                sender.sendRichMessage(messages.get("currency.default.failed", "error" to (error.message ?: "")))
+                sender.sendMessage(messages.get("currency.default.failed", "error" to (error.message ?: "")))
             },
             ifRight = {
-                sender.sendRichMessage(messages.get("currency.default.success", "name" to currency.name))
+                sender.sendMessage(messages.get("currency.default.success", "name" to currency.name))
             },
         )
     }
@@ -157,16 +157,16 @@ class CurrencyCommand : KoinComponent {
 
         // 通貨名から通貨を取得
         val currency = api.getCurrencyManager().getCurrencyByName(name).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("currency.not-found", "name" to name))
+            sender.sendMessage(messages.get("currency.not-found", "name" to name))
             return
         }
 
         api.getCurrencyManager().deleteCurrency(currency.id).fold(
             ifLeft = { error ->
-                sender.sendRichMessage(messages.get("currency.delete.failed", "error" to (error.message ?: "")))
+                sender.sendMessage(messages.get("currency.delete.failed", "error" to (error.message ?: "")))
             },
             ifRight = {
-                sender.sendRichMessage(messages.get("currency.delete.success", "name" to currency.name))
+                sender.sendMessage(messages.get("currency.delete.success", "name" to currency.name))
             },
         )
     }
@@ -178,18 +178,18 @@ class CurrencyCommand : KoinComponent {
         val sender = stack.sender
 
         val currencies = api.getCurrencyManager().getAllCurrencies().getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("currency.list.failed"))
+            sender.sendMessage(messages.get("currency.list.failed"))
             return
         }
 
         if (currencies.isEmpty()) {
-            sender.sendRichMessage(messages.get("currency.list.empty"))
+            sender.sendMessage(messages.get("currency.list.empty"))
             return
         }
 
-        sender.sendRichMessage(messages.get("currency.list.header"))
+        sender.sendMessage(messages.get("currency.list.header"))
         currencies.forEach { currency ->
-            sender.sendRichMessage(
+            sender.sendMessage(
                 messages.get(
                     "currency.list.entry",
                     "id" to currency.id.toString(),
@@ -208,18 +208,18 @@ class CurrencyCommand : KoinComponent {
         val sender = stack.sender
 
         val currency = api.getCurrencyManager().getCurrencyByName(name).getOrNull() ?: run {
-            sender.sendRichMessage(messages.get("currency.not-found", "name" to name))
+            sender.sendMessage(messages.get("currency.not-found", "name" to name))
             return
         }
 
-        sender.sendRichMessage(messages.get("currency.info.header"))
-        sender.sendRichMessage(messages.get("currency.info.id", "id" to currency.id.toString()))
-        sender.sendRichMessage(messages.get("currency.info.name", "name" to currency.name))
-        sender.sendRichMessage(messages.get("currency.info.plural", "plural" to currency.plural))
-        sender.sendRichMessage(messages.get("currency.info.symbol", "symbol" to currency.symbol))
-        sender.sendRichMessage(messages.get("currency.info.format", "format" to currency.format))
-        sender.sendRichMessage(messages.get("currency.info.digits", "digits" to currency.fractionalDigits.toString()))
-        sender.sendRichMessage(
+        sender.sendMessage(messages.get("currency.info.header"))
+        sender.sendMessage(messages.get("currency.info.id", "id" to currency.id.toString()))
+        sender.sendMessage(messages.get("currency.info.name", "name" to currency.name))
+        sender.sendMessage(messages.get("currency.info.plural", "plural" to currency.plural))
+        sender.sendMessage(messages.get("currency.info.symbol", "symbol" to currency.symbol))
+        sender.sendMessage(messages.get("currency.info.format", "format" to currency.format))
+        sender.sendMessage(messages.get("currency.info.digits", "digits" to currency.fractionalDigits.toString()))
+        sender.sendMessage(
             messages.get("currency.info.example", "example" to currency.format(java.math.BigDecimal("1234.56"))),
         )
     }

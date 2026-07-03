@@ -1,23 +1,46 @@
 ---
 title: メッセージ設定
-description: プレイヤーへ送信されるメッセージのカスタマイズ (messages.yml)
+description: プレイヤーへ送信されるメッセージのカスタマイズと多言語対応 (translation)
 ---
 
-💬 Kerria がプレイヤーへ送信するメッセージは、すべて `plugins/Kerria/messages.yml` に外部化されています。
+💬 Kerria がプレイヤーへ送信するメッセージは、すべて `plugins/Kerria/translation/` 以下のロケール別ファイルに外部化されています。
 このファイルを編集することで、文言・色・装飾を自由にカスタマイズできます。
+
+## 多言語対応
+
+Kerria は Adventure の翻訳フレームワークを利用しており、メッセージはプレイヤーごとに異なる言語で表示されます。
+プレイヤーには、そのクライアントの言語設定に対応する翻訳が自動的に表示され、対応する翻訳が無い場合は既定のロケールへフォールバックします。
+
+初回起動時に、同梱されているロケール（日本語・英語）のファイルが `translation/` へ書き出されます。
+
+```
+plugins/Kerria/translation/
+├── ja_JP.properties   # 日本語
+└── en_US.properties   # 英語
+```
+
+ファイル名は `言語_国.properties`（`Locale` 表記）です。新しい言語を追加するには、同じキーを持つ `<locale>.properties` を作成してください。
+
+## 既定のロケール
+
+`config.yaml` の `defaultLocale` で、フォールバック先の言語を指定します（例: `ja`, `en`）。
+プレイヤーのクライアント言語に対応する翻訳が無い場合や、コンソール宛のメッセージでこのロケールが使用されます。
+
+```yaml
+# 既定の言語ロケール（例: ja, en）
+defaultLocale: ja
+```
 
 ## ファイル形式
 
-`messages.yml` は「メッセージキー」と「テンプレート」のフラットな対応表です。
-キーはドット区切りで、値は [MiniMessage](https://docs.advntr.dev/minimessage/format.html) 形式で記述します。
+各 `.properties` ファイルは「メッセージキー」と「テンプレート」の対応表です。
+キーはドット区切りで、値は [MiniMessage](https://docs.advntr.dev/minimessage/format.html) 形式で記述します。ファイルは UTF-8 で保存してください。
 
-```yaml
-balance.result: "<green>あなたの残高は<amount>です。"
-pay.success: "<green><yellow><player></yellow> に <amount> を送金しました。"
-common.player-not-found: "<red>プレイヤー <yellow><player></yellow> が見つかりません。"
+```properties
+balance.result=<green>あなたの残高は<amount>です。
+pay.success=<green><yellow><player></yellow> に <amount> を送金しました。
+common.player-not-found=<red>プレイヤー <yellow><player></yellow> が見つかりません。
 ```
-
-初回起動時に、デフォルトのメッセージが自動的に書き出されます。
 
 ## プレースホルダ
 
@@ -31,15 +54,28 @@ common.player-not-found: "<red>プレイヤー <yellow><player></yellow> が見�
 | `<name>` | 通貨名 |
 | `<error>` | エラーの内容 |
 
-置換される値は MiniMessage として再解釈されないようエスケープされます。
+置換される値は文字列として安全に埋め込まれ、MiniMessage タグとしては解釈されません。
 そのため、通貨名などに `<` が含まれていても、意図しない装飾やタグの注入は発生しません。
+
+:::info[クリック可能なページ送り]
+ランキングや取引履歴の「次のページ」リンクのクリック動作は、テンプレートではなくコード側で組み立てられます。テンプレートでは表示文言のみをカスタマイズできます。
+:::
+
+## 解決順序
+
+メッセージは次の順序で解決されます。
+
+1. プレイヤーのクライアントロケールに対応する翻訳
+2. 既定ロケール（`defaultLocale`）の翻訳
+3. 読み込み済みのいずれかのロケールの翻訳
+4. いずれにも見つからない場合は `Missing message: <key>` を表示
 
 ## 色や装飾
 
-MiniMessage のタグ（`<red>`、`<gradient>`、`<click>` など）はテンプレート側にそのまま記述できます。
+MiniMessage のタグ（`<red>`、`<gradient>` など）はテンプレート側にそのまま記述できます。
 装飾を変更したい場合は、テンプレートの MiniMessage タグを編集してください。
 
 ## 再読み込み
 
-`messages.yml` を編集した後は、サーバーを再起動するか、設定の再読み込みコマンドで反映できます。
-不正な YAML を保存した場合は読み込みがスキップされ、直前の正常なメッセージが維持されます。
+`translation/` 以下のファイルを編集した後は、サーバーを再起動するか、設定の再読み込みコマンドで反映できます。
+いずれかのファイルの読み込みに失敗した場合は差し替えがスキップされ、直前の正常なメッセージが維持されます。
