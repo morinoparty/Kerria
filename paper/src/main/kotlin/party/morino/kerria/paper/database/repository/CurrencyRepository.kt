@@ -5,6 +5,7 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.update
 import party.morino.kerria.api.currency.Currency
 import party.morino.kerria.paper.database.table.CurrencyTable
 
@@ -75,6 +76,25 @@ class CurrencyRepository {
         return CurrencyTable
             .selectAll()
             .map { it.toCurrency() }
+    }
+
+    /**
+     * 既存の通貨を更新する
+     *
+     * `currency.id` で対象を特定し、全フィールドを上書きする。
+     *
+     * @return 更新された行数
+     */
+    fun update(currency: Currency): Int {
+        return CurrencyTable.update({ CurrencyTable.id eq currency.id }) {
+            it[name] = currency.name
+            it[plural] = currency.plural
+            it[symbol] = currency.symbol
+            it[format] = currency.format
+            it[fractionalDigits] = currency.fractionalDigits
+            it[thousandsSeparator] = currency.thousandsSeparator
+            it[decimalSeparator] = currency.decimalSeparator
+        }
     }
 
     /**

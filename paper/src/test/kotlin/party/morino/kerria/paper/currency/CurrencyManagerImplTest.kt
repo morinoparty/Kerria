@@ -100,6 +100,37 @@ class CurrencyManagerImplTest : KoinTest {
     }
 
     @Test
+    @DisplayName("Update currency persists new values")
+    fun updateCurrencyPersistsNewValues() {
+        val created = currencyManager.createCurrency(
+            "AUD", "$", "%amount% AUD", 2, "Dollars",
+        ).getOrNull()!!
+
+        // 記号と小数桁数を変更して更新する
+        val updated = currencyManager.updateCurrency(
+            created.copy(symbol = "A$", fractionalDigits = 0),
+        )
+        assertTrue(updated.isRight())
+
+        val retrieved = currencyManager.getCurrency(created.id).getOrNull()!!
+        assertEquals("A$", retrieved.symbol)
+        assertEquals(0, retrieved.fractionalDigits)
+    }
+
+    @Test
+    @DisplayName("Update currency to existing name returns error")
+    fun updateCurrencyDuplicateNameReturnsError() {
+        val created = currencyManager.createCurrency(
+            "CHF", "Fr", "%amount% CHF", 2, "Francs",
+        ).getOrNull()!!
+
+        // 既存のデフォルト通貨 JPY と同名に変更しようとすると失敗する
+        val result = currencyManager.updateCurrency(created.copy(name = "JPY"))
+        assertTrue(result.isLeft())
+        assertTrue(result.leftOrNull() is KerriaError.CurrencyAlreadyExists)
+    }
+
+    @Test
     @DisplayName("Create and delete currency")
     fun createAndDeleteCurrency() {
         val created = currencyManager.createCurrency(

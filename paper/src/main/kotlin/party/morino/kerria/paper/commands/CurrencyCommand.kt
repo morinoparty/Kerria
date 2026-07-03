@@ -12,6 +12,7 @@ import party.morino.kerria.api.KerriaAPI
  * 通貨管理コマンド
  *
  * /kerria currency create <name> <symbol> [decimals]
+ * /kerria currency edit <name> <property> <newValue>
  * /kerria currency delete <name>
  * /kerria currency list
  * /kerria currency info <name>
@@ -44,6 +45,60 @@ class CurrencyCommand : KoinComponent {
                 sender.sendRichMessage(
                     "<green>通貨 <yellow>${currency.name}</yellow> (${currency.symbol}) を作成しました。ID: ${currency.id}",
                 )
+            },
+        )
+    }
+
+    @Command("edit <name> <property> <newValue>")
+    @Permission("kerria.admin.currency")
+    @Suppress("UnstableApiUsage")
+    fun edit(stack: CommandSourceStack, name: String, property: String, newValue: String) {
+        val sender = stack.sender
+
+        // 対象の通貨を名前から取得する
+        val currency = api.getCurrencyManager().getCurrencyByName(name).getOrNull() ?: run {
+            sender.sendRichMessage("<red>通貨 <yellow>$name</yellow> が見つかりません。")
+            return
+        }
+
+        // 指定されたプロパティに応じて更新後の通貨を組み立てる（不正な場合は null）
+        val updated = when (property.lowercase()) {
+            "name" -> currency.copy(name = newValue)
+            "plural" -> currency.copy(plural = newValue)
+            "symbol" -> currency.copy(symbol = newValue)
+            "format" -> currency.copy(format = newValue)
+            "fractionaldigits", "decimals" -> {
+                // 小数桁数は 0 以上の整数のみ許可する
+                val digits = newValue.toIntOrNull()
+                if (digits == null || digits < 0) {
+                    sender.sendRichMessage("<red>小数桁数には 0 以上の整数を指定してください。")
+                    return
+                }
+                currency.copy(fractionalDigits = digits)
+            }
+            "thousandsseparator" -> currency.copy(thousandsSeparator = newValue)
+            "decimalseparator" -> currency.copy(decimalSeparator = newValue)
+            else -> {
+                sender.sendRichMessage(
+                    "<red>不明なプロパティです: <yellow>$property</yellow>",
+                )
+                sender.sendRichMessage(
+                    "<gray>指定可能: name, plural, symbol, format, fractionalDigits, " +
+                        "thousandsSeparator, decimalSeparator",
+                )
+                return
+            }
+        }
+
+        api.getCurrencyManager().updateCurrency(updated).fold(
+            ifLeft = { error ->
+                sender.sendRichMessage("<red>通貨の更新に失敗しました: ${error.message}")
+            },
+            ifRight = { result ->
+                sender.sendRichMessage(
+                    "<green>通貨 <yellow>${result.name}</yellow> の <white>$property</white> を更新しました。",
+                )
+                sender.sendRichMessage("<gray>表示例: <green>${result.format(java.math.BigDecimal("1234.56"))}")
             },
         )
     }

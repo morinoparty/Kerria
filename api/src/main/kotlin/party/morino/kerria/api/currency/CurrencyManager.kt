@@ -48,6 +48,17 @@ interface CurrencyManager {
     ): Either<KerriaError, Currency>
 
     /**
+     * 既存の通貨を更新する
+     *
+     * `currency.id` で対象を特定し、名前・記号・フォーマット等を上書きする。
+     * 別の通貨が同名の場合はエラーを返す。
+     *
+     * @param currency 更新後の内容を持つ通貨
+     * @return 更新された通貨、もしくはエラー
+     */
+    fun updateCurrency(currency: Currency): Either<KerriaError, Currency>
+
+    /**
      * 全ての通貨を取得する
      *
      * @return 通貨のリスト、もしくはエラー
