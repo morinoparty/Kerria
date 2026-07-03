@@ -72,6 +72,8 @@ description: サーバー管理者向けコマンドの一覧
 `decimals` は小数点以下の桁数で、省略時は 2 になります。
 フォーマットはデフォルトで `%amount% <name>` が設定されます。
 
+フォーマットでは `%amount%`（桁区切り済みの金額）・`%plural%`・`%symbol%`・`%name%` のプレースホルダが利用できます。桁区切り文字や小数点記号は設定ファイルの `thousandsSeparator` / `decimalSeparator` で通貨ごとに調整できます。詳しくは[設定ファイル](/docs/administrator/configuration)を参照してください。
+
 - **パーミッション:** `kerria.admin.currency`
 
 ### 通貨削除
