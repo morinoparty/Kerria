@@ -60,8 +60,22 @@ Vault経由の取引では、呼び出し元プラグインが自動的に検出
 
 ## カスタムイベント
 
-Kerriaは経済操作が実行される前に `KerriaTransactionEvent` を発火します。
-このイベントはキャンセル可能で、他のプラグインが取引を監視・制御できます。
+Kerria は経済操作に関して、実行前・実行後の 2 種類のイベントを発火します。用途に応じて使い分けてください。
+
+| イベント | 発火タイミング | キャンセル | 主な用途 |
+|---------|--------------|-----------|---------|
+| `KerriaTransactionEvent` | DB 反映の**前** | 可能 | 取引の監視・拒否（veto） |
+| `KerriaTransactionCompletedEvent` | DB コミットの**後** | 不可 | 確定した残高変更の観測 |
+
+:::warning
+残高が実際に変化したことを確実に知りたい場合は、必ず `KerriaTransactionCompletedEvent` を使用してください。
+`KerriaTransactionEvent`（事前イベント）は、その後の DB トランザクションが失敗してロールバックされる可能性があるため、
+残高が変化したことを保証しません。
+:::
+
+### 事前イベント（KerriaTransactionEvent）
+
+経済操作が実行される前に発火します。キャンセル可能で、他のプラグインが取引を監視・制御できます。
 
 ```kotlin
 @EventHandler
@@ -72,14 +86,8 @@ fun onTransaction(event: KerriaTransactionEvent) {
         TransactionType.WITHDRAW -> { /* 出金 */ }
         TransactionType.TRANSFER -> { /* 送金 */ }
         TransactionType.SET_BALANCE -> { /* 残高設定 */ }
+        TransactionType.CONVERT -> { /* 通貨変換 */ }
     }
-
-    // 取引の詳細
-    val from = event.fromAccountId
-    val to = event.toAccountId
-    val amount = event.amount
-    val currency = event.currencyId
-    val caller = event.callerPluginName
 
     // 必要に応じてキャンセル
     if (shouldBlock(event)) {
@@ -88,14 +96,46 @@ fun onTransaction(event: KerriaTransactionEvent) {
 }
 ```
 
-### イベントプロパティ
-
 | プロパティ | 型 | 説明 |
 |-----------|-----|------|
-| `type` | `TransactionType` | 取引の種類（DEPOSIT / WITHDRAW / TRANSFER / SET_BALANCE） |
+| `type` | `TransactionType` | 取引の種類（DEPOSIT / WITHDRAW / TRANSFER / SET_BALANCE / CONVERT） |
 | `fromAccountId` | `UUID` | 送金元アカウントID |
 | `toAccountId` | `UUID` | 送金先アカウントID |
 | `currencyId` | `Int` | 通貨ID |
 | `amount` | `BigDecimal` | 取引金額 |
 | `callerPluginName` | `String?` | 操作を実行したプラグイン名 |
 | `isCancelled` | `Boolean` | キャンセル可能 |
+
+### 確定後イベント（KerriaTransactionCompletedEvent）
+
+経済操作が DB にコミットされた後に発火します。キャンセルはできず、確定した残高変更を通知します。
+DB トランザクションの外側で発火されるため、リスナーからコミット済みの変更をロールバックすることはできません。
+
+```kotlin
+@EventHandler
+fun onTransactionCompleted(event: KerriaTransactionCompletedEvent) {
+    // 確定した残高変更を観測する
+    val amount = event.amount
+    val newFromBalance = event.fromBalance // 送金元の確定後残高
+    val newToBalance = event.toBalance     // 送金先の確定後残高
+
+    // 例: スコアボードの更新や通知など
+    updateScoreboard(event.toAccountId, newToBalance)
+}
+```
+
+| プロパティ | 型 | 説明 |
+|-----------|-----|------|
+| `type` | `TransactionType` | 取引の種類 |
+| `fromAccountId` | `UUID` | 送金元アカウントID |
+| `toAccountId` | `UUID` | 送金先アカウントID |
+| `currencyId` | `Int` | 通貨ID |
+| `amount` | `BigDecimal` | 取引金額 |
+| `callerPluginName` | `String?` | 操作を実行したプラグイン名 |
+| `fromBalance` | `BigDecimal` | 送金元アカウントの確定後残高 |
+| `toBalance` | `BigDecimal` | 送金先アカウントの確定後残高 |
+
+:::note
+入金・出金・残高設定では送金元と送金先が同一アカウントとなり、`fromBalance` と `toBalance` は同じ値になります。
+これらのイベントは `party.morino.kerria.paper.event` パッケージに定義されています。
+:::
