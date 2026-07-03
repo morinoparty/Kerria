@@ -51,5 +51,6 @@ class KerriaTransactionEvent(
         WITHDRAW,
         TRANSFER,
         SET_BALANCE,
+        CONVERT,
     }
 }

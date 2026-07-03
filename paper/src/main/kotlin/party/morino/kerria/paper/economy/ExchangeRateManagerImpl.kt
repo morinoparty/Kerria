@@ -3,16 +3,18 @@ package party.morino.kerria.paper.economy
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import org.bukkit.Bukkit
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.currency.CurrencyManager
-import party.morino.kerria.api.economy.EconomyManager
 import party.morino.kerria.api.economy.ExchangeRate
 import party.morino.kerria.api.economy.ExchangeRateManager
 import party.morino.kerria.api.error.KerriaError
+import party.morino.kerria.api.log.LogManager
 import party.morino.kerria.paper.database.repository.AccountRepository
 import party.morino.kerria.paper.database.repository.ExchangeRateRepository
+import party.morino.kerria.paper.event.KerriaTransactionEvent
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.UUID
@@ -26,7 +28,7 @@ class ExchangeRateManagerImpl : ExchangeRateManager, KoinComponent {
     private val exchangeRateRepository: ExchangeRateRepository by inject()
     private val accountRepository: AccountRepository by inject()
     private val currencyManager: CurrencyManager by inject()
-    private val economyManager: EconomyManager by inject()
+    private val logManager: LogManager by inject()
 
     override fun getRate(fromCurrencyId: Int, toCurrencyId: Int): Either<KerriaError, BigDecimal> = runCatching {
         transaction {
@@ -99,14 +101,57 @@ class ExchangeRateManagerImpl : ExchangeRateManager, KoinComponent {
         // 変換額を計算
         val convertedAmount = amount.multiply(rate).setScale(toCurrency.fractionalDigits, RoundingMode.HALF_UP)
 
-        // 変換元通貨から出金
-        economyManager.withdraw(accountId, fromCurrencyId, amount, "Currency conversion", "Kerria")
-            .onLeft { return it.left() }
+        // イベント発火（キャンセル可能）。変換元通貨と金額を通知する。
+        // トランザクション開始前に一度だけ発火することで、操作の途中でキャンセルされて
+        // 出金だけが確定してしまう状態を防ぐ。
+        val event = KerriaTransactionEvent(
+            KerriaTransactionEvent.TransactionType.CONVERT,
+            accountId, accountId, fromCurrencyId, amount, "Kerria",
+        )
+        Bukkit.getPluginManager().callEvent(event)
+        if (event.isCancelled) {
+            return KerriaError.InvalidAmount(amount, "Transaction cancelled by event").left()
+        }
 
-        // 変換先通貨に入金
-        economyManager.deposit(accountId, toCurrencyId, convertedAmount, "Currency conversion", "Kerria")
-            .onLeft { return it.left() }
+        // 出金・入金・ログを単一トランザクションで実行し、原子性を保証する。
+        // いずれかが失敗すると throw してロールバックするため、出金だけが確定して
+        // 資金が消失するバグ（旧実装の withdraw/deposit 二重トランザクション）を防ぐ。
+        return runCatching {
+            transaction {
+                // アカウントの存在確認
+                accountRepository.findById(accountId)
+                    ?: throw KerriaError.AccountNotFound(accountId.toString())
 
-        return convertedAmount.right()
+                // 変換元通貨からアトミックに減算（残高チェック付き）
+                val rows = accountRepository.subtractBalance(accountId, fromCurrencyId, amount)
+                if (rows == 0) {
+                    val currentBalance = accountRepository.getBalance(accountId, fromCurrencyId)
+                    throw KerriaError.InsufficientBalance(
+                        required = amount,
+                        actual = currentBalance,
+                    )
+                }
+
+                // 変換先通貨にアトミックに加算
+                accountRepository.ensureBalanceRow(accountId, toCurrencyId)
+                accountRepository.addBalance(accountId, toCurrencyId, convertedAmount)
+
+                // 取引ログを記録（失敗時は throw してロールバック）。
+                // 出金側（変換元・負値）と入金側（変換先・正値）の両方を残す。
+                logManager.logTransaction(
+                    accountId, accountId, fromCurrencyId, amount.negate(), "Currency conversion", "Kerria",
+                ).onLeft { throw it }
+                logManager.logTransaction(
+                    accountId, accountId, toCurrencyId, convertedAmount, "Currency conversion", "Kerria",
+                ).onLeft { throw it }
+
+                convertedAmount.right()
+            }
+        }.getOrElse { e ->
+            when (e) {
+                is KerriaError -> e.left()
+                else -> KerriaError.DatabaseError("Currency conversion failed: ${e.message}", e).left()
+            }
+        }
     }
 }
