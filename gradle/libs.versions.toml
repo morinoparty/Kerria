@@ -59,7 +59,7 @@ adventure-text-minimessage = { group = "net.kyori", name = "adventure-text-minim
 
 vault-api = { group = "com.github.MilkBowl", name = "vaultAPI", version = "1.7.1" }
 placeholderapi = { group = "me.clip", name = "placeholderapi", version = "2.11.6" }
-velocity-api = { group = "com.velocitypowered", name = "velocity-api", version = "3.4.0-SNAPSHOT" }
+velocity-api = { group = "com.velocitypowered", name = "velocity-api", version = "4.0.0-SNAPSHOT" }
 
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 mock-bukkit = { group = "org.mockbukkit.mockbukkit", name = "mockbukkit-v1.21", version.ref = "mockBukkit" }
