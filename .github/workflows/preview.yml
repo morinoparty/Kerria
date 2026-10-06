@@ -264,6 +264,8 @@ jobs:
           DETEKT_REPORT_URL: "${{ env.PREVIEW_BASE_URL }}/${{ env.PROJECT_NAME }}/${{ env.COMMIT_SHORT_SHA }}/detekt/detekt.html"
           DOCS_PREVIEW_URL: "${{ env.PREVIEW_BASE_URL }}/${{ env.PROJECT_NAME }}/${{ env.COMMIT_SHORT_SHA }}/docs/index.html"
           DOKKA_URL: "${{ env.PREVIEW_BASE_URL }}/${{ env.PROJECT_NAME }}/${{ env.COMMIT_SHORT_SHA }}/docs/dokka/index.html"
+          # Game test ワークフロー（fukurou）が同じ <sha>/ の下に置くビューア。テスト完了までは 404 になる
+          GAME_TEST_URL: "${{ env.PREVIEW_BASE_URL }}/${{ env.PROJECT_NAME }}/${{ env.COMMIT_SHORT_SHA }}/game-test/index.html"
           LIMIT_TIME: ${{ env.LIMIT_TIME }}
         run: |
           cat << EOF > comment.md
@@ -287,6 +289,7 @@ jobs:
           | 🧪 Allure Report | [Report]($ALLURE_REPORT_URL) |
           | 🧪 JUnit Report | [Report]($JUNIT_REPORT_URL) |
           | 🔍 Detekt Report | [Report]($DETEKT_REPORT_URL) |
+          | 🦉 In-game Tests (fukurou) | [Viewer]($GAME_TEST_URL) (available after the Game test workflow finishes) |
 
           ### 🧪 Test Summary
           | Tests | Passed | Skipped | Failed |

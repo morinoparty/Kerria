@@ -67,7 +67,7 @@ tasks {
         }
     }
     runServer {
-        minecraftVersion("1.21.11")
+        minecraftVersion("26.2")
         val plugins = runPaper.downloadPluginsSpec {
             url("https://github.com/MilkBowl/Vault/releases/download/1.7.3/Vault.jar")
         }
@@ -139,7 +139,7 @@ sourceSets.main {
             main = "$group.kerria.paper.Kerria"
             bootstrapper = "$group.kerria.paper.KerriaBootstrap"
             loader = "$group.kerria.paper.KerriaLoader"
-            apiVersion = "1.21"
+            apiVersion = "26.1"
             // PlaceholderAPI は任意依存（存在すれば連携する）
             dependencies {
                 server("PlaceholderAPI", PaperPluginYaml.Load.BEFORE, required = false)
