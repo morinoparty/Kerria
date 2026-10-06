@@ -27,7 +27,6 @@ dependencies {
     implementation(libs.kotlin.reflect)
 
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.kaml)
     implementation(libs.bundles.coroutines.bukkit)
 
     // i18n（翻訳）: Adventure の MiniMessageTranslationStore を利用する（実行時は Paper が提供）

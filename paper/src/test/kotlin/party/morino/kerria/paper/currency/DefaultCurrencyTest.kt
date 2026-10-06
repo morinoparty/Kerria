@@ -8,6 +8,8 @@ import org.koin.test.inject
 import party.morino.kerria.api.currency.CurrencyManager
 import party.morino.kerria.api.files.ConfigManager
 import party.morino.kerria.paper.KerriaTest
+import party.morino.kerria.paper.economy.VaultEconomy
+import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -23,26 +25,21 @@ class DefaultCurrencyTest : KoinTest {
     private val currencyManager: CurrencyManager by inject()
 
     @Test
-    @DisplayName("Set default currency persists and getDefaultCurrency reflects it")
+    @DisplayName("Default currency id selects currency details from the database")
     fun setDefaultCurrencyPersists() {
         val original = configManager.getConfig()
         try {
-            // 新しい通貨を作成し、それをデフォルトに設定する
-            val eur = currencyManager.createCurrency("EURD", "€", "%amount% EURD", 2, "Euros").getOrNull()!!
-            val newCurrency = original.economy.currency.copy(
-                id = eur.id,
-                name = eur.name,
-                symbol = eur.symbol,
-                plural = eur.plural,
-                format = eur.format,
-                fractionalDigits = eur.fractionalDigits,
-            )
-            val newConfig = original.copy(economy = original.economy.copy(currency = newCurrency))
+            // 新しい通貨を作成し、設定にはIDだけを書き込む
+            val eur = currencyManager.createCurrency("EURD", "€", "%amount% EURD", 3, "Euros").getOrNull()!!
+            val newConfig = original.copy(economy = original.economy.copy(defaultCurrencyId = eur.id))
+            assertTrue(configManager.updateConfig(newConfig).isRight())
 
-            val result = configManager.updateConfig(newConfig)
-            assertTrue(result.isRight())
-            // デフォルト通貨が切り替わっていることを確認
+            // 名前・複数形・桁数はDBの通貨から引かれる
             assertEquals("EURD", currencyManager.getDefaultCurrency().getOrNull()!!.name)
+            val vault = VaultEconomy()
+            assertEquals("Euros", vault.currencyNamePlural())
+            assertEquals("EURD", vault.currencyNameSingular())
+            assertEquals(3, vault.fractionalDigits())
         } finally {
             // 他テストへ影響しないよう元の設定へ戻す
             configManager.updateConfig(original)
@@ -50,17 +47,20 @@ class DefaultCurrencyTest : KoinTest {
     }
 
     @Test
-    @DisplayName("updateConfig round-trips through disk")
+    @DisplayName("updateConfig round-trips through the HOCON file and keeps comments")
     fun updateConfigRoundTrips() {
         val original = configManager.getConfig()
         try {
             // id を変更して保存し、リロードで永続化を確認する
-            val changed = original.copy(
-                economy = original.economy.copy(currency = original.economy.currency.copy(id = 999)),
-            )
+            val changed = original.copy(economy = original.economy.copy(defaultCurrencyId = 999))
             assertTrue(configManager.updateConfig(changed).isRight())
             assertTrue(configManager.reloadConfig().isRight())
-            assertEquals(999, configManager.getConfig().economy.currency.id)
+            assertEquals(999, configManager.getConfig().economy.defaultCurrencyId)
+
+            // ファイルは kebab-case の HOCON で、既定ファイルのコメントが残っている
+            val text = File(KerriaTest.plugin.dataFolder, "config.conf").readText()
+            assertTrue(text.contains("default-currency-id"), text)
+            assertTrue(text.contains("デフォルト通貨のID"), text)
         } finally {
             configManager.updateConfig(original)
         }

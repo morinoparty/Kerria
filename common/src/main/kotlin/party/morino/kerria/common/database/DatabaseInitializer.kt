@@ -8,7 +8,6 @@ import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.migration.jdbc.MigrationUtils
-import party.morino.kerria.api.files.CurrencyConfig
 import party.morino.kerria.api.files.DatabaseConfig
 import party.morino.kerria.common.database.table.AccountBalanceTable
 import party.morino.kerria.common.database.table.AccountTable
@@ -104,21 +103,21 @@ object DatabaseInitializer {
     }
 
     /**
-     * デフォルト通貨がなければ設定から作成する（通貨が1つでも存在すればスキップ）
+     * 通貨が1つも無ければ初期通貨（[DefaultCurrencySeed]）を作成する（通貨が1つでも存在すればスキップ）
      */
-    fun seedDefaultCurrency(currencyConfig: CurrencyConfig, log: (String) -> Unit) {
+    fun seedDefaultCurrency(log: (String) -> Unit) {
         transaction {
             if (CurrencyTable.selectAll().count() > 0) return@transaction
             val generatedId = CurrencyTable.insertAndGetId {
-                it[name] = currencyConfig.name
-                it[symbol] = currencyConfig.symbol
-                it[plural] = currencyConfig.plural
-                it[format] = currencyConfig.format
-                it[fractionalDigits] = currencyConfig.fractionalDigits
-                it[thousandsSeparator] = currencyConfig.thousandsSeparator
-                it[decimalSeparator] = currencyConfig.decimalSeparator
+                it[name] = DefaultCurrencySeed.NAME
+                it[symbol] = DefaultCurrencySeed.SYMBOL
+                it[plural] = DefaultCurrencySeed.PLURAL
+                it[format] = DefaultCurrencySeed.FORMAT
+                it[fractionalDigits] = DefaultCurrencySeed.FRACTIONAL_DIGITS
+                it[thousandsSeparator] = DefaultCurrencySeed.THOUSANDS_SEPARATOR
+                it[decimalSeparator] = DefaultCurrencySeed.DECIMAL_SEPARATOR
             }
-            log("Default currency '${currencyConfig.name}' created with id=${generatedId.value}.")
+            log("Default currency '${DefaultCurrencySeed.NAME}' created with id=${generatedId.value}.")
         }
     }
 }

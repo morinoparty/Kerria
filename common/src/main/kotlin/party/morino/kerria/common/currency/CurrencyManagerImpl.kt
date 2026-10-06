@@ -31,7 +31,7 @@ class CurrencyManagerImpl : CurrencyManager, KoinComponent {
     }
 
     override fun getDefaultCurrency(): Either<KerriaError, Currency> {
-        val defaultId = configManager.getConfig().economy.currency.id
+        val defaultId = configManager.getConfig().economy.defaultCurrencyId
         return getCurrency(defaultId)
     }
 
@@ -93,7 +93,7 @@ class CurrencyManagerImpl : CurrencyManager, KoinComponent {
     override fun deleteCurrency(id: Int): Either<KerriaError, Unit> = runCatching {
         transaction {
             // デフォルト通貨の削除を防止
-            val defaultId = configManager.getConfig().economy.currency.id
+            val defaultId = configManager.getConfig().economy.defaultCurrencyId
             if (id == defaultId) {
                 return@transaction KerriaError.InvalidAmount(
                     java.math.BigDecimal.ZERO,

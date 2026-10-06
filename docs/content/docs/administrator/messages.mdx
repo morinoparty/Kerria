@@ -24,12 +24,12 @@ plugins/Kerria/translation/
 
 ## 既定のロケール
 
-`config.yaml` の `defaultLocale` で、フォールバック先の言語を指定します（例: `ja`, `en`）。
+`config.conf` の `default-locale` で、フォールバック先の言語を指定します（例: `ja`, `en`）。
 プレイヤーのクライアント言語に対応する翻訳が無い場合や、コンソール宛のメッセージでこのロケールが使用されます。
 
-```yaml
+```hcl
 # 既定の言語ロケール（例: ja, en）
-defaultLocale: ja
+default-locale = "ja"
 ```
 
 ## ファイル形式
@@ -67,7 +67,7 @@ common.player-not-found=<red>プレイヤー <yellow><player></yellow> が見つ
 メッセージは次の順序で解決されます。
 
 1. プレイヤーのクライアントロケールに対応する翻訳
-2. 既定ロケール（`defaultLocale`）の翻訳
+2. 既定ロケール（`default-locale`）の翻訳
 3. 読み込み済みのいずれかのロケールの翻訳
 4. いずれにも見つからない場合は `Missing message: <key>` を表示
 

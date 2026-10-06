@@ -14,6 +14,9 @@ dependencies {
     // データベース層（Exposed + ドライバ + HikariCP）
     api(libs.bundles.database)
 
+    // 設定ファイル（HOCON）の読み書き。Paper / Velocity の両方で同じローダーを使う
+    api(libs.bundles.hocon)
+
     // DI（by inject を利用する実装のため）
     api(libs.koin.core)
 }

@@ -51,7 +51,7 @@ Kerria は現在開発中のため、バージョンアップにより破壊的�
 
 初回起動時に、次のファイルが生成されます。
 
-- `plugins/Kerria/config.yaml` — 通貨・データベース・言語などの設定
+- `plugins/Kerria/config.conf` — データベース・言語・デフォルト通貨などの設定（HOCON 形式）。通貨そのものは `/kerria currency` コマンドで管理します
 - `plugins/Kerria/translation/` — メッセージのロケール別ファイル（`ja_JP.properties` など）
 
 既定ではデータベースに SQLite が使用され、追加の設定なしで動作します。PostgreSQL を利用する場合や通貨をカスタマイズする場合は、[設定ファイル](/docs/administrator/configuration)を参照してください。

@@ -1,19 +1,18 @@
 package party.morino.kerria.api.files
 
-import com.charleskorn.kaml.YamlComment
 import kotlinx.serialization.Serializable
 
 /**
  * プラグインの設定を表現するデータクラス
  *
  * @property debug デバッグモードかどうか
+ * @property defaultLocale 既定の言語ロケール
+ * @property economy 経済機能の設定
  * @property database データベースの設定
  */
 @Serializable
 data class Config(
-    @YamlComment("デバッグモード")
     val debug: Boolean = false,
-    @YamlComment("既定の言語ロケール（例: ja, en）。プレイヤーのクライアントロケールに対応する翻訳が無い場合や、コンソール宛のメッセージで使用する")
     val defaultLocale: String = "ja",
     val economy: EconomyConfig = EconomyConfig(),
     val database: DatabaseConfig = DatabaseConfig(),
@@ -52,44 +51,25 @@ data class DatabaseConfig(
  */
 @Serializable
 data class ConnectionPoolConfig(
-    @YamlComment("最大コネクション数")
     val maximumPoolSize : Int = 10,
-    @YamlComment("最小アイドルコネクション数")
     val minimumIdle : Int = 2,
-    @YamlComment("接続タイムアウト（ミリ秒）")
     val connectionTimeout : Long = 30000,
-    @YamlComment("アイドルタイムアウト（ミリ秒）")
     val idleTimeout : Long = 600000,
-    @YamlComment("コネクションの最大生存時間（ミリ秒）")
     val maxLifetime : Long = 1800000,
 )
 
 
+/**
+ * 経済機能の設定を表現するデータクラス
+ *
+ * 通貨そのもの（名前・記号・複数形・フォーマットなど）はデータベースの通貨テーブルで管理し、
+ * 設定ファイルにはサーバーごとに変えたい値だけを持たせる。
+ *
+ * @property initialBalance 新規プレイヤーの初期残高（デフォルト通貨）
+ * @property defaultCurrencyId デフォルト通貨のID（通貨テーブルのID）
+ */
 @Serializable
 data class EconomyConfig(
-    @YamlComment("小数点以下の桁数")
-    val fractionalDigits : Int = 2,
-    @YamlComment("新規プレイヤーの初期残高（デフォルト通貨）")
     val initialBalance : Double = 0.0,
-    val currency : CurrencyConfig = CurrencyConfig()
-)
-
-@Serializable
-data class CurrencyConfig(
-    @YamlComment("通貨ID")
-    val id : Int = 1,
-    @YamlComment("通貨名")
-    val name : String = "JPY",
-    @YamlComment("通貨記号")
-    val symbol : String = "¥",
-    @YamlComment("通貨複数形")
-    val plural : String = "円",
-    @YamlComment("通貨フォーマット")
-    val format : String = "%amount% %plural%",
-    @YamlComment("小数点以下の桁数")
-    val fractionalDigits : Int = 2,
-    @YamlComment("3桁ごとの桁区切り文字（空文字なら桁区切りしない）")
-    val thousandsSeparator : String = ",",
-    @YamlComment("小数点記号")
-    val decimalSeparator : String = "."
+    val defaultCurrencyId : Int = 1,
 )

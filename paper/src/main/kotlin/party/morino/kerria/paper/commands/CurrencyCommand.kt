@@ -122,21 +122,9 @@ class CurrencyCommand : KoinComponent {
             return
         }
 
-        // デフォルト通貨は economy.currency に保持されるため、選んだ通貨の全項目を反映する。
-        // id だけでなく name/plural/symbol 等も更新するのは、VaultEconomy がこれらをVault APIへ
-        // 直接返しており、id のみだと古い通貨情報が表示され続けるため。
+        // 通貨の情報（名前・記号など）はDBにあるため、設定ファイルにはIDだけを書き込む
         val config = configManager.getConfig()
-        val newCurrencyConfig = config.economy.currency.copy(
-            id = currency.id,
-            name = currency.name,
-            symbol = currency.symbol,
-            plural = currency.plural,
-            format = currency.format,
-            fractionalDigits = currency.fractionalDigits,
-            thousandsSeparator = currency.thousandsSeparator,
-            decimalSeparator = currency.decimalSeparator,
-        )
-        val newConfig = config.copy(economy = config.economy.copy(currency = newCurrencyConfig))
+        val newConfig = config.copy(economy = config.economy.copy(defaultCurrencyId = currency.id))
 
         // 永続化して結果を通知する
         configManager.updateConfig(newConfig).fold(

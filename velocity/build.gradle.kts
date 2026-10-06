@@ -14,7 +14,6 @@ dependencies {
 
     compileOnly(libs.velocity.api)
 
-    implementation(libs.kaml)
     implementation(libs.kotlinx.serialization.json)
 }
 

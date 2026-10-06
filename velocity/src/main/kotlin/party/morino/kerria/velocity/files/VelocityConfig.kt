@@ -1,6 +1,5 @@
 package party.morino.kerria.velocity.files
 
-import com.charleskorn.kaml.YamlComment
 import kotlinx.serialization.Serializable
 import party.morino.kerria.api.files.DatabaseConfig
 
@@ -16,6 +15,5 @@ import party.morino.kerria.api.files.DatabaseConfig
 @Serializable
 data class VelocityConfig(
     val database: DatabaseConfig = DatabaseConfig(mode = "postgresql"),
-    @YamlComment("既定の通貨ID")
     val defaultCurrencyId: Int = 1,
 )

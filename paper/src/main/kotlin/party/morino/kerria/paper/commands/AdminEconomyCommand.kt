@@ -5,7 +5,6 @@ import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotations.Command
-import org.incendo.cloud.annotations.Default
 import org.incendo.cloud.annotations.Flag
 import org.incendo.cloud.annotations.Permission
 import org.koin.core.component.KoinComponent
@@ -42,7 +41,7 @@ class AdminEconomyCommand : KoinComponent {
         stack: CommandSourceStack,
         player: PlayerTarget,
         amount: Double,
-        @Default("1") currencyId: Int,
+        currencyId: Int?,
         @Flag("message") @Greedy message: String?,
     ) = execute(stack.sender, AdminBalanceOperation.SET, player, amount, currencyId, message)
 
@@ -53,7 +52,7 @@ class AdminEconomyCommand : KoinComponent {
         stack: CommandSourceStack,
         player: PlayerTarget,
         amount: Double,
-        @Default("1") currencyId: Int,
+        currencyId: Int?,
         @Flag("message") @Greedy message: String?,
     ) = execute(stack.sender, AdminBalanceOperation.GIVE, player, amount, currencyId, message)
 
@@ -64,7 +63,7 @@ class AdminEconomyCommand : KoinComponent {
         stack: CommandSourceStack,
         player: PlayerTarget,
         amount: Double,
-        @Default("1") currencyId: Int,
+        currencyId: Int?,
         @Flag("message") @Greedy message: String?,
     ) = execute(stack.sender, AdminBalanceOperation.TAKE, player, amount, currencyId, message)
 
@@ -78,7 +77,7 @@ class AdminEconomyCommand : KoinComponent {
         operation: AdminBalanceOperation,
         target: PlayerTarget,
         amount: Double,
-        currencyId: Int,
+        currencyId: Int?,
         message: String?,
     ) {
         // 取引メッセージは give のみ MiniMessage を許可し、set / take はプレーンテキストとして保存する
@@ -110,7 +109,7 @@ class AdminEconomyCommand : KoinComponent {
         }
 
         // 通貨を取得
-        val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
+        val currency = api.getCurrencyManager().getCurrencyOrDefault(currencyId).getOrNull() ?: run {
             sender.sendMessage(messages.get("common.currency-not-found"))
             return
         }
