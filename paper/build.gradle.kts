@@ -1,4 +1,5 @@
 import java.time.Duration
+import xyz.jpenilla.resourcefactory.bukkit.Permission
 import xyz.jpenilla.resourcefactory.paper.PaperPluginYaml
 
 plugins {
@@ -185,6 +186,32 @@ sourceSets.main {
             loader = "$group.kerria.paper.KerriaLoader"
             apiVersion = "26.1"
             // PlaceholderAPI は任意依存（存在すれば連携する）
+            // コマンドのパーミッション。宣言しないと既定で OP のみになるため、プレイヤー向けは全員に許可する
+            permissions {
+                mapOf(
+                    "kerria.balance" to "自分の残高を確認する",
+                    "kerria.pay" to "他のプレイヤーに送金する",
+                    "kerria.top" to "残高ランキングを表示する",
+                    "kerria.log" to "自分の取引履歴を表示する",
+                    "kerria.convert" to "通貨を変換する",
+                ).forEach { (name, text) ->
+                    register(name) {
+                        description = text
+                        default = Permission.Default.TRUE
+                    }
+                }
+                mapOf(
+                    "kerria.admin.economy" to "残高の設定・付与・徴収",
+                    "kerria.admin.currency" to "通貨と為替レートの管理",
+                    "kerria.admin.log" to "他のプレイヤーの取引履歴を表示する",
+                    "kerria.admin.reload" to "設定ファイルとメッセージファイルを再読み込みする",
+                ).forEach { (name, text) ->
+                    register(name) {
+                        description = text
+                        default = Permission.Default.OP
+                    }
+                }
+            }
             dependencies {
                 server("PlaceholderAPI", PaperPluginYaml.Load.BEFORE, required = false)
                 // Vault は任意依存（存在すれば Economy を登録する）。Vault のクラスを参照するためクラスパスを共有する
