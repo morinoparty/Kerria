@@ -287,6 +287,7 @@ jobs:
           LIMIT_TIME: ${{ env.LIMIT_TIME }}
         run: |
           cat << EOF > comment.md
+          <!-- kerria:preview -->
           ## 🚀 Preview of ${{ github.event.repository.name }}
 
           ### 📦 Preview JARs
@@ -300,14 +301,11 @@ jobs:
 
           ### 📖 Documentation & Reports
           Available for 7 days (until $LIMIT_TIME)
-          | Resource | Link |
-          |----------|------|
-          | 📖 Documentation | [Preview]($DOCS_PREVIEW_URL) |
-          | 📖 Dokka API | [Preview]($DOKKA_URL) |
-          | 🧪 Allure Report | [Report]($ALLURE_REPORT_URL) |
-          | 🧪 JUnit Report | [Report]($JUNIT_REPORT_URL) |
-          | 🔍 Detekt Report | [Report]($DETEKT_REPORT_URL) |
-          | 🦉 In-game Tests (fukurou) | [Viewer]($GAME_TEST_URL) (available after the Game test workflow finishes) |
+          | 📖 Documentation | 📖 Dokka API | 🧪 Allure Report | 🧪 JUnit Report | 🔍 Detekt Report | 🦉 In-game Tests |
+          |:---:|:---:|:---:|:---:|:---:|:---:|
+          | [Preview]($DOCS_PREVIEW_URL) | [Preview]($DOKKA_URL) | [Report]($ALLURE_REPORT_URL) | [Report]($JUNIT_REPORT_URL) | [Report]($DETEKT_REPORT_URL) | [Viewer]($GAME_TEST_URL) |
+
+          > 🦉 The in-game test viewer is available after the Game test workflow finishes.
 
           ### 🧪 Test Summary
           | Tests | Passed | Skipped | Failed |
@@ -315,7 +313,17 @@ jobs:
           | ${{ needs.build-gradle.outputs.test_total }} | ${{ needs.build-gradle.outputs.test_passed }} ✅ | ${{ needs.build-gradle.outputs.test_skipped }} ⏭️ | ${{ needs.build-gradle.outputs.test_failed }} ❌ |
           EOF
 
-      - name: Create PR comment
-        run: gh pr comment ${{ github.event.number }} --body-file comment.md
+      # 同じ PR では新しいコメントを増やさず、既存のプレビューコメント（マーカー、または旧形式の見出しで判定）を更新する
+      - name: Create or update PR comment
+        run: |
+          marker="<!-- kerria:preview -->"
+          comment_id=$(gh api --paginate "repos/${{ github.repository }}/issues/${{ github.event.number }}/comments" \
+            --jq "[.[] | select(.user.login == \"github-actions[bot]\" and ((.body | contains(\"$marker\")) or (.body | contains(\"## 🚀 Preview of\"))))] | last | .id // empty" | tail -n 1)
+          if [ -n "$comment_id" ]; then
+            gh api -X PATCH "repos/${{ github.repository }}/issues/comments/$comment_id" -F body=@comment.md > /dev/null
+          else
+            gh pr comment ${{ github.event.number }} --body-file comment.md
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
