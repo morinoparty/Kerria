@@ -1,3 +1,5 @@
+import java.time.Duration
+import xyz.jpenilla.resourcefactory.bukkit.Permission
 import xyz.jpenilla.resourcefactory.paper.PaperPluginYaml
 
 plugins {
@@ -21,6 +23,8 @@ dependencies {
     implementation(libs.arrow.fx.coroutines)
 
     implementation(libs.bundles.commands.paper)
+    // cloud-kotlin-coroutines が推移的に持ち込む kotlin-reflect は古い版になるため、stdlib と同じ版にそろえる
+    implementation(libs.kotlin.reflect)
 
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kaml)
@@ -40,7 +44,8 @@ dependencies {
     compileOnly(libs.placeholderapi)
 
     // テスト依存関係
-    testImplementation(libs.paper.api)
+    // MockBukkit が 26.3 に未対応のため、テストは MockBukkit と同じ 26.2 の API で実行する
+    testImplementation(libs.paper.api.test)
     testImplementation(libs.vault.api)
     testImplementation(libs.placeholderapi)
     testImplementation(libs.bundles.junit.jupiter)
@@ -50,11 +55,52 @@ dependencies {
     testImplementation(libs.allure.junit5)
 }
 
+// JAR に同梱する依存。これ以外の runtimeClasspath の外部依存は KerriaLoader が実行時に Paper に取得させる
+fun isBundled(
+    group: String,
+    version: String,
+): Boolean =
+    // common / api モジュール
+    group == "party.morino" ||
+        // スナップショット版は Paper が参照する Maven Central のミラーにない
+        version.endsWith("-SNAPSHOT")
+
+// runtimeClasspath のうち同梱しない外部依存（KMP は解決済みの -jvm アーティファクトになる）
+val runtimeLibraries =
+    configurations.runtimeClasspath.map { configuration ->
+        configuration.incoming.artifacts.artifacts
+            .mapNotNull { it.id.componentIdentifier as? ModuleComponentIdentifier }
+            .filterNot { isBundled(it.group, it.version) }
+            .map { "${it.group}:${it.module}:${it.version}" }
+            .distinct()
+    }
+
+// KerriaLoader が読み込むライブラリ一覧をリソースとして生成する
+val generatePaperLibraries by tasks.registering {
+    val libraries = runtimeLibraries
+    val outputDirectory = layout.buildDirectory.dir("generated/paper-libraries")
+    // 依存が変わったときだけ再生成されるようにする
+    inputs.property("libraries", libraries)
+    outputs.dir(outputDirectory)
+    doLast {
+        outputDirectory.get().file("paper-libraries.txt").asFile.writeText(libraries.get().joinToString("\n"))
+    }
+}
+
+sourceSets.main {
+    resources.srcDir(generatePaperLibraries)
+}
+
 tasks {
     build {
         dependsOn("shadowJar")
     }
-    shadowJar
+    shadowJar {
+        // Paper が実行時に取得するので同梱しない
+        dependencies {
+            exclude { !isBundled(it.moduleGroup, it.moduleVersion) }
+        }
+    }
     test {
         useJUnitPlatform()
         // Allure結果の出力先を指定
@@ -66,12 +112,65 @@ tasks {
         }
     }
     runServer {
-        minecraftVersion("1.21.11")
+        minecraftVersion("26.3")
         val plugins = runPaper.downloadPluginsSpec {
             url("https://github.com/MilkBowl/Vault/releases/download/1.7.3/Vault.jar")
         }
         downloadPlugins {
             downloadPlugins.from(plugins)
+        }
+    }
+}
+
+testing {
+    suites {
+        // ゲーム内テスト（fukurou）は Minecraft のクライアントと Xvfb が要るため、既定の test（./gradlew build が実行する）とは分ける。
+        // 独自の JvmTestSuite は check に含まれないので、build では実行されない
+        register<JvmTestSuite>("gameTest") {
+            // fukurou v3 は JUnit 6 を前提にしている
+            useJUnitJupiter(libs.versions.junit)
+            dependencies {
+                implementation(libs.fukurou)
+                // JUnit 6 が suspend のテストメソッドを呼ぶには kotlinx-coroutines-core が要る
+                implementation(libs.kotlinx.coroutines.core)
+                runtimeOnly(libs.junit.platform.launcher)
+            }
+            targets.configureEach {
+                testTask.configure {
+                    description = "Runs the in-game tests with fukurou (needs Xvfb, xdotool, xmodmap and Mesa; CI only)"
+                    // CI は build ジョブの JAR を -Pfukurou.plugin.kerria で渡す。無ければここで shadowJar を作る
+                    val prebuilt = providers.gradleProperty("fukurou.plugin.kerria")
+                    if (!prebuilt.isPresent) dependsOn(tasks.shadowJar)
+                    val pluginJar =
+                        prebuilt.orElse(tasks.shadowJar.flatMap { it.archiveFile }.map { it.asFile.absolutePath })
+                    // -Pfukurou.* をすべてシステムプロパティとして渡す（minecraftVersion, paperChannel, acceptEula, outDir …）
+                    val forwarded = providers.gradlePropertiesPrefixedBy("fukurou.")
+                    jvmArgumentProviders.add(
+                        CommandLineArgumentProvider {
+                            forwarded.get().filterKeys { it != "fukurou.plugin.kerria" }.map { (k, v) -> "-D$k=$v" } +
+                                "-Dfukurou.plugin.kerria=${pluginJar.get()}"
+                        },
+                    )
+                    // 出力先と作業ディレクトリの既定値（-Pfukurou.outDir / FUKUROU_OUT_DIR があればそちらが優先される）
+                    systemProperty("fukurou.outDir.default", layout.buildDirectory.dir("fukurou/out").get().asFile.absolutePath)
+                    systemProperty("fukurou.workDir.default", layout.buildDirectory.dir("fukurou/work").get().asFile.absolutePath)
+                    // サーバーのリースとメモリ予算は 1 つの JVM を前提にしている
+                    maxParallelForks = 1
+                    forkEvery = 0
+                    maxHeapSize = "512m"
+                    // 実機テストは入力が同じでも結果が変わり、バージョンなどは環境変数で渡るので、
+                    // UP-TO-DATE にもビルドキャッシュ（gradle.properties で有効）からの復元にもしない
+                    outputs.upToDateWhen { false }
+                    outputs.cacheIf { false }
+                    // CI の timeout-minutes（30）より短くし、強制終了の前に JUnit の XML と result.json を書き終える
+                    timeout.set(Duration.ofMinutes(25))
+                    testLogging {
+                        showStandardStreams = true
+                        events("passed", "skipped", "failed")
+                        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+                    }
+                }
+            }
         }
     }
 }
@@ -85,10 +184,39 @@ sourceSets.main {
             main = "$group.kerria.paper.Kerria"
             bootstrapper = "$group.kerria.paper.KerriaBootstrap"
             loader = "$group.kerria.paper.KerriaLoader"
-            apiVersion = "1.21"
+            apiVersion = "26.1"
             // PlaceholderAPI は任意依存（存在すれば連携する）
+            // コマンドのパーミッション。宣言しないと既定で OP のみになるため、プレイヤー向けは全員に許可する
+            permissions {
+                mapOf(
+                    "kerria.balance" to "自分の残高を確認する",
+                    "kerria.pay" to "他のプレイヤーに送金する",
+                    "kerria.log" to "自分の取引履歴を表示する",
+                    "kerria.convert" to "通貨を変換する",
+                ).forEach { (name, text) ->
+                    register(name) {
+                        description = text
+                        default = Permission.Default.TRUE
+                    }
+                }
+                mapOf(
+                    // ランキングは他のプレイヤーの残高が見えるため、OP のみに許可する
+                    "kerria.top" to "残高ランキング（他のプレイヤーの残高）を表示する",
+                    "kerria.admin.economy" to "残高の設定・付与・徴収",
+                    "kerria.admin.currency" to "通貨と為替レートの管理",
+                    "kerria.admin.log" to "他のプレイヤーの取引履歴を表示する",
+                    "kerria.admin.reload" to "設定ファイルとメッセージファイルを再読み込みする",
+                ).forEach { (name, text) ->
+                    register(name) {
+                        description = text
+                        default = Permission.Default.OP
+                    }
+                }
+            }
             dependencies {
                 server("PlaceholderAPI", PaperPluginYaml.Load.BEFORE, required = false)
+                // Vault は任意依存（存在すれば Economy を登録する）。Vault のクラスを参照するためクラスパスを共有する
+                server("Vault", PaperPluginYaml.Load.BEFORE, required = false, joinClasspath = true)
             }
         }
     }

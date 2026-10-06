@@ -31,6 +31,9 @@ object DatabaseInitializer {
         AccountTable, CurrencyTable, AccountBalanceTable, TransactionLogTable, ExchangeRateTable, BankMemberTable,
     )
 
+    // SQLite の接続オプション（同時書き込み対策）
+    private const val SQLITE_OPTIONS = "transaction_mode=IMMEDIATE&busy_timeout=10000&journal_mode=WAL"
+
     /**
      * 接続結果
      *
@@ -51,8 +54,13 @@ object DatabaseInitializer {
     fun connect(config: DatabaseConfig, dataDir: File, log: (String) -> Unit): ConnectResult {
         return when (config.mode) {
             "sqlite" -> {
+                // コマンドは非同期に並行実行されるため、同時書き込みで SQLITE_BUSY にならないようにする
+                // - transaction_mode=IMMEDIATE: 書き込みロックをトランザクション開始時に取り、読み取り→書き込みの昇格による競合を防ぐ
+                // - busy_timeout: ロック中は即座に失敗せず、解放まで待つ
+                // - journal_mode=WAL: 書き込み中も読み取りをブロックしない
+                val path = dataDir.resolve("${config.database}.db").absolutePath
                 Database.connect(
-                    "jdbc:sqlite:${dataDir.resolve("${config.database}.db").absolutePath}",
+                    "jdbc:sqlite:$path?$SQLITE_OPTIONS",
                     "org.sqlite.JDBC",
                 )
                 log("SQLite database connected!")

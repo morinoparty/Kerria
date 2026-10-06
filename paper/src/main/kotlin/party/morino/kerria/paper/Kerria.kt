@@ -4,6 +4,14 @@ import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.plugin.ServicePriority
 import io.papermc.paper.command.brigadier.CommandSourceStack
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes
+import io.leangen.geantyref.TypeToken
+import org.incendo.cloud.execution.ExecutionCoordinator
+import org.incendo.cloud.paper.PaperCommandManager
+import org.incendo.cloud.setting.ManagerSetting
+import party.morino.kerria.paper.listener.AccountCreateListener
+import party.morino.kerria.paper.commands.target.PlayerTarget
+import party.morino.kerria.paper.commands.target.PlayerTargetParser
 import org.incendo.cloud.annotations.AnnotationParser
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.GlobalContext.getOrNull
@@ -83,13 +91,11 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
             ServicePriority.Normal,
         )
 
-        // Vault Economy サービスの登録
-        server.servicesManager.register<Economy>(
-            Economy::class.java,
-            VaultEconomy(),
-            this,
-            ServicePriority.Highest,
-        )
+        // Vault Economy サービスの登録（Vault が存在する場合のみ）
+        registerVaultEconomy()
+
+        // 参加時のアカウント作成リスナーの登録
+        server.pluginManager.registerEvents(AccountCreateListener(), this)
 
         // PlaceholderAPI 連携の登録（存在する場合のみ）
         registerPlaceholders()
@@ -150,6 +156,24 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
     }
 
     /**
+     * Vault が存在する場合に Kerria の Economy を Vault のサービスとして登録する
+     *
+     * Vault は任意依存のため、未導入の環境では Vault のクラスを読み込まないようガードする。
+     */
+    private fun registerVaultEconomy() {
+        if (server.pluginManager.getPlugin("Vault") == null) {
+            logger.info("Vault is not installed. Skipping Vault economy registration.")
+            return
+        }
+        server.servicesManager.register<Economy>(
+            Economy::class.java,
+            VaultEconomy(),
+            this,
+            ServicePriority.Highest,
+        )
+    }
+
+    /**
      * PlaceholderAPI が存在する場合に Kerria の Expansion を登録する
      *
      * PlaceholderAPI は任意依存（softdepend）のため、未導入でもプラグインは正常に動作する。
@@ -177,14 +201,52 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
     override fun getExchangeRateManager(): ExchangeRateManager = exchangeRateManager
 
     /**
+     * [PlayerTarget] のパーサーを Cloud と Brigadier に登録する
+     *
+     * Brigadier 上では Paper のプレイヤーセレクタ引数として扱うことで、`@a` などの入力が
+     * Brigadier の解析で拒否されず、クライアントでもセレクタの補完が表示されるようにする。
+     * 実際の値の解析とプレイヤーの解決は Cloud 側（[PlayerTargetParser]）で行う。
+     */
+    @Suppress("UnstableApiUsage")
+    private fun registerPlayerTargetParser(commandManager: PaperCommandManager<CommandSourceStack>) {
+        commandManager.parserRegistry().registerParserSupplier(TypeToken.get(PlayerTarget::class.java)) {
+            PlayerTargetParser()
+        }
+        if (commandManager.hasBrigadierManager()) {
+            commandManager.brigadierManager().registerMapping(
+                object : TypeToken<PlayerTargetParser<CommandSourceStack>>() {},
+            ) { builder -> builder.toConstant(ArgumentTypes.players()).nativeSuggestions() }
+        }
+    }
+
+    /**
+     * Cloud のコマンドマネージャーを作成する
+     */
+    @Suppress("UnstableApiUsage")
+    private fun createCommandManager(): PaperCommandManager<CommandSourceStack> =
+        PaperCommandManager
+            .builder()
+            .executionCoordinator(ExecutionCoordinator.asyncCoordinator())
+            .buildOnEnable(this)
+            .also { manager ->
+                // 省略可能な引数（currencyId）を省略したままフラグ（--message）を指定できるようにする
+                manager.settings().set(ManagerSetting.LIBERAL_FLAG_PARSING, true)
+            }
+
+    /**
      * Cloud Annotations を使ってコマンドを登録する
      */
     private fun registerCommands() {
-        val commandManager = KerriaBootstrap.commandManager
-        if (commandManager == null) {
-            logger.warning("CommandManager is not initialized. Skipping command registration.")
+        // テスト環境(MockBukkit)では Bootstrap が実行されず、コマンドマネージャーを作成できないため登録を省略する
+        if (!KerriaBootstrap.bootstrapped) {
+            logger.warning("Plugin was not bootstrapped. Skipping command registration.")
             return
         }
+        // Bootstrap で作成したマネージャーは onEnable の時点で登録を受け付けなくなるため、onEnable で作成する
+        val commandManager = createCommandManager()
+
+        // 対象プレイヤー（名前またはセレクタ）のパーサーを登録する
+        registerPlayerTargetParser(commandManager)
 
         @Suppress("UnstableApiUsage")
         val annotationParser = AnnotationParser(

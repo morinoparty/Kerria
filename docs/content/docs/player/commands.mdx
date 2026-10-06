@@ -3,14 +3,14 @@ title: コマンド
 description: プレイヤー向けコマンドの一覧
 ---
 
-すべてのコマンドは `/kerria` をルートとして実行します。
+すべてのコマンドは `/kerria` をルートとして実行します（残高確認は `/balance`・`/bal`、送金は `/pay` でも実行できます）。
 `<param>` は必須パラメータ、`[param]` はオプションパラメータを示します。
 
 ## 残高確認
 
 <CommandLine command={{
-  command: "/kerria balance [currencyId]",
-  aliases: [],
+  command: "/balance [currencyId]",
+  aliases: ["/bal [currencyId]", "/kerria balance [currencyId]"],
   status: "stable"
 }} />
 
@@ -22,13 +22,20 @@ description: プレイヤー向けコマンドの一覧
 ## 送金
 
 <CommandLine command={{
-  command: "/kerria pay <player> <amount> [currencyId]",
-  aliases: [],
+  command: "/pay <player> <amount> [currencyId] [--message <message>]",
+  aliases: ["/kerria pay <player> <amount> [currencyId] [--message <message>]"],
   status: "stable"
 }} />
 
 指定したプレイヤーに送金します。
 自分自身への送金はできません。残高が不足している場合はエラーになります。
+
+`--message` を指定すると、送金にメッセージ（メモ）を添えられます。メッセージは送金者と受取人に表示され、取引履歴にも記録されます。
+メッセージには空白を含められ、最大 512 文字まで指定できます。MiniMessage のタグは解釈されず、入力した文字列がそのまま表示されます。
+
+```
+/pay _NIKOMARU 100 --message ガラス代
+```
 
 - **パーミッション:** `kerria.pay`
 
@@ -43,7 +50,7 @@ description: プレイヤー向けコマンドの一覧
 残高ランキングを表示します。
 通貨やページ番号を指定してフィルタリングできます。1ページあたり10件表示され、次ページへのクリック可能なリンクが表示されます。
 
-- **パーミッション:** `kerria.top`
+- **パーミッション:** `kerria.top`（他のプレイヤーの残高が見えるため、デフォルトでは OP のみ）
 
 ## 取引履歴
 
@@ -54,7 +61,7 @@ description: プレイヤー向けコマンドの一覧
 }} />
 
 自分の取引履歴をページ送りで表示します。
-各エントリには日時・金額・取引を実行したプラグイン名が含まれます。
+各エントリには日時・金額・取引を実行したプラグイン名・取引メッセージが含まれます。
 
 - **パーミッション:** `kerria.log`
 
