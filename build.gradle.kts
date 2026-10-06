@@ -37,7 +37,7 @@ allprojects {
         maven("https://plugins.gradle.org/m2/")
         maven("https://repo.codemc.io/repository/maven-public/")
         // PlaceholderAPI の配布リポジトリ
-        maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
+        maven("https://repo.extendedclip.com/releases/")
     }
 
     dependencies {

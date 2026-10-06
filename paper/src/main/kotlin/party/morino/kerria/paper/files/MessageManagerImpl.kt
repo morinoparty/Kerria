@@ -5,6 +5,8 @@ import arrow.core.left
 import arrow.core.right
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
+import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.translation.Argument
 import net.kyori.adventure.text.minimessage.translation.MiniMessageTranslationStore
@@ -62,6 +64,21 @@ class MessageManagerImpl(private val plugin: JavaPlugin) : MessageManager, KoinC
         return Component.translatable(key).arguments(args)
     }
 
+    override fun get(
+        key: String,
+        components: Map<String, ComponentLike>,
+        vararg placeholders: Pair<String, String>,
+    ): Component {
+        // 文字列プレースホルダのみで組み立てた結果を土台にする（欠落キーの扱いも共通化する）
+        val base = get(key, *placeholders)
+        if (base !is TranslatableComponent) {
+            return base
+        }
+        // コンポーネント引数は装飾を保ったまま埋め込む
+        val componentArgs = components.map { (name, value) -> Argument.component(name, value) }
+        return base.arguments(base.arguments() + componentArgs)
+    }
+
     override fun reloadMessages(): Either<KerriaError, Unit> = load()
 
     /**
@@ -96,6 +113,9 @@ class MessageManagerImpl(private val plugin: JavaPlugin) : MessageManager, KoinC
 
     /**
      * 指定ロケールの properties を読み込む（無ければバンドル済みリソースから書き出す）
+     *
+     * バンドル済みの値を土台にディスク上の値で上書きする。これにより、プラグイン更新で
+     * 追加されたキーは、既存のファイルを持つサーバーでもバンドルの既定値で表示される。
      */
     private fun loadProperties(fileName: String): Properties {
         val file = File(translationDir, "$fileName.properties")
@@ -105,10 +125,17 @@ class MessageManagerImpl(private val plugin: JavaPlugin) : MessageManager, KoinC
                 file.outputStream().use { output -> input.copyTo(output) }
             }
         }
-        // ファイルから UTF-8 で読み込む
-        return Properties().apply {
-            file.inputStream().use { input -> load(input.reader(Charsets.UTF_8)) }
+        // バンドル済みの既定値を先に読み込む
+        val merged = Properties().apply {
+            javaClass.getResourceAsStream("/translation/$fileName.properties")?.use { input ->
+                load(input.reader(Charsets.UTF_8))
+            }
         }
+        // ディスク上の値（管理者の編集内容）で上書きする
+        if (file.exists()) {
+            file.inputStream().use { input -> merged.load(input.reader(Charsets.UTF_8)) }
+        }
+        return merged
     }
 
     /**

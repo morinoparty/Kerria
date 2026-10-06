@@ -1,0 +1,57 @@
+---
+title: ゲーム内テスト
+description: fukurou を使った実サーバー・実クライアントでのテスト
+---
+
+Kerria は [fukurou](https://github.com/morinoparty/fukurou) を使い、実際の Paper サーバーと Minecraft クライアントでコマンドの動作を確認するゲーム内テストを備えています。
+MockBukkit を使う通常のユニットテストでは確認できない、Brigadier によるコマンド解析（セレクタやフラグの扱いなど）を検証します。
+
+ゲーム内テストは `./gradlew build` では実行されず、専用の `gameTest` タスクで実行します。
+
+## テストの構成
+
+テストは `paper/src/gameTest/kotlin/` に配置します。
+
+| ファイル | 内容 |
+|---------|------|
+| `KerriaServer.kt` | Kerria と Vault を導入したサーバーの定義。プレイヤーは OP の `Alice` と一般プレイヤーの `Bob` |
+| `PayCommandTest.kt` | `/pay` と `/kerria pay` の引数・`--message` の解析 |
+| `AdminGiveMessageTest.kt` | `/kerria give @a ... --message` によるセレクタと MiniMessage の解析 |
+
+各テストの前に、2 人の残高は `KerriaServer.INITIAL_BALANCE` に設定されます。
+
+## テストの追加
+
+新しいテストクラスに `@ExtendWith(KerriaServer::class)` を付け、`suspend` のテストメソッドを作成します。
+メソッド名がテスト ID になり、`@DisplayName` には英語の短い説明を記載します。
+チャットを検証する場合は、操作の前に `mark()` で位置を記録し、それ以降のチャットだけを対象にしてください。
+
+## ローカルでの実行
+
+Linux（x86_64）で `xvfb`・`xdotool`・`x11-xserver-utils` と OpenGL/OpenAL のライブラリが必要です。
+
+```bash
+./gradlew :paper:gameTest -Pfukurou.acceptEula=true -Pfukurou.minecraftVersion=26.2
+```
+
+主なオプションは以下の通りです。
+
+| オプション | 説明 |
+|-----------|------|
+| `-Pfukurou.missingHost=skip` | 必要なパッケージが無い場合、プレイヤーを使うテストをスキップする |
+| `-Pfukurou.keepWork=true` | サーバーの作業ディレクトリを残す |
+| `-Pfukurou.plugin.kerria=<jar>` | ビルド済みの jar を使う（省略時は `shadowJar` を作成する） |
+
+結果は `paper/build/fukurou/out/` に出力されます。
+
+## CI
+
+プルリクエストでは「Game test」ワークフローが実行され、Minecraft 26.1 以降の各バージョン（26.x 系）でテストします。
+Paper のビルドは alpha を含む最新のビルドを対象とします。
+結果のビューアは `<PREVIEW_BASE_URL>/Kerria/<commit>/game-test/index.html` に公開され、プルリクエストにリンクがコメントされます。
+手動実行（workflow_dispatch）では、対象バージョン・テスト ID・タグ・Paper のチャンネルを指定できます。
+
+:::info[fukurou のバージョン]
+fukurou v3 はまだタグが付いていないため、ライブラリ（`gradle/libs.versions.toml`）とアクション（`.github/workflows/game_test.yml`）をコミット `d87616a` に固定しています。
+v3 のリリース後は、両方をタグに更新してください。
+:::

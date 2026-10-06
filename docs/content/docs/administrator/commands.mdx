@@ -14,10 +14,22 @@ description: サーバー管理者向けコマンドの一覧
 `<player>` にはオフラインプレイヤーも指定できます。Kerriaのアカウントを持つプレイヤーであれば、サーバーのプロファイルキャッシュに存在しなくても名前で解決されます（大文字小文字は区別しません）。
 :::
 
+:::info[セレクタの指定]
+`<player>` には `@a` や `@a[distance=..10]` などのセレクタも指定できます。セレクタに該当するオンラインプレイヤーのうち、Kerriaのアカウントを持つプレイヤー全員が対象になります。
+複数のプレイヤーが対象の場合は、個別の結果の代わりに成功件数がまとめて表示されます。
+:::
+
+:::info[取引メッセージ]
+`--message` を指定すると、取引ログに記録するメッセージを指定できます。省略時は `Admin give by <実行者>` のような既定のメッセージが記録されます。
+`/kerria give` のメッセージは [MiniMessage](https://docs.advntr.dev/minimessage/format.html) 形式に対応しており、受取人がオンラインの場合に受取通知とともに表示されます。
+`/kerria set` と `/kerria take` のメッセージはプレーンテキストとして扱われ、MiniMessage のタグは解釈されません。
+取引履歴（`/kerria log`）では、色や装飾などのタグのみが解釈されます。最大 512 文字まで指定できます。
+:::
+
 ### 残高設定
 
 <CommandLine command={{
-  command: "/kerria set <player> <amount> [currencyId]",
+  command: "/kerria set <player> <amount> [currencyId] [--message <message>]",
   aliases: [],
   status: "stable"
 }} />
@@ -29,19 +41,24 @@ description: サーバー管理者向けコマンドの一覧
 ### 残高付与
 
 <CommandLine command={{
-  command: "/kerria give <player> <amount> [currencyId]",
+  command: "/kerria give <player> <amount> [currencyId] [--message <message>]",
   aliases: [],
   status: "stable"
 }} />
 
 指定したプレイヤーに金額を付与します。
+受取人がオンラインの場合は、受け取った金額と `--message` のメッセージが通知されます。
+
+```
+/kerria give @a 100 --message <gold>イベント参加報酬
+```
 
 - **パーミッション:** `kerria.admin.economy`
 
 ### 残高徴収
 
 <CommandLine command={{
-  command: "/kerria take <player> <amount> [currencyId]",
+  command: "/kerria take <player> <amount> [currencyId] [--message <message>]",
   aliases: [],
   status: "stable"
 }} />

@@ -13,15 +13,18 @@ import party.morino.kerria.api.files.MessageManager
 /**
  * 残高確認コマンド
  *
+ * /balance [currencyId]
+ * /bal [currencyId]
  * /kerria balance [currencyId]
  */
-@Command("kerria")
 class BalanceCommand : KoinComponent {
 
     private val api: KerriaAPI by inject()
     private val messages: MessageManager by inject()
 
     @Command("balance [currencyId]")
+    @Command("bal [currencyId]")
+    @Command("kerria balance [currencyId]")
     @Permission("kerria.balance")
     @Suppress("UnstableApiUsage")
     fun balance(stack: CommandSourceStack, @Default("1") currencyId: Int) {
