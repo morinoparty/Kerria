@@ -204,7 +204,7 @@ sourceSets.main {
                     "kerria.top" to "残高ランキング（他のプレイヤーの残高）を表示する",
                     "kerria.admin.economy" to "残高の設定・付与・徴収",
                     "kerria.admin.currency" to "通貨と為替レートの管理",
-                    "kerria.admin.log" to "他のプレイヤーの取引履歴を表示する",
+                    "kerria.admin.log" to "他のプレイヤーの取引履歴の表示・古い取引ログの削除",
                     "kerria.admin.reload" to "設定ファイルとメッセージファイルを再読み込みする",
                 ).forEach { (name, text) ->
                     register(name) {

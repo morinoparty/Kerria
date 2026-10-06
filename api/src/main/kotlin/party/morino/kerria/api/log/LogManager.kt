@@ -48,4 +48,22 @@ interface LogManager {
         limit: Int = 10,
         offset: Int = 0,
     ): Either<KerriaError, List<TransactionLog>>
+
+    /**
+     * 指定日時より前の取引ログの件数を取得します
+     *
+     * @param cutoff 基準日時（この日時より前のログが対象）
+     * @return 対象の件数、もしくはエラー
+     */
+    fun countLogsOlderThan(cutoff: LocalDateTime): Either<KerriaError, Long>
+
+    /**
+     * 指定日時より前の取引ログを削除します
+     *
+     * データベースの肥大化を防ぐため、古い取引ログを整理する用途を想定しています。
+     *
+     * @param cutoff 基準日時（この日時より前のログを削除）
+     * @return 削除した件数、もしくはエラー
+     */
+    fun deleteLogsOlderThan(cutoff: LocalDateTime): Either<KerriaError, Int>
 }

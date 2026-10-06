@@ -6,6 +6,7 @@ import net.kyori.adventure.text.event.ClickEvent
 import org.bukkit.entity.Player
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Default
+import org.incendo.cloud.annotations.Flag
 import org.incendo.cloud.annotations.Permission
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -13,13 +14,15 @@ import party.morino.kerria.api.KerriaAPI
 import party.morino.kerria.api.files.MessageManager
 import party.morino.kerria.paper.commands.target.TargetAccountResolver
 import party.morino.kerria.paper.message.TransactionMessageFormatter
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 /**
  * 取引履歴コマンド
  *
  * /kerria log [page]         - 自分の取引履歴
- * /kerria log <player> [page] - 他人の取引履歴（管理者権限が必要）
+ * /kerria log player <player> [page] - 他人の取引履歴（管理者権限が必要）
+ * /kerria log clear <days> [--confirm] - 指定日数より前の取引ログを削除（管理者権限が必要）
  */
 @Command("kerria")
 class LogCommand : KoinComponent {
@@ -65,6 +68,56 @@ class LogCommand : KoinComponent {
         }
 
         showLogs(sender, account.name ?: player, account.accountId, page)
+    }
+
+    @Command("log clear <days>")
+    @Permission("kerria.admin.log")
+    @Suppress("UnstableApiUsage")
+    fun clear(
+        stack: CommandSourceStack,
+        days: Int,
+        @Flag("confirm") confirm: Boolean,
+    ) {
+        val sender = stack.sender
+
+        // 日数は 1 以上のみ受け付ける（0 以下だとすべてのログが対象になりうるため）
+        if (days < 1) {
+            sender.sendMessage(messages.get("log.clear.invalid-days"))
+            return
+        }
+        // 指定日数より前（基準日時より古い）のログが削除対象
+        val cutoff = LocalDateTime.now().minusDays(days.toLong())
+        val logManager = api.getLogManager()
+
+        // 確認前は対象件数を表示し、クリックで確認付きのコマンドを実行できるようにする
+        if (!confirm) {
+            val count = logManager.countLogsOlderThan(cutoff).getOrNull() ?: run {
+                sender.sendMessage(messages.get("log.clear.failed", "error" to "count failed"))
+                return
+            }
+            if (count == 0L) {
+                sender.sendMessage(messages.get("log.clear.nothing", "days" to days.toString()))
+                return
+            }
+            // クリックコマンドはコード側で組み立てる（テンプレート内のタグ引数は解決されないため）
+            sender.sendMessage(
+                messages.get("log.clear.confirm", "count" to count.toString(), "days" to days.toString())
+                    .clickEvent(ClickEvent.runCommand("/kerria log clear $days --confirm")),
+            )
+            return
+        }
+
+        // 確認済みのため削除を実行する
+        logManager.deleteLogsOlderThan(cutoff).fold(
+            ifLeft = { error ->
+                sender.sendMessage(messages.get("log.clear.failed", "error" to (error.message ?: "")))
+            },
+            ifRight = { deleted ->
+                sender.sendMessage(
+                    messages.get("log.clear.success", "count" to deleted.toString(), "days" to days.toString()),
+                )
+            },
+        )
     }
 
     /**

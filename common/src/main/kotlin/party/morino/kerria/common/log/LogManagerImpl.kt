@@ -58,4 +58,20 @@ class LogManagerImpl : LogManager, KoinComponent {
     }.getOrElse { e ->
         KerriaError.DatabaseError("Failed to get transaction history: ${e.message}", e).left()
     }
+
+    override fun countLogsOlderThan(cutoff: LocalDateTime): Either<KerriaError, Long> = runCatching {
+        transaction {
+            transactionLogRepository.countOlderThan(cutoff).right()
+        }
+    }.getOrElse { e ->
+        KerriaError.DatabaseError("Failed to count transaction logs: ${e.message}", e).left()
+    }
+
+    override fun deleteLogsOlderThan(cutoff: LocalDateTime): Either<KerriaError, Int> = runCatching {
+        transaction {
+            transactionLogRepository.deleteOlderThan(cutoff).right()
+        }
+    }.getOrElse { e ->
+        KerriaError.DatabaseError("Failed to delete transaction logs: ${e.message}", e).left()
+    }
 }
