@@ -54,6 +54,7 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
     private lateinit var economyManager: EconomyManager
     private lateinit var logManager: LogManager
     private lateinit var bankManager: BankManager
+    private lateinit var exchangeRateManager: ExchangeRateManager
 
     override suspend fun onEnableAsync() {
         // DI設定
@@ -65,6 +66,7 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
         economyManager = GlobalContext.get().get()
         logManager = GlobalContext.get().get()
         bankManager = GlobalContext.get().get()
+        exchangeRateManager = GlobalContext.get().get()
 
         // データベースの初期化
         val databaseManager: DatabaseManager = GlobalContext.get().get()
@@ -172,6 +174,7 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
     override fun getEconomyManager(): EconomyManager = economyManager
     override fun getLogManager(): LogManager = logManager
     override fun getBankManager(): BankManager = bankManager
+    override fun getExchangeRateManager(): ExchangeRateManager = exchangeRateManager
 
     /**
      * Cloud Annotations を使ってコマンドを登録する

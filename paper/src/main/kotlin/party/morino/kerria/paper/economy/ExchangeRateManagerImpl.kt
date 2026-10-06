@@ -65,6 +65,20 @@ class ExchangeRateManagerImpl : ExchangeRateManager, KoinComponent {
         }
     }
 
+    override fun deleteRate(fromCurrencyId: Int, toCurrencyId: Int): Either<KerriaError, Unit> = runCatching {
+        transaction {
+            // 削除件数が 0 の場合は、存在しないレートとして getRate と同じエラーを返す
+            val deleted = exchangeRateRepository.deleteRate(fromCurrencyId, toCurrencyId)
+            if (deleted > 0) {
+                Unit.right()
+            } else {
+                KerriaError.CurrencyNotFound("Exchange rate not found: $fromCurrencyId -> $toCurrencyId").left()
+            }
+        }
+    }.getOrElse { e ->
+        KerriaError.DatabaseError("Failed to delete exchange rate: ${e.message}", e).left()
+    }
+
     override fun getAllRates(): Either<KerriaError, List<ExchangeRate>> = runCatching {
         transaction {
             // リポジトリの Triple 表現を API のデータクラスへ変換する

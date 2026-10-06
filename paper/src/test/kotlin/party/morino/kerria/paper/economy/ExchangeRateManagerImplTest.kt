@@ -76,6 +76,24 @@ class ExchangeRateManagerImplTest : KoinTest {
     }
 
     @Test
+    @DisplayName("Delete removes a configured rate")
+    fun deleteRateRemovesRate() {
+        val usdId = createSecondCurrency()
+        exchangeRateManager.setRate(1, usdId, BigDecimal("0.0067"))
+
+        assertTrue(exchangeRateManager.deleteRate(1, usdId).isRight())
+        // 削除後は取得できない
+        assertTrue(exchangeRateManager.getRate(1, usdId).isLeft())
+    }
+
+    @Test
+    @DisplayName("Delete for nonexistent pair returns not found")
+    fun deleteRateNonexistentPairReturnsNotFound() {
+        val result = exchangeRateManager.deleteRate(1, 9999)
+        assertTrue(result.leftOrNull() is KerriaError.CurrencyNotFound)
+    }
+
+    @Test
     @DisplayName("Get all rates returns configured pairs")
     fun getAllRatesReturnsConfiguredPairs() {
         val usdId = createSecondCurrency()
