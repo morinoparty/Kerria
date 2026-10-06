@@ -196,14 +196,16 @@ class AdminEconomyCommand : KoinComponent {
      */
     private fun notifyReceiver(account: Account, formattedAmount: String, customMessage: String?) {
         val receiver = account.playerUniqueId?.let { Bukkit.getPlayer(it) } ?: return
-        receiver.sendMessage(messages.get("admin.give.received", "amount" to formattedAmount))
-        customMessage ?: return
-        // 管理者が指定したメッセージのため、MiniMessage の全タグを解釈して表示する
-        receiver.sendMessage(
+        // メッセージがあれば同じ行に添える（管理者が指定したため、MiniMessage の全タグを解釈する）
+        val notice = if (customMessage == null) {
+            messages.get("admin.give.received", "amount" to formattedAmount)
+        } else {
             messages.get(
-                "transaction.message",
+                "admin.give.received-with-message",
                 mapOf("message" to TransactionMessageFormatter.render(customMessage)),
-            ),
-        )
+                "amount" to formattedAmount,
+            )
+        }
+        receiver.sendMessage(notice)
     }
 }

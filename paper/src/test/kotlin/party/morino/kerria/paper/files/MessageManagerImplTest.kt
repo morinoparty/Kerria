@@ -86,10 +86,13 @@ class MessageManagerImplTest : KoinTest {
     @DisplayName("Component placeholders keep their formatting")
     fun componentPlaceholdersAreEmbedded() {
         val component = messageManager.get(
-            "transaction.message",
+            "pay.received-with-message",
             mapOf("message" to Component.text("ガラス代")),
+            "player" to "Steve",
+            "amount" to "100 円",
         )
-        assertTrue(render(component, Locale.JAPAN).contains("ガラス代"))
+        // 受取通知とメッセージが1行にまとまる
+        assertEquals("Steveから100 円 送られてきました。 (メッセージ: ガラス代)", render(component, Locale.JAPAN))
     }
 
     @Test
