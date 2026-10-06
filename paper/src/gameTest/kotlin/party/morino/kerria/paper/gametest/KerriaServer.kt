@@ -27,10 +27,10 @@ class KerriaServer : GameServerExtension() {
      * 起動するサーバーの種類。
      *
      * CI は FUKUROU_MINECRAFT_VERSION / FUKUROU_PAPER_CHANNEL（または -Pfukurou.*）を渡す。
-     * 省略時は Kerria の paper-api と同じ 1.21.11 を、alpha ビルドまで含めて使う。
+     * 省略時は Kerria の paper-api と同じ 1.21.11 を、beta ビルドまで含めて使う。
      */
     override fun type(config: FukurouConfig): ServerType =
-        Paper.fromProperties(config, defaultVersion = DEFAULT_VERSION, defaultChannel = PaperChannel.Alpha)
+        Paper.fromProperties(config, defaultVersion = DEFAULT_VERSION, defaultChannel = PaperChannel.Beta)
 
     override fun ServerSpec.configure() {
         // result の id は paper-<version>-kerria になる

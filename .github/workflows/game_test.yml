@@ -12,7 +12,7 @@ on:
         default: ""
       paper-channel:
         description: "Least stable Paper build channel to test: stable, beta or alpha"
-        default: alpha
+        default: beta
 
 permissions:
   contents: read
@@ -33,10 +33,10 @@ jobs:
       - id: versions
         uses: morinoparty/fukurou/versions@d87616a2521ec540af8e8a2d8f3358c48b340353
         with:
-          # Kerria がコンパイルしている paper-api（1.21.11）以降を確認する
+          # Kerria がコンパイルしている paper-api（1.21.11）以降、26.x も含めて確認する
           minecraft-version: ${{ inputs.minecraft-versions || '1.21.11-' }}
-          # Paper がまだ alpha のバージョンも含めて確認する（test ジョブと同じ値にする）
-          paper-channel: ${{ inputs.paper-channel || 'alpha' }}
+          # 26.x の beta ビルドまで含めて確認する（alpha のみのバージョンは除く。test ジョブと同じ値にする）
+          paper-channel: ${{ inputs.paper-channel || 'beta' }}
 
   # テスト対象のプラグインを 1 回だけビルドし、各バージョンのジョブで使い回す
   build:
@@ -124,7 +124,7 @@ jobs:
         with:
           accept-eula: "true" # Minecraft EULA に同意する: https://aka.ms/MinecraftEULA
           minecraft-version: ${{ matrix.minecraft-version }}
-          paper-channel: ${{ inputs.paper-channel || 'alpha' }}
+          paper-channel: ${{ inputs.paper-channel || 'beta' }}
           gradle-task: :paper:gameTest
           gradle-args: ${{ steps.args.outputs.gradle-args }}
           # Kerria の toolchain（gradle/libs.versions.toml の java）と同じ
