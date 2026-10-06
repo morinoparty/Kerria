@@ -15,7 +15,7 @@ import kotlin.test.assertTrue
 class HoconConfigLoaderTest {
 
     // テスト用クラスパスに含まれる Paper の既定ファイルを使う
-    private val loader = HoconConfigLoader(javaClass.classLoader, "config.conf")
+    private val loader = HoconConfigLoader(javaClass.classLoader, "kerria/config.conf")
 
     @Test
     @DisplayName("Missing file is created from the commented default resource")

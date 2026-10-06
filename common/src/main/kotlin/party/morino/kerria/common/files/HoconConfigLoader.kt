@@ -18,7 +18,7 @@ import java.io.File
  * - キー名は HOCON の慣習に合わせて kebab-case（例: `default-currency-id`）を使う
  *
  * @property classLoader 既定ファイル（リソース）を探すクラスローダー
- * @property resourceName 既定ファイルのリソース名（例: `config.conf`）
+ * @property resourceName 既定ファイルのリソース名（例: `kerria/config.conf`）
  */
 @OptIn(ExperimentalSerializationApi::class)
 class HoconConfigLoader(
@@ -68,6 +68,7 @@ class HoconConfigLoader(
      * @param serializer 設定クラスのシリアライザ
      * @param previous 変更前の設定（現在メモリ上にある設定）
      * @param value 書き出す設定
+     * @throws com.typesafe.config.ConfigException 現在の設定ファイルの構文が不正な場合
      */
     fun <T> save(file: File, serializer: KSerializer<T>, previous: T, value: T) {
         // 初回はコメント付きの既定ファイルを元にする
@@ -80,6 +81,8 @@ class HoconConfigLoader(
         if (changed.isEmpty()) return
 
         val original = file.readText()
+        // 現在のファイルが壊れている場合は、追記しても読めないままなので書き込まずにエラーにする
+        parseText(original)
         // まずは該当行の値だけを置き換え、置き換えられないキーは追記する
         val patched = changed.entries.fold(original) { text, (path, rendered) ->
             replaceValue(text, path, rendered) ?: appendValue(text, path, rendered)

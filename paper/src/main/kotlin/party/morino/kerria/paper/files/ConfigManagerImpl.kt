@@ -17,8 +17,8 @@ import java.io.File
  */
 class ConfigManagerImpl(private val plugin: JavaPlugin) : ConfigManager {
     private val configFile = File(plugin.dataFolder, CONFIG_FILE_NAME)
-    // 既定ファイルはプラグイン JAR 内のリソースから読み込む
-    private val loader = HoconConfigLoader(javaClass.classLoader, CONFIG_FILE_NAME)
+    // 既定ファイルはプラグイン JAR 内のリソースから読み込む（他の JAR の config.conf と衝突しないよう名前空間を付ける）
+    private val loader = HoconConfigLoader(javaClass.classLoader, DEFAULT_CONFIG_RESOURCE)
     private var currentConfig = Config()
 
     init {
@@ -56,7 +56,9 @@ class ConfigManagerImpl(private val plugin: JavaPlugin) : ConfigManager {
     }
 
     private companion object {
-        // 設定ファイル名（既定ファイルのリソース名も兼ねる）
+        // 設定ファイル名
         const val CONFIG_FILE_NAME = "config.conf"
+        // コメント付きの既定ファイルのリソース名
+        const val DEFAULT_CONFIG_RESOURCE = "kerria/config.conf"
     }
 }
