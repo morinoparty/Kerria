@@ -17,11 +17,11 @@ class TmpSmokeServer : GameServerExtension() {
     override fun type(config: FukurouConfig): ServerType =
         Paper.fromProperties(config, defaultVersion = "1.21.11", defaultChannel = PaperChannel.Alpha)
     override fun ServerSpec.configure() {
-        label = if (System.getProperty("tmp.vault") == "true") "tmp-smoke-vault" else "tmp-smoke-novault"
+        label = if (System.getProperty("fukurou.tmpVault") == "true") "tmp-smoke-vault" else "tmp-smoke-novault"
         isolation = Isolation.Reset(arena = null)
         plugins {
             underTest(PluginSource.systemProperty("kerria"))
-            if (System.getProperty("tmp.vault") == "true") dependency(PluginSource.url(KerriaServer.VAULT_URL))
+            if (System.getProperty("fukurou.tmpVault") == "true") dependency(PluginSource.url(KerriaServer.VAULT_URL))
         }
     }
 }

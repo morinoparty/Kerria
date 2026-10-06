@@ -5,14 +5,14 @@ on:
   workflow_dispatch:
     inputs:
       minecraft-versions:
-        description: 'Versions: "latest", "1.21.11", "1.21.11-" or "1.21.11-26.1"'
-        default: "1.21.11-"
+        description: 'Versions: "latest", "26.2", "26.1-" or "26.1-26.2"'
+        default: "26.1-"
       tests:
         description: "Test ids (method names) or globs, comma separated. Empty runs everything"
         default: ""
       paper-channel:
         description: "Least stable Paper build channel to test: stable, beta or alpha"
-        default: beta
+        default: alpha
 
 permissions:
   contents: read
@@ -33,10 +33,10 @@ jobs:
       - id: versions
         uses: morinoparty/fukurou/versions@d87616a2521ec540af8e8a2d8f3358c48b340353
         with:
-          # Kerria がコンパイルしている paper-api（1.21.11）以降、26.x も含めて確認する
-          minecraft-version: ${{ inputs.minecraft-versions || '1.21.11-' }}
-          # 26.x の beta ビルドまで含めて確認する（alpha のみのバージョンは除く。test ジョブと同じ値にする）
-          paper-channel: ${{ inputs.paper-channel || 'beta' }}
+          # 26.x 系のみを確認する（1.21.x は対象外）
+          minecraft-version: ${{ inputs.minecraft-versions || '26.1-' }}
+          # Paper がまだ alpha のバージョンも含めて確認する（test ジョブと同じ値にする）
+          paper-channel: ${{ inputs.paper-channel || 'alpha' }}
 
   # テスト対象のプラグインを 1 回だけビルドし、各バージョンのジョブで使い回す
   build:
@@ -124,7 +124,7 @@ jobs:
         with:
           accept-eula: "true" # Minecraft EULA に同意する: https://aka.ms/MinecraftEULA
           minecraft-version: ${{ matrix.minecraft-version }}
-          paper-channel: ${{ inputs.paper-channel || 'beta' }}
+          paper-channel: ${{ inputs.paper-channel || 'alpha' }}
           gradle-task: :paper:gameTest
           gradle-args: ${{ steps.args.outputs.gradle-args }}
           # Kerria の toolchain（gradle/libs.versions.toml の java）と同じ
@@ -154,7 +154,7 @@ jobs:
       uploaded: ${{ steps.ui.outputs.uploaded }}
       # {"total","passed","failed","error","skipped"}: テスト × バージョンの件数
       tests-summary: ${{ steps.ui.outputs.tests-summary }}
-      # "pay-with-message@1.21.11/kerria" のような一覧
+      # "pay-with-message@26.2/kerria" のような一覧
       failed-tests: ${{ steps.ui.outputs.failed-tests }}
     steps:
       # preview.yml と同じく、Bitwarden Secrets Manager から S3 アップロード用の AWS 認証情報を取得する

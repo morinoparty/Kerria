@@ -31,7 +31,7 @@ MockBukkit を使う通常のユニットテストでは確認できない、Bri
 Linux（x86_64）で `xvfb`・`xdotool`・`x11-xserver-utils` と OpenGL/OpenAL のライブラリが必要です。
 
 ```bash
-./gradlew :paper:gameTest -Pfukurou.acceptEula=true -Pfukurou.minecraftVersion=1.21.11
+./gradlew :paper:gameTest -Pfukurou.acceptEula=true -Pfukurou.minecraftVersion=26.2
 ```
 
 主なオプションは以下の通りです。
@@ -46,8 +46,8 @@ Linux（x86_64）で `xvfb`・`xdotool`・`x11-xserver-utils` と OpenGL/OpenAL 
 
 ## CI
 
-プルリクエストでは「Game test」ワークフローが実行され、Minecraft 1.21.11 以降（26.x を含む）の各バージョンでテストします。
-Paper のビルドは beta 以上（beta または stable）を対象とし、alpha のビルドしか無いバージョンは対象外です。
+プルリクエストでは「Game test」ワークフローが実行され、Minecraft 26.1 以降の各バージョン（26.x 系）でテストします。
+Paper のビルドは alpha を含む最新のビルドを対象とします。
 結果のビューアは `<PREVIEW_BASE_URL>/Kerria/<commit>/game-test/index.html` に公開され、プルリクエストにリンクがコメントされます。
 手動実行（workflow_dispatch）では、対象バージョン・テスト ID・タグ・Paper のチャンネルを指定できます。
 

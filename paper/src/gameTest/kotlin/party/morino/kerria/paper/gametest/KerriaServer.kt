@@ -27,10 +27,10 @@ class KerriaServer : GameServerExtension() {
      * 起動するサーバーの種類。
      *
      * CI は FUKUROU_MINECRAFT_VERSION / FUKUROU_PAPER_CHANNEL（または -Pfukurou.*）を渡す。
-     * 省略時は Kerria の paper-api と同じ 1.21.11 を、beta ビルドまで含めて使う。
+     * 省略時は 26.2 を、alpha ビルドまで含めて使う。
      */
     override fun type(config: FukurouConfig): ServerType =
-        Paper.fromProperties(config, defaultVersion = DEFAULT_VERSION, defaultChannel = PaperChannel.Beta)
+        Paper.fromProperties(config, defaultVersion = DEFAULT_VERSION, defaultChannel = PaperChannel.Alpha)
 
     override fun ServerSpec.configure() {
         // result の id は paper-<version>-kerria になる
@@ -58,7 +58,7 @@ class KerriaServer : GameServerExtension() {
 
     companion object {
         /** -Pfukurou.minecraftVersion を省略したときの Minecraft のバージョン。 */
-        const val DEFAULT_VERSION = "1.21.11"
+        const val DEFAULT_VERSION = "26.2"
 
         /** Vault 1.7.3 の配布 jar（paper/build.gradle.kts の runServer と同じもの）。 */
         const val VAULT_URL = "https://github.com/MilkBowl/Vault/releases/download/1.7.3/Vault.jar"
