@@ -43,7 +43,8 @@ dependencies {
     compileOnly(libs.placeholderapi)
 
     // テスト依存関係
-    testImplementation(libs.paper.api)
+    // MockBukkit が 26.3 に未対応のため、テストは MockBukkit と同じ 26.2 の API で実行する
+    testImplementation(libs.paper.api.test)
     testImplementation(libs.vault.api)
     testImplementation(libs.placeholderapi)
     testImplementation(libs.bundles.junit.jupiter)
@@ -110,7 +111,7 @@ tasks {
         }
     }
     runServer {
-        minecraftVersion("26.2")
+        minecraftVersion("26.3")
         val plugins = runPaper.downloadPluginsSpec {
             url("https://github.com/MilkBowl/Vault/releases/download/1.7.3/Vault.jar")
         }

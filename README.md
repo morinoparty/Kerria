@@ -14,7 +14,7 @@ morinoparty の Minecraft 経済プラグインです。Paper / Velocity 両対�
 ## 技術スタック
 
 - **Kotlin** - 言語
-- **Paper API** 26.2 - Minecraft サーバー API
+- **Paper API** 26.3 (beta) - Minecraft サーバー API
 - **Velocity API** 4.2.0 - Minecraft プロキシ API
 - **Cloud** - コマンドフレームワーク (Incendo)
 - **Koin** - 依存性注入

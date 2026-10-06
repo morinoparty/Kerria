@@ -1,6 +1,8 @@
 [versions]
 java = "25"
-paper = "26.2.build.130-stable"
+paper = "26.3.build.157-beta"
+# MockBukkit（mockbukkit-v26.2）が対応する paper-api。26.3 対応版が出るまでテストのみこの版を使う
+paperTest = "26.2.build.130-stable"
 kotlin = "2.5.0-Beta1"
 detekt = "2.0.0-alpha.6"
 mccoroutine = "2.23.0"
@@ -27,6 +29,7 @@ fukurou = "d87616a252"
 
 [libraries]
 paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
+paper-api-test = { group = "io.papermc.paper", name = "paper-api", version.ref = "paperTest" }
 
 cloud = { group = "org.incendo", name = "cloud-core", version.ref = "cloud" }
 cloud-annotations = { group = "org.incendo", name = "cloud-annotations", version.ref = "cloud" }
