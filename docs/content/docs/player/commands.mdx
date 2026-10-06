@@ -3,14 +3,14 @@ title: コマンド
 description: プレイヤー向けコマンドの一覧
 ---
 
-すべてのコマンドは `/kerria` をルートとして実行します（送金のみ `/pay` でも実行できます）。
+すべてのコマンドは `/kerria` をルートとして実行します（残高確認は `/balance`・`/bal`、送金は `/pay` でも実行できます）。
 `<param>` は必須パラメータ、`[param]` はオプションパラメータを示します。
 
 ## 残高確認
 
 <CommandLine command={{
-  command: "/kerria balance [currencyId]",
-  aliases: [],
+  command: "/balance [currencyId]",
+  aliases: ["/bal [currencyId]", "/kerria balance [currencyId]"],
   status: "stable"
 }} />
 

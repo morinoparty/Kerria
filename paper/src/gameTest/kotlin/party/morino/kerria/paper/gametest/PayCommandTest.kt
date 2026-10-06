@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import party.morino.fukurou.log.LogMark
 import party.morino.fukurou.pause
+import party.morino.fukurou.screenshot
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -32,6 +33,14 @@ class PayCommandTest {
         env.bob.awaitChat(KerriaServer.transactionMessage("glass fee"), after = bobMark)
         env.alice.awaitChat(KerriaServer.transactionMessage("glass fee"), after = aliceMark)
         env.alice.assertNoChat(KerriaServer.COMMAND_FAILURES, after = aliceMark)
+
+        // 送金後の残高を /balance（Alice）と /bal（Bob）で確認する（setUp で 2 人とも 1000）
+        env.alice.sendCommand("balance")
+        env.bob.sendCommand("bal")
+        env.alice.awaitChat(balanceOf("900"), after = aliceMark)
+        env.bob.awaitChat(balanceOf("1,?100"), after = bobMark)
+        // チャットが消える前に、2 人の画面を残す
+        screenshot(env.alice, env.bob, name = "balance-after-pay")
     }
 
     /**
@@ -87,5 +96,12 @@ class PayCommandTest {
     private companion object {
         /** Alice が Bob への送金に成功したときのチャット。 */
         val SENT_TO_BOB = Regex("(?:Sent .+ to Bob|Bob に .+ を送金しました)")
+
+        /**
+         * 残高表示（en_US: `Your balance is <amount>.` / ja_JP: `あなたの残高は<amount>です。`）に一致する正規表現を作る。
+         *
+         * @param amount 金額の正規表現（桁区切りや小数部の有無に依存しないよう、整数部のみを指定する）
+         */
+        fun balanceOf(amount: String): Regex = Regex("(?:Your balance is|あなたの残高は)\\D*\\b$amount\\b")
     }
 }
