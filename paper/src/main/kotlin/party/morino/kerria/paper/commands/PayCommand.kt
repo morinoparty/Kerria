@@ -1,8 +1,8 @@
 package party.morino.kerria.paper.commands
 
 import io.papermc.paper.command.brigadier.CommandSourceStack
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
-import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotations.Command
@@ -101,33 +101,39 @@ class PayCommand : KoinComponent {
             },
             ifRight = {
                 val formatted = currency.format(bigAmount)
+                // 送金者への通知（メッセージがあれば同じ行に添える）
                 sender.sendMessage(
-                    messages.get("pay.success", "player" to (toAccount.name ?: player), "amount" to formatted),
+                    withTransactionMessage(
+                        "pay.success",
+                        storedMessage,
+                        "player" to (toAccount.name ?: player),
+                        "amount" to formatted,
+                    ),
                 )
-                sendTransactionMessage(sender, storedMessage)
-                // 送金先がオンラインならメッセージを送信
-                toAccount.playerUniqueId?.let { Bukkit.getPlayer(it) }?.let { receiver ->
-                    receiver.sendMessage(
-                        messages.get("pay.received", "player" to (sender.name), "amount" to formatted),
-                    )
-                    sendTransactionMessage(receiver, storedMessage)
-                }
+                // 送金先がオンラインなら受取通知を送信
+                toAccount.playerUniqueId?.let { Bukkit.getPlayer(it) }?.sendMessage(
+                    withTransactionMessage("pay.received", storedMessage, "player" to sender.name, "amount" to formatted),
+                )
             },
         )
     }
 
     /**
-     * 取引メッセージが指定されていれば、受信者へ表示する
+     * 取引メッセージの有無に応じて、通知メッセージを1行で組み立てる
      *
+     * メッセージがある場合は `<key>-with-message` を使い、末尾に「(メッセージ: ...)」を添える。
      * 保存形式はエスケープ済みのため、装飾系タグのみの解釈でもプレーンテキストとして表示される。
      */
-    private fun sendTransactionMessage(receiver: CommandSender, storedMessage: String?) {
-        storedMessage ?: return
-        receiver.sendMessage(
-            messages.get(
-                "transaction.message",
-                mapOf("message" to TransactionMessageFormatter.renderStyleOnly(storedMessage)),
-            ),
+    private fun withTransactionMessage(
+        key: String,
+        storedMessage: String?,
+        vararg placeholders: Pair<String, String>,
+    ): Component {
+        storedMessage ?: return messages.get(key, *placeholders)
+        return messages.get(
+            "$key-with-message",
+            mapOf("message" to TransactionMessageFormatter.renderStyleOnly(storedMessage)),
+            *placeholders,
         )
     }
 }

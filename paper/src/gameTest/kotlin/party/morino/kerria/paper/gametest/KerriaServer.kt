@@ -66,7 +66,7 @@ class KerriaServer : GameServerExtension() {
         /** setUp で 2 人に設定する残高。 */
         const val INITIAL_BALANCE = 1000
 
-        /** 取引メッセージの行（en_US: `Message: <text>` / ja_JP: `メッセージ: <text>`）に一致する正規表現を作る。 */
+        /** 通知に添えられた取引メッセージ（en_US: `(Message: <text>)` / ja_JP: `(メッセージ: <text>)`）に一致する正規表現を作る。 */
         fun transactionMessage(text: String): Regex = Regex("(?:Message|メッセージ): ${Regex.escape(text)}")
 
         /** コマンドの構文エラーや Kerria の失敗メッセージ。成功するはずの操作で出ていないことを確かめる。 */
