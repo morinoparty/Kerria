@@ -31,6 +31,15 @@ interface ExchangeRateManager {
     fun setRate(fromCurrencyId: Int, toCurrencyId: Int, rate: BigDecimal): Either<KerriaError, Unit>
 
     /**
+     * 通貨ペアの為替レートを削除する
+     *
+     * @param fromCurrencyId 変換元通貨ID
+     * @param toCurrencyId 変換先通貨ID
+     * @return 成功時はUnit、レートが存在しない場合は[KerriaError.CurrencyNotFound]、その他の失敗時はエラー
+     */
+    fun deleteRate(fromCurrencyId: Int, toCurrencyId: Int): Either<KerriaError, Unit>
+
+    /**
      * 設定されている全ての為替レートを取得する
      *
      * @return 為替レートのリスト、もしくはエラー
