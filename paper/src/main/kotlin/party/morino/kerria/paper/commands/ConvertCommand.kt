@@ -8,13 +8,17 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.KerriaAPI
 import party.morino.kerria.api.economy.ExchangeRateManager
+import party.morino.kerria.api.error.KerriaError
 import party.morino.kerria.api.files.MessageManager
 import java.math.BigDecimal
 
 /**
- * 通貨変換コマンド
+ * 通貨変換・為替レート管理コマンド
  *
  * /kerria convert <amount> <fromCurrency> <toCurrency>
+ * /kerria rate set <fromCurrency> <toCurrency> <rate>
+ * /kerria rate delete <fromCurrency> <toCurrency>
+ * /kerria rate list
  */
 @Command("kerria")
 class ConvertCommand : KoinComponent {
@@ -114,6 +118,42 @@ class ConvertCommand : KoinComponent {
                         "rate" to rate.toString(),
                     ),
                 )
+            },
+        )
+    }
+
+    @Command("rate delete <fromCurrency> <toCurrency>")
+    @Permission("kerria.admin.currency")
+    @Suppress("UnstableApiUsage")
+    fun deleteRate(
+        stack: CommandSourceStack,
+        fromCurrency: String,
+        toCurrency: String,
+    ) {
+        val sender = stack.sender
+
+        // 通貨を名前から取得
+        val from = api.getCurrencyManager().getCurrencyByName(fromCurrency).getOrNull() ?: run {
+            sender.sendMessage(messages.get("currency.not-found", "name" to fromCurrency))
+            return
+        }
+        val to = api.getCurrencyManager().getCurrencyByName(toCurrency).getOrNull() ?: run {
+            sender.sendMessage(messages.get("currency.not-found", "name" to toCurrency))
+            return
+        }
+
+        // レートを削除（存在しない場合は専用のメッセージを表示する）
+        exchangeRateManager.deleteRate(from.id, to.id).fold(
+            ifLeft = { error ->
+                val message = if (error is KerriaError.CurrencyNotFound) {
+                    messages.get("rate.delete.not-found", "from" to from.name, "to" to to.name)
+                } else {
+                    messages.get("rate.delete.failed", "error" to (error.message ?: ""))
+                }
+                sender.sendMessage(message)
+            },
+            ifRight = {
+                sender.sendMessage(messages.get("rate.delete.success", "from" to from.name, "to" to to.name))
             },
         )
     }

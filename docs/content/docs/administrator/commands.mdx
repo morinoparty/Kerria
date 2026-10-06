@@ -188,6 +188,19 @@ Vault 連携でもこの通貨が使用されるため、`id` だけでなく名
 
 - **パーミッション:** `kerria.admin.currency`
 
+### 為替レート削除
+
+<CommandLine command={{
+  command: "/kerria rate delete <fromCurrency> <toCurrency>",
+  aliases: [],
+  status: "stable"
+}} />
+
+設定されている通貨ペアの為替レートを削除します。削除したペアでは通貨変換ができなくなります。
+指定したペアにレートが設定されていない場合はエラーになります。
+
+- **パーミッション:** `kerria.admin.currency`
+
 ### 為替レート一覧
 
 <CommandLine command={{

@@ -38,6 +38,13 @@ val history = logManager.getTransactionHistory(accountId, limit = 10)
 val bankManager = kerriaAPI.getBankManager()
 bankManager.createBank("guild_bank", ownerUuid)
 bankManager.deposit("guild_bank", currencyId, BigDecimal("1000.00"))
+
+// 為替レート・通貨変換
+val exchangeRateManager = kerriaAPI.getExchangeRateManager()
+exchangeRateManager.setRate(fromCurrencyId, toCurrencyId, BigDecimal("0.0067"))
+val rate = exchangeRateManager.getRate(fromCurrencyId, toCurrencyId)
+exchangeRateManager.convert(accountId, fromCurrencyId, toCurrencyId, BigDecimal("1000"))
+exchangeRateManager.deleteRate(fromCurrencyId, toCurrencyId)
 ```
 
 :::note
