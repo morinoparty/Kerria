@@ -191,7 +191,6 @@ sourceSets.main {
                 mapOf(
                     "kerria.balance" to "自分の残高を確認する",
                     "kerria.pay" to "他のプレイヤーに送金する",
-                    "kerria.top" to "残高ランキングを表示する",
                     "kerria.log" to "自分の取引履歴を表示する",
                     "kerria.convert" to "通貨を変換する",
                 ).forEach { (name, text) ->
@@ -201,6 +200,8 @@ sourceSets.main {
                     }
                 }
                 mapOf(
+                    // ランキングは他のプレイヤーの残高が見えるため、OP のみに許可する
+                    "kerria.top" to "残高ランキング（他のプレイヤーの残高）を表示する",
                     "kerria.admin.economy" to "残高の設定・付与・徴収",
                     "kerria.admin.currency" to "通貨と為替レートの管理",
                     "kerria.admin.log" to "他のプレイヤーの取引履歴を表示する",
