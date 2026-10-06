@@ -2,6 +2,7 @@ package party.morino.kerria.api.files
 
 import arrow.core.Either
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
 import party.morino.kerria.api.error.KerriaError
 
 /**
@@ -30,6 +31,24 @@ interface MessageManager {
      * @return 翻訳可能なコンポーネント、もしくは欠落キーのフォールバック
      */
     fun get(key: String, vararg placeholders: Pair<String, String>): Component
+
+    /**
+     * メッセージキーと、装飾済みコンポーネントを含むプレースホルダから翻訳可能な [Component] を生成する
+     *
+     * [components] の値はコンポーネントとしてそのまま埋め込まれるため、呼び出し側で
+     * MiniMessage などを用いて装飾した内容（例: 取引メッセージ）を表示できます。
+     * 文字列のプレースホルダは [get] と同様に安全に埋め込まれます。
+     *
+     * @param key メッセージキー（例: "transaction.message"）
+     * @param components プレースホルダ名とコンポーネントの対応
+     * @param placeholders プレースホルダ名と文字列値のペア
+     * @return 翻訳可能なコンポーネント、もしくは欠落キーのフォールバック
+     */
+    fun get(
+        key: String,
+        components: Map<String, ComponentLike>,
+        vararg placeholders: Pair<String, String>,
+    ): Component
 
     /**
      * すべてのロケールバンドルをディスクから再読み込みする

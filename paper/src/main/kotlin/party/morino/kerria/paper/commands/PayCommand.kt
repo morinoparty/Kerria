@@ -2,28 +2,36 @@ package party.morino.kerria.paper.commands
 
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import org.bukkit.Bukkit
+import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Default
+import org.incendo.cloud.annotations.Flag
 import org.incendo.cloud.annotations.Permission
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.KerriaAPI
 import party.morino.kerria.api.files.MessageManager
+import party.morino.kerria.paper.commands.target.TargetAccountResolver
+import party.morino.kerria.paper.message.TransactionMessageFormatter
 import java.math.BigDecimal
 
 /**
  * プレイヤー間送金コマンド
  *
- * /kerria pay <player> <amount> [currencyId]
+ * /pay <player> <amount> [currencyId] [--message <text>]
+ * /kerria pay <player> <amount> [currencyId] [--message <text>]
+ *
+ * `--message` はプレーンテキストとして扱い、MiniMessage のタグは解釈しない。
  */
-@Command("kerria")
 class PayCommand : KoinComponent {
 
     private val api: KerriaAPI by inject()
     private val messages: MessageManager by inject()
 
     @Command("pay <player> <amount> [currencyId]")
+    @Command("kerria pay <player> <amount> [currencyId]")
     @Permission("kerria.pay")
     @Suppress("UnstableApiUsage")
     fun pay(
@@ -31,6 +39,7 @@ class PayCommand : KoinComponent {
         player: String,
         amount: Double,
         @Default("1") currencyId: Int,
+        @Flag("message") @Greedy message: String?,
     ) {
         val sender = stack.sender
         if (sender !is Player) {
@@ -41,6 +50,15 @@ class PayCommand : KoinComponent {
         // 金額バリデーション
         if (amount <= 0) {
             sender.sendMessage(messages.get("common.invalid-amount"))
+            return
+        }
+
+        // 取引メッセージはタグをエスケープしたうえで長さを検証する（プレイヤーにはタグを許可しない）
+        val storedMessage = message?.let { TransactionMessageFormatter.fromPlainText(it) }
+        if (storedMessage != null && !TransactionMessageFormatter.isValid(storedMessage)) {
+            sender.sendMessage(
+                messages.get("common.invalid-message", "max" to TransactionMessageFormatter.MAX_LENGTH.toString()),
+            )
             return
         }
 
@@ -75,6 +93,7 @@ class PayCommand : KoinComponent {
             toAccount.accountId,
             currencyId,
             bigAmount,
+            message = storedMessage,
             treatePluginName = "Kerria",
         ).fold(
             ifLeft = { error ->
@@ -85,11 +104,30 @@ class PayCommand : KoinComponent {
                 sender.sendMessage(
                     messages.get("pay.success", "player" to (toAccount.name ?: player), "amount" to formatted),
                 )
+                sendTransactionMessage(sender, storedMessage)
                 // 送金先がオンラインならメッセージを送信
-                toAccount.playerUniqueId?.let { Bukkit.getPlayer(it) }?.sendMessage(
-                    messages.get("pay.received", "player" to (sender.name), "amount" to formatted),
-                )
+                toAccount.playerUniqueId?.let { Bukkit.getPlayer(it) }?.let { receiver ->
+                    receiver.sendMessage(
+                        messages.get("pay.received", "player" to (sender.name), "amount" to formatted),
+                    )
+                    sendTransactionMessage(receiver, storedMessage)
+                }
             },
+        )
+    }
+
+    /**
+     * 取引メッセージが指定されていれば、受信者へ表示する
+     *
+     * 保存形式はエスケープ済みのため、装飾系タグのみの解釈でもプレーンテキストとして表示される。
+     */
+    private fun sendTransactionMessage(receiver: CommandSender, storedMessage: String?) {
+        storedMessage ?: return
+        receiver.sendMessage(
+            messages.get(
+                "transaction.message",
+                mapOf("message" to TransactionMessageFormatter.renderStyleOnly(storedMessage)),
+            ),
         )
     }
 }

@@ -1,6 +1,7 @@
 package party.morino.kerria.paper.commands
 
 import io.papermc.paper.command.brigadier.CommandSourceStack
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import org.bukkit.entity.Player
 import org.incendo.cloud.annotations.Command
@@ -10,6 +11,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import party.morino.kerria.api.KerriaAPI
 import party.morino.kerria.api.files.MessageManager
+import party.morino.kerria.paper.commands.target.TargetAccountResolver
+import party.morino.kerria.paper.message.TransactionMessageFormatter
 import java.time.format.DateTimeFormatter
 
 /**
@@ -102,17 +105,19 @@ class LogCommand : KoinComponent {
             // 送金方向で色分けするテンプレートを選ぶ（出金=赤マイナス、入金=緑プラス）
             val key = if (log.fromAccountId == accountId) "log.entry.outgoing" else "log.entry.incoming"
 
-            // プラグイン名・メッセージは色をテンプレート側に持たせ、値はプレーンで渡す
+            // プラグイン名は色をテンプレート側に持たせ、値はプレーンで渡す
             val pluginText = log.treatePluginName?.let { "[$it]" } ?: ""
-            val messageText = log.message ?: ""
+            // メッセージは MiniMessage 形式で保存されているため、装飾系タグのみ解釈して表示する
+            val messageComponent = log.message?.let { TransactionMessageFormatter.renderStyleOnly(it) }
+                ?: Component.empty()
 
             sender.sendMessage(
                 messages.get(
                     key,
+                    mapOf("message" to messageComponent),
                     "time" to time,
                     "amount" to amountStr,
                     "plugin" to pluginText,
-                    "message" to messageText,
                 ),
             )
         }

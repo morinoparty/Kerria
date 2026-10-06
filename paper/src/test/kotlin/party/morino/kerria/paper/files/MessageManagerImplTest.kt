@@ -81,4 +81,32 @@ class MessageManagerImplTest : KoinTest {
             messageManager.reloadMessages()
         }
     }
+
+    @Test
+    @DisplayName("Component placeholders keep their formatting")
+    fun componentPlaceholdersAreEmbedded() {
+        val component = messageManager.get(
+            "transaction.message",
+            mapOf("message" to Component.text("ガラス代")),
+        )
+        assertTrue(render(component, Locale.JAPAN).contains("ガラス代"))
+    }
+
+    @Test
+    @DisplayName("Keys missing from the file fall back to bundled defaults")
+    fun missingKeysFallBackToBundled() {
+        val original = jaFile.readText()
+        try {
+            // 旧バージョンのファイルを想定し、既存キーのみを上書きしたファイルにする
+            jaFile.writeText("pay.self=custom\n")
+            messageManager.reloadMessages()
+            assertEquals("custom", render(messageManager.get("pay.self"), Locale.JAPAN))
+            // ファイルに無いキーは同梱の既定値で解決される
+            assertTrue(render(messageManager.get("balance.fetch-failed"), Locale.JAPAN).isNotEmpty())
+            assertTrue(!render(messageManager.get("balance.fetch-failed"), Locale.JAPAN).contains("Missing"))
+        } finally {
+            jaFile.writeText(original)
+            messageManager.reloadMessages()
+        }
+    }
 }

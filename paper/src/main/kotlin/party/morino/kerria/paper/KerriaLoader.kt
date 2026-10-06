@@ -11,7 +11,7 @@ import org.eclipse.aether.repository.RemoteRepository
 class KerriaLoader : PluginLoader {
     override fun classloader(classpathBuilder: PluginClasspathBuilder) {
         val resolver = MavenLibraryResolver()
-        resolver.addDependency(Dependency(DefaultArtifact("org.jetbrains.kotlin:kotlin-stdlib:2.3.10"), null))
+        resolver.addDependency(Dependency(DefaultArtifact("org.jetbrains.kotlin:kotlin-stdlib:2.4.20"), null))
         resolver.addRepository(
             RemoteRepository.Builder("paper", "default", "https://repo.papermc.io/repository/maven-public/").build(),
         )
