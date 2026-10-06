@@ -33,6 +33,8 @@ val currencies = currencyManager.getAllCurrencies()
 // 取引ログ
 val logManager = kerriaAPI.getLogManager()
 val history = logManager.getTransactionHistory(accountId, limit = 10)
+// 90 日より前の取引ログを削除
+logManager.deleteLogsOlderThan(LocalDateTime.now().minusDays(90))
 
 // 銀行管理（ギルド・町の金庫など共有残高）
 val bankManager = kerriaAPI.getBankManager()

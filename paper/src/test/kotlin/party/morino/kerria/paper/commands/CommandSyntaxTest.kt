@@ -49,6 +49,23 @@ class CommandSyntaxTest {
             calls += listOf(player, amount, currencyId, message)
         }
 
+        @Command("log [page]")
+        fun log(
+            sender: TestSender,
+            @Argument("page") @Default("1") page: Int,
+        ) {
+            calls += listOf("page", page)
+        }
+
+        @Command("log clear <days>")
+        fun clear(
+            sender: TestSender,
+            @Argument("days") days: Int,
+            @Flag("confirm") confirm: Boolean,
+        ) {
+            calls += listOf("clear", days, confirm)
+        }
+
         @Command("give <player> <amount> [currencyId]")
         fun give(
             sender: TestSender,
@@ -126,5 +143,15 @@ class CommandSyntaxTest {
         assertTrue(brigadierAccepts("pay", "pay Bob 100 2"))
         assertTrue(brigadierAccepts("pay", "pay Bob 100 --message glass fee"))
         assertTrue(brigadierAccepts("pay", "pay Bob 100 2 --message glass fee"))
+    }
+
+    @Test
+    @DisplayName("Log clear literal coexists with the optional page argument")
+    fun logClearCoexistsWithPage() {
+        assertEquals(listOf("page", 2), execute("log 2"))
+        assertEquals(listOf("clear", 30, false), execute("log clear 30"))
+        assertEquals(listOf("clear", 30, true), execute("log clear 30 --confirm"))
+        assertTrue(brigadierAccepts("log", "log clear 30 --confirm"))
+        assertTrue(brigadierAccepts("log", "log 2"))
     }
 }

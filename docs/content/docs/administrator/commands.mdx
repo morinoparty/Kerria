@@ -79,6 +79,26 @@ description: サーバー管理者向けコマンドの一覧
 
 - **パーミッション:** `kerria.admin.log`
 
+### 取引ログの削除
+
+<CommandLine command={{
+  command: "/kerria log clear <days> [--confirm]",
+  aliases: [],
+  status: "stable"
+}} />
+
+指定した日数より前の取引ログを削除し、データベースの肥大化を防ぎます。
+`--confirm` を付けずに実行すると、削除対象の件数と確認用のリンクが表示されます。リンクをクリックするか、`--confirm` を付けて再実行すると削除されます。
+
+```
+/kerria log clear 90
+/kerria log clear 90 --confirm
+```
+
+日数には 1 以上の整数を指定します。削除した取引ログは元に戻せません。
+
+- **パーミッション:** `kerria.admin.log`
+
 ## 通貨管理
 
 ### 通貨作成

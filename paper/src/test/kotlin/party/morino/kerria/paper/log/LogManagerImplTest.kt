@@ -10,6 +10,7 @@ import party.morino.kerria.api.economy.EconomyManager
 import party.morino.kerria.api.log.LogManager
 import party.morino.kerria.paper.KerriaTest
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -55,5 +56,26 @@ class LogManagerImplTest : KoinTest {
 
         val logs = logManager.getTransactionHistory(account.accountId).getOrNull()!!
         assertEquals("ShopPlugin", logs.first().treatePluginName)
+    }
+
+    @Test
+    @DisplayName("Old logs are counted and deleted while recent logs remain")
+    fun deleteLogsOlderThanCutoff() {
+        val account = accountManager.getOrCreateAccount(UUID.randomUUID(), "LogClearPlayer").getOrNull()!!
+        val id = account.accountId
+        // 基準日時より前のログ 2 件と、現在時刻のログ 1 件を記録する
+        val old = LocalDateTime.of(2000, 1, 1, 0, 0)
+        logManager.logTransaction(id, id, 1, BigDecimal.ONE, "old-1", null, old)
+        logManager.logTransaction(id, id, 1, BigDecimal.ONE, "old-2", null, old)
+        logManager.logTransaction(id, id, 1, BigDecimal.ONE, "recent", null, LocalDateTime.now())
+
+        val cutoff = LocalDateTime.of(2001, 1, 1, 0, 0)
+        assertEquals(2L, logManager.countLogsOlderThan(cutoff).getOrNull())
+        assertEquals(2, logManager.deleteLogsOlderThan(cutoff).getOrNull())
+
+        // 古いログだけが消え、新しいログは残る
+        assertEquals(0L, logManager.countLogsOlderThan(cutoff).getOrNull())
+        val remaining = logManager.getTransactionHistory(id).getOrNull()!!
+        assertEquals(listOf("recent"), remaining.map { it.message })
     }
 }

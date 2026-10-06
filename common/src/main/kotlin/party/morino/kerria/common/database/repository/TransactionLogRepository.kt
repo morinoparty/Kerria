@@ -3,7 +3,9 @@ package party.morino.kerria.common.database.repository
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.less
 import org.jetbrains.exposed.v1.core.or
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import party.morino.kerria.api.log.TransactionLog
@@ -64,6 +66,25 @@ class TransactionLogRepository {
             .limit(limit)
             .offset(offset.toLong())
             .map { it.toTransactionLog() }
+    }
+
+    /**
+     * 指定日時より前の取引ログの件数を数える
+     */
+    fun countOlderThan(cutoff: LocalDateTime): Long {
+        return TransactionLogTable
+            .selectAll()
+            .where { TransactionLogTable.timestamp less cutoff }
+            .count()
+    }
+
+    /**
+     * 指定日時より前の取引ログを削除する
+     *
+     * @return 削除した件数
+     */
+    fun deleteOlderThan(cutoff: LocalDateTime): Int {
+        return TransactionLogTable.deleteWhere { TransactionLogTable.timestamp less cutoff }
     }
 
     /**
