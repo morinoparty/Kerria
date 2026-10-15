@@ -96,7 +96,17 @@ jobs:
           mkdir -p ./gradle-artifacts/detekt
           mkdir -p ./gradle-artifacts/allure
           mv ./paper/build/libs/paper-*-all.jar ./gradle-artifacts/jars/${{ env.PROJECT_NAME }}-paper-${{ env.COMMIT_SHORT_SHA }}.jar
-          mv ./addons/quickshop-hikari/build/libs/quickshop-hikari-*.jar ./gradle-artifacts/jars/${{ env.PROJECT_NAME }}-addon-quickshop-hikari-${{ env.COMMIT_SHORT_SHA }}.jar
+          # addons/ 以下のアドオンを動的に検出して移動する（アドオンを追加してもワークフローの変更は不要）
+          for addon_dir in ./addons/*/; do
+            addon_name=$(basename "$addon_dir")
+            jar_file=$(find "${addon_dir}build/libs/" -name "${addon_name}-*.jar" ! -name "*-sources.jar" ! -name "*-javadoc.jar" 2>/dev/null | head -1)
+            if [ -n "$jar_file" ]; then
+              mv "$jar_file" "./gradle-artifacts/jars/${{ env.PROJECT_NAME }}-addon-${addon_name}-${{ env.COMMIT_SHORT_SHA }}.jar"
+              echo "Moved addon: ${addon_name}"
+            else
+              echo "No JAR found for addon: ${addon_name}"
+            fi
+          done
           # sourcesJARを除外してメインJARのみ移動
           api_jar=$(find ./api/build/libs/ -name "api-*.jar" ! -name "*-sources.jar" | head -1)
           mv "$api_jar" ./gradle-artifacts/jars/${{ env.PROJECT_NAME }}-api-${{ env.COMMIT_SHORT_SHA }}.jar
@@ -269,6 +279,25 @@ jobs:
           echo "paper=$(human_size "$JARS/${{ env.PROJECT_NAME }}-paper-${{ env.COMMIT_SHORT_SHA }}.jar")" >> $GITHUB_OUTPUT
           echo "api=$(human_size "$JARS/${{ env.PROJECT_NAME }}-api-${{ env.COMMIT_SHORT_SHA }}.jar")" >> $GITHUB_OUTPUT
 
+          # アドオンの行を動的に生成する（Kerria-addon-xxx-SHA.jar -> "Addon: Xxx"）
+          JAR_BASE_URL="${{ env.PREVIEW_BASE_URL }}/${{ env.PROJECT_NAME }}/${{ env.COMMIT_SHORT_SHA }}/jars"
+          ADDON_ROWS=""
+          for jar in "$JARS"/${{ env.PROJECT_NAME }}-addon-*.jar; do
+            [ -f "$jar" ] || continue
+            jar_name=$(basename "$jar")
+            addon_name=$(echo "$jar_name" | sed "s/${{ env.PROJECT_NAME }}-addon-//" | sed "s/-${{ env.COMMIT_SHORT_SHA }}.jar//")
+            # 表示名を整形する (quickshop-hikari -> Quickshop Hikari)
+            display_name=$(echo "$addon_name" | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
+            ADDON_ROWS="${ADDON_ROWS}| Addon: ${display_name} | [${jar_name}](${JAR_BASE_URL}/${jar_name}) | $(human_size "$jar") |
+          "
+          done
+          # 複数行の値を出力するため、区切り文字付きの形式で書き出す
+          {
+            echo "addon_rows<<ADDON_ROWS_EOF"
+            printf "%s" "$ADDON_ROWS"
+            echo "ADDON_ROWS_EOF"
+          } >> $GITHUB_OUTPUT
+
       - name: Get limit time
         id: limit-time
         run: |
@@ -297,6 +326,7 @@ jobs:
           |----------|----------|------|
           | Paper | [${{ env.PROJECT_NAME }}-paper-${{ env.COMMIT_SHORT_SHA }}.jar]($JAR_BASE_URL/${{ env.PROJECT_NAME }}-paper-${{ env.COMMIT_SHORT_SHA }}.jar) | ${{ steps.jar-sizes.outputs.paper }} |
           | API | [${{ env.PROJECT_NAME }}-api-${{ env.COMMIT_SHORT_SHA }}.jar]($JAR_BASE_URL/${{ env.PROJECT_NAME }}-api-${{ env.COMMIT_SHORT_SHA }}.jar) | ${{ steps.jar-sizes.outputs.api }} |
+          ${{ steps.jar-sizes.outputs.addon_rows }}
 
           > 📜 **Attestation**: \`gh attestation verify <jar-file> --owner morinoparty\`
 

@@ -49,7 +49,17 @@ jobs:
         run: |
           mv ./paper/build/libs/paper-*-all.jar ./paper/build/libs/Kerria-paper-${{ env.PLUGIN_VERSION }}.jar
           mv ./velocity/build/libs/velocity-*-all.jar ./velocity/build/libs/Kerria-velocity-${{ env.PLUGIN_VERSION }}.jar
-          mv ./addons/quickshop-hikari/build/libs/quickshop-hikari-*.jar ./addons/quickshop-hikari/build/libs/Kerria-addon-quickshop-hikari-${{ env.PLUGIN_VERSION }}.jar
+          # addons/ 以下のアドオンを動的に検出してリネームする（アドオンを追加してもワークフローの変更は不要）
+          for addon_dir in ./addons/*/; do
+            addon_name=$(basename "$addon_dir")
+            jar_file=$(find "${addon_dir}build/libs/" -name "${addon_name}-*.jar" ! -name "*-sources.jar" ! -name "*-javadoc.jar" 2>/dev/null | head -1)
+            if [ -n "$jar_file" ]; then
+              mv "$jar_file" "${addon_dir}build/libs/Kerria-addon-${addon_name}-${{ env.PLUGIN_VERSION }}.jar"
+              echo "Renamed addon: ${addon_name}"
+            else
+              echo "No JAR found for addon: ${addon_name}"
+            fi
+          done
 
       # GitHub Attestations で署名（Paper）
       - name: Attest Paper JAR artifact
@@ -63,11 +73,11 @@ jobs:
         with:
           subject-path: './velocity/build/libs/Kerria-velocity-${{ env.PLUGIN_VERSION }}.jar'
 
-      # GitHub Attestations で署名（QuickShop-Hikari アドオン）
-      - name: Attest QuickShop-Hikari addon JAR artifact
+      # GitHub Attestations で署名（アドオン - 動的に検出）
+      - name: Attest addon JAR artifacts
         uses: actions/attest-build-provenance@v2
         with:
-          subject-path: './addons/quickshop-hikari/build/libs/Kerria-addon-quickshop-hikari-${{ env.PLUGIN_VERSION }}.jar'
+          subject-path: './addons/*/build/libs/Kerria-addon-*-${{ env.PLUGIN_VERSION }}.jar'
 
       # GitHub リリースにアップロード
       - name: Upload to GitHub Release
@@ -75,5 +85,5 @@ jobs:
           gh release upload ${{ github.event.release.tag_name }} \
             ./paper/build/libs/Kerria-paper-${{ env.PLUGIN_VERSION }}.jar \
             ./velocity/build/libs/Kerria-velocity-${{ env.PLUGIN_VERSION }}.jar \
-            ./addons/quickshop-hikari/build/libs/Kerria-addon-quickshop-hikari-${{ env.PLUGIN_VERSION }}.jar \
+            ./addons/*/build/libs/Kerria-addon-*-${{ env.PLUGIN_VERSION }}.jar \
             --clobber
