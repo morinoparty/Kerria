@@ -1,33 +1,71 @@
 ---
 title: プレースホルダー
-description: PlaceholderAPI 連携で利用できる残高・通貨のプレースホルダー
+description: MiniPlaceholders 連携で利用できる残高・通貨のプレースホルダー
 ---
 
-Kerria は [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) と連携し、プレイヤーの残高や通貨情報をプレースホルダーとして公開します。スコアボード・タブリスト・チャット装飾など、PlaceholderAPI を参照する各種プラグインから残高を表示できます。
+Kerria は [MiniPlaceholders](https://modrinth.com/plugin/miniplaceholders) と連携し、プレイヤーの残高や通貨情報をプレースホルダーとして公開します。
+MiniPlaceholders は MiniMessage のタグとしてプレースホルダーを扱うため、`<kerria_balance>` のように記述します。
+スコアボード・タブリスト・チャット装飾など、MiniPlaceholders に対応した各種プラグインから残高を表示できます。
 
-## 🔧 準備
+:::warning[PlaceholderAPI には対応していません]
+以前のバージョンで提供していた PlaceholderAPI のプレースホルダー（`%kerria_balance%` など）は廃止しました。
+MiniPlaceholders のプレースホルダーに置き換えてください。
+:::
 
-PlaceholderAPI は任意依存です。導入している場合のみ連携が有効になり、未導入でも Kerria は通常どおり動作します。
+## 準備
 
-1. サーバーに PlaceholderAPI を導入します。
+MiniPlaceholders は任意依存です。導入している場合のみ連携が有効になり、未導入でも Kerria は通常どおり動作します。
+
+| 実行場所 | 必要なもの | 残高の取得元 | デフォルト通貨 |
+|---------|-----------|-------------|--------------|
+| Paper | Paper 用の MiniPlaceholders | Paper の Kerria | `config.conf` の `economy.default-currency-id` |
+| プロキシ（Velocity） | Velocity 用の MiniPlaceholders | 共有データベース | プロキシの `config.conf` の `default-currency-id` |
+
+1. 使用するサーバー（Paper・プロキシ）に MiniPlaceholders を導入します。
 2. Kerria を有効化すると、起動時に `kerria` エクスパンションが自動で登録されます。
 
-登録に成功すると、サーバーログに `Registered PlaceholderAPI expansion.` と出力されます。
+登録に成功すると、サーバーログに `Registered MiniPlaceholders expansion.` と出力されます。
 
 ## 利用できるプレースホルダー
 
-| プレースホルダー | 説明 |
+| プレースホルダー | 種類 | 説明 |
+|-----------------|------|------|
+| `<kerria_balance>` | プレイヤー | 残高（通貨フォーマット適用） |
+| `<kerria_balance_raw>` | プレイヤー | 残高（数値のみ） |
+| `<kerria_currency_default>` | グローバル | デフォルト通貨の名前 |
+
+`<kerria_balance>` と `<kerria_balance_raw>` は、`:` で区切って引数を指定できます。
+
+```text
+<kerria_balance[:通貨][:桁数]>
+<kerria_balance_raw[:通貨][:桁数]>
+```
+
+| 引数 | 指定できる値 | 省略時 |
+|-----|------------|-------|
+| 通貨 | 通貨ID（`1`）・通貨名（`JPY`）・`default` | デフォルト通貨 |
+| 桁数 | 小数点以下に表示する桁数（`0`〜`10`） | 通貨の小数点以下の桁数 |
+
+桁数を指定すると、小数点以下をその桁数で**切り捨てて**表示します。実際の所持金より多く見えないよう、四捨五入はしません。
+デフォルト通貨のまま桁数だけを指定する場合は、通貨に `default` を指定してください。
+
+## 表示例
+
+残高が `1234.56`、通貨が `JPY`（ID `1`、フォーマット `%amount% %plural%`、小数点以下 2 桁）の場合の表示です。
+
+| プレースホルダー | 表示 |
 |-----------------|------|
-| `%kerria_balance%` | デフォルト通貨の残高（通貨フォーマット適用） |
-| `%kerria_balance_raw%` | デフォルト通貨の残高（数値のみ） |
-| `%kerria_balance_<id>%` | 指定した通貨IDの残高（通貨フォーマット適用） |
-| `%kerria_balance_raw_<id>%` | 指定した通貨IDの残高（数値のみ） |
-| `%kerria_currency_default%` | デフォルト通貨の名前 |
+| `<kerria_balance>` | `1,234.56 円` |
+| `<kerria_balance:default:0>` | `1,234 円` |
+| `<kerria_balance:JPY:1>` | `1,234.5 円` |
+| `<kerria_balance_raw>` | `1234.56` |
+| `<kerria_balance_raw:1:0>` | `1234` |
+| `<kerria_currency_default>` | `JPY` |
 
-`<id>` には通貨IDを指定します。例えば通貨ID `2` の残高をフォーマット付きで表示する場合は `%kerria_balance_2%` を使用します。通貨IDは `/kerria currency list` で確認できます。
-
-フォーマット適用版はコマンド出力と同じ通貨フォーマット（桁区切り・記号・複数形）で表示されます。数値のみが必要な場合は `raw` 版を利用してください。
+通貨ID・通貨名は `/kerria currency list` で確認できます。
 
 :::info[取得に失敗した場合]
-アカウントが存在しない、または残高の取得に失敗した場合でも、プレースホルダーは例外を投げず `0`（フォーマット適用版は `0` をフォーマットした文字列）を返します。参照側プラグインの描画を妨げません。
+- アカウントが存在しないプレイヤーの残高は `0` として表示されます。
+- 存在しない通貨を指定した場合や、プレイヤー以外（コンソールなど）が対象の場合は、何も表示されません。
+- 残高の取得に失敗しても例外は発生せず、参照側プラグインの描画を妨げません。
 :::

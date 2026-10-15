@@ -39,14 +39,14 @@ dependencies {
     implementation(libs.koin.core)
 
     compileOnly(libs.vault.api)
-    // PlaceholderAPI 連携（存在する場合のみ利用する softdepend）
-    compileOnly(libs.placeholderapi)
+    // MiniPlaceholders 連携（存在する場合のみ利用する任意依存）
+    compileOnly(libs.miniplaceholders.api)
 
     // テスト依存関係
     // MockBukkit が 26.3 に未対応のため、テストは MockBukkit と同じ 26.2 の API で実行する
     testImplementation(libs.paper.api.test)
     testImplementation(libs.vault.api)
-    testImplementation(libs.placeholderapi)
+    testImplementation(libs.miniplaceholders.api)
     testImplementation(libs.bundles.junit.jupiter)
     testImplementation(libs.bundles.koin.test)
     testImplementation(libs.mockk)
@@ -184,7 +184,6 @@ sourceSets.main {
             bootstrapper = "$group.kerria.paper.KerriaBootstrap"
             loader = "$group.kerria.paper.KerriaLoader"
             apiVersion = "26.1"
-            // PlaceholderAPI は任意依存（存在すれば連携する）
             // コマンドのパーミッション。宣言しないと既定で OP のみになるため、プレイヤー向けは全員に許可する
             permissions {
                 mapOf(
@@ -237,7 +236,8 @@ sourceSets.main {
                 }
             }
             dependencies {
-                server("PlaceholderAPI", PaperPluginYaml.Load.BEFORE, required = false)
+                // MiniPlaceholders は任意依存（存在すれば連携する）。API のクラスを参照するためクラスパスを共有する
+                server("MiniPlaceholders", PaperPluginYaml.Load.BEFORE, required = false, joinClasspath = true)
                 // Vault は任意依存（存在すれば Economy を登録する）。Vault のクラスを参照するためクラスパスを共有する
                 server("Vault", PaperPluginYaml.Load.BEFORE, required = false, joinClasspath = true)
             }

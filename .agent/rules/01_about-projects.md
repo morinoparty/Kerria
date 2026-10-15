@@ -10,7 +10,7 @@ Paper サーバーと Velocity プロキシで 1 つのデータベースを共�
 - **currency** - 複数通貨の管理 (`/kerria currency`) と、通貨間の為替レート・両替 (`/convert`)
 - **bank** - 複数人で共有できる銀行口座
 - **log** - すべての取引の履歴 (取引メッセージ付き) と、古いログの削除
-- **integration** - Vault (Economy API) と PlaceholderAPI への連携
+- **integration** - Vault (Economy API) と MiniPlaceholders (Paper / Velocity) への連携
 - **cross-server** - Velocity プロキシ上の `/vkerria` コマンドによる、サーバーをまたいだ残高確認・送金
 
 ### 設計上の前提

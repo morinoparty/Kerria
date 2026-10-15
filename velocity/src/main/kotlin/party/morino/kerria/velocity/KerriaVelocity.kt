@@ -7,9 +7,11 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory
 import com.velocitypowered.api.proxy.ProxyServer
 import org.slf4j.Logger
 import party.morino.kerria.common.database.DatabaseInitializer
+import party.morino.kerria.common.placeholder.KerriaPlaceholders
 import party.morino.kerria.velocity.command.VKerriaCommand
 import party.morino.kerria.velocity.economy.CrossServerEconomy
 import party.morino.kerria.velocity.files.VelocityConfigManager
+import party.morino.kerria.velocity.placeholder.VelocityPlaceholderBalanceSource
 import java.nio.file.Path
 
 /**
@@ -43,6 +45,34 @@ class KerriaVelocity
             val meta = proxy.commandManager.metaBuilder(VKerriaCommand.LABEL).plugin(this).build()
             proxy.commandManager.register(meta, VKerriaCommand(proxy, economy, config.defaultCurrencyId))
 
+            // MiniPlaceholders 連携の登録（存在する場合のみ）
+            registerPlaceholders(economy, config.defaultCurrencyId)
+
             logger.info("Kerria (Velocity) has been enabled.")
+        }
+
+        /**
+         * MiniPlaceholders が存在する場合に Kerria のプレースホルダーを登録する
+         *
+         * プロキシ上のプラグイン（タブリストなど）から、共有データベースの残高を表示できるようにする。
+         */
+        private fun registerPlaceholders(economy: CrossServerEconomy, defaultCurrencyId: Int) {
+            // MiniPlaceholders が無い環境では API のクラスを読み込まないよう、参照はこのガードの内側に閉じ込める
+            if (!proxy.pluginManager.isLoaded(MINI_PLACEHOLDERS_ID)) {
+                return
+            }
+            try {
+                val version = proxy.pluginManager.ensurePluginContainer(this).description.version.orElse("unknown")
+                KerriaPlaceholders.create(VelocityPlaceholderBalanceSource(economy, defaultCurrencyId), version).register()
+                logger.info("Registered MiniPlaceholders expansion.")
+            } catch (e: Exception) {
+                // 連携の失敗は致命的ではないため、警告のみで続行する
+                logger.warn("Failed to register MiniPlaceholders expansion: ${e.message}")
+            }
+        }
+
+        private companion object {
+            // MiniPlaceholders の Velocity プラグインID
+            const val MINI_PLACEHOLDERS_ID = "miniplaceholders"
         }
     }

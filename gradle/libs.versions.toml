@@ -68,7 +68,8 @@ adventure-api = { group = "net.kyori", name = "adventure-api", version.ref = "ad
 adventure-text-minimessage = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "adventure" }
 
 vault-api = { group = "com.github.MilkBowl", name = "vaultAPI", version = "1.7.1" }
-placeholderapi = { group = "me.clip", name = "placeholderapi", version = "2.12.3" }
+# MiniPlaceholders 連携（Paper / Velocity。実行時は MiniPlaceholders プラグインが提供する）
+miniplaceholders-api = { group = "io.github.miniplaceholders", name = "miniplaceholders-api", version = "3.2.0" }
 # QuickShop-Hikari 連携アドオン用（codemc リポジトリで配布）
 quickshop-api = { group = "com.ghostchu", name = "quickshop-api", version = "6.3.0.0" }
 velocity-api = { group = "com.velocitypowered", name = "velocity-api", version = "4.2.0" }
