@@ -1,12 +1,56 @@
 ---
 title: 管理者コマンド
-description: サーバー管理者向けコマンドの一覧
+description: Paper サーバーとプロキシ（Velocity）で使える管理・運用コマンドの一覧
 ---
 
-管理者向けのコマンドです。すべて適切なパーミッションが必要です。
+Kerria のコマンドは、**Paper サーバー上で実行するコマンド**（`/kerria ...`）と、**プロキシ（Velocity）上で実行するコマンド**（`/vkerria ...`）の 2 種類に分かれています。
 `<param>` は必須パラメータ、`[param]` はオプションパラメータを示します。
 
-## 残高操作
+プレイヤー向けのコマンド（`/balance`・`/pay`・`/kerria log` など）は[プレイヤー向けコマンド](/docs/player/commands)を参照してください。
+
+## コマンド一覧
+
+| コマンド | 実行場所 | 説明 | パーミッション |
+|---------|---------|------|--------------|
+| `/kerria set <player> <amount> [currencyId] [--message <message>]` | Paper | 残高を直接設定する | `kerria.admin.economy` |
+| `/kerria give <player> <amount> [currencyId] [--message <message>]` | Paper | 残高を付与する | `kerria.admin.economy` |
+| `/kerria take <player> <amount> [currencyId] [--message <message>]` | Paper | 残高を徴収する | `kerria.admin.economy` |
+| `/kerria log player <player> [page]` | Paper | 他のプレイヤーの取引履歴を表示する | `kerria.admin.log` |
+| `/kerria log clear <days> [--confirm]` | Paper | 古い取引ログを削除する | `kerria.admin.log` |
+| `/kerria currency create <name> <symbol> [decimals]` | Paper | 通貨を作成する | `kerria.admin.currency` |
+| `/kerria currency edit <name> <property> <newValue>` | Paper | 通貨のプロパティを変更する | `kerria.admin.currency` |
+| `/kerria currency default <name>` | Paper | デフォルト通貨を変更する | `kerria.admin.currency` |
+| `/kerria currency delete <name>` | Paper | 通貨を削除する | `kerria.admin.currency` |
+| `/kerria currency list` | Paper | 通貨の一覧を表示する | `kerria.admin.currency` |
+| `/kerria currency info <name>` | Paper | 通貨の詳細を表示する | `kerria.admin.currency` |
+| `/kerria rate set <fromCurrency> <toCurrency> <rate>` | Paper | 為替レートを設定する | `kerria.admin.currency` |
+| `/kerria rate delete <fromCurrency> <toCurrency>` | Paper | 為替レートを削除する | `kerria.admin.currency` |
+| `/kerria rate list` | Paper | 為替レートの一覧を表示する | `kerria.admin.currency` |
+| `/kerria reload` | Paper | 設定ファイルとメッセージファイルを再読み込みする | `kerria.admin.reload` |
+| `/vkerria balance` | プロキシ（Velocity） | 自分の残高を表示する | なし |
+| `/vkerria pay <player> <amount>` | プロキシ（Velocity） | 他のプレイヤーへ送金する | なし |
+
+### `/kerria` と `/vkerria` を分けている理由
+
+Velocity では、プロキシに登録されたコマンドがバックエンドの Paper サーバーより先に処理されます。
+プロキシ側のコマンドも `/kerria` という名前にすると、プレイヤーが入力した `/kerria ...` をすべてプロキシが受け取ってしまい、Paper 側の `/kerria` が実行できなくなります。
+そのため、プロキシ側のコマンドは `/vkerria` という別の名前で登録しています。
+
+```mermaid
+flowchart LR
+    P[プレイヤーのコマンド入力] --> V{Velocity}
+    V -- "/vkerria ..." --> VK[プロキシで処理]
+    V -- "/kerria ... /balance /pay" --> S[Paper サーバーへ転送]
+    S --> K[Paper で処理]
+    VK --> DB[(共有データベース)]
+    K --> DB
+```
+
+## Paper サーバーのコマンド
+
+以下のコマンドは Paper サーバー上で実行します。すべて適切なパーミッションが必要です（パーミッションの既定値は[パーミッション](/docs/permissions)を参照してください）。
+
+### 残高操作
 
 プレイヤーの残高を直接操作するコマンドです。
 
@@ -26,7 +70,7 @@ description: サーバー管理者向けコマンドの一覧
 取引履歴（`/kerria log`）では、色や装飾などのタグのみが解釈されます。最大 512 文字まで指定できます。
 :::
 
-### 残高設定
+#### 残高設定
 
 <CommandLine command={{
   command: "/kerria set <player> <amount> [currencyId] [--message <message>]",
@@ -38,7 +82,7 @@ description: サーバー管理者向けコマンドの一覧
 
 - **パーミッション:** `kerria.admin.economy`
 
-### 残高付与
+#### 残高付与
 
 <CommandLine command={{
   command: "/kerria give <player> <amount> [currencyId] [--message <message>]",
@@ -55,7 +99,7 @@ description: サーバー管理者向けコマンドの一覧
 
 - **パーミッション:** `kerria.admin.economy`
 
-### 残高徴収
+#### 残高徴収
 
 <CommandLine command={{
   command: "/kerria take <player> <amount> [currencyId] [--message <message>]",
@@ -67,7 +111,9 @@ description: サーバー管理者向けコマンドの一覧
 
 - **パーミッション:** `kerria.admin.economy`
 
-## 取引履歴の閲覧
+### 取引履歴
+
+#### 取引履歴の閲覧
 
 <CommandLine command={{
   command: "/kerria log player <player> [page]",
@@ -79,7 +125,7 @@ description: サーバー管理者向けコマンドの一覧
 
 - **パーミッション:** `kerria.admin.log`
 
-### 取引ログの削除
+#### 取引ログの削除
 
 <CommandLine command={{
   command: "/kerria log clear <days> [--confirm]",
@@ -96,12 +142,13 @@ description: サーバー管理者向けコマンドの一覧
 ```
 
 日数には 1 以上の整数を指定します。削除した取引ログは元に戻せません。
+取引ログの保存先については[データベース](/docs/database)を参照してください。
 
 - **パーミッション:** `kerria.admin.log`
 
-## 通貨管理
+### 通貨管理
 
-### 通貨作成
+#### 通貨作成
 
 <CommandLine command={{
   command: "/kerria currency create <name> <symbol> [decimals]",
@@ -113,11 +160,11 @@ description: サーバー管理者向けコマンドの一覧
 `decimals` は小数点以下の桁数で、省略時は 2 になります。
 フォーマットはデフォルトで `%amount% <name>` が設定されます。
 
-フォーマットでは `%amount%`（桁区切り済みの金額）・`%plural%`・`%symbol%`・`%name%` のプレースホルダが利用できます。桁区切り文字や小数点記号は、後述の `/kerria currency edit` で `thousandsSeparator` / `decimalSeparator` を変更して通貨ごとに調整できます。表示例は[設定ファイル](/docs/administrator/configuration#通貨の表示形式)を参照してください。
+フォーマットでは `%amount%`（桁区切り済みの金額）・`%plural%`・`%symbol%`・`%name%` のプレースホルダが利用できます。桁区切り文字や小数点記号は、後述の `/kerria currency edit` で `thousandsSeparator` / `decimalSeparator` を変更して通貨ごとに調整できます。表示例は[設定ファイル](/docs/configuration#通貨の表示形式)を参照してください。
 
 - **パーミッション:** `kerria.admin.currency`
 
-### 通貨編集
+#### 通貨編集
 
 <CommandLine command={{
   command: "/kerria currency edit <name> <property> <newValue>",
@@ -126,6 +173,7 @@ description: サーバー管理者向けコマンドの一覧
 }} />
 
 既存の通貨のプロパティを、削除・再作成せずに変更します。
+プロパティ名の大文字小文字は区別しません。
 
 編集できるプロパティは以下の通りです。
 
@@ -135,7 +183,7 @@ description: サーバー管理者向けコマンドの一覧
 | `plural` | 通貨の複数形 |
 | `symbol` | 通貨記号 |
 | `format` | フォーマットパターン |
-| `fractionalDigits` | 小数点以下の桁数（0 以上の整数） |
+| `fractionalDigits`（`decimals` でも可） | 小数点以下の桁数（0 以上の整数） |
 | `thousandsSeparator` | 桁区切り文字 |
 | `decimalSeparator` | 小数点記号 |
 
@@ -144,7 +192,7 @@ description: サーバー管理者向けコマンドの一覧
 
 - **パーミッション:** `kerria.admin.currency`
 
-### デフォルト通貨の変更
+#### デフォルト通貨の変更
 
 <CommandLine command={{
   command: "/kerria currency default <name>",
@@ -157,9 +205,14 @@ description: サーバー管理者向けコマンドの一覧
 
 通貨の名前・記号・フォーマットなどはデータベースで管理されているため、Vault 連携でもデータベース上の通貨の情報がそのまま使用されます。
 
+:::warning[プロキシの設定は自動で更新されません]
+このコマンドが書き換えるのは、実行した Paper サーバーの設定ファイルだけです。
+プロキシ（Velocity）の `default-currency-id` は自動では更新されないため、`/vkerria` で扱う通貨を合わせる場合は手動で同じ値に変更してください。詳しくは[クロスサーバー](/docs/cross-server)を参照してください。
+:::
+
 - **パーミッション:** `kerria.admin.currency`
 
-### 通貨削除
+#### 通貨削除
 
 <CommandLine command={{
   command: "/kerria currency delete <name>",
@@ -171,7 +224,7 @@ description: サーバー管理者向けコマンドの一覧
 
 - **パーミッション:** `kerria.admin.currency`
 
-### 通貨一覧
+#### 通貨一覧
 
 <CommandLine command={{
   command: "/kerria currency list",
@@ -183,7 +236,7 @@ description: サーバー管理者向けコマンドの一覧
 
 - **パーミッション:** `kerria.admin.currency`
 
-### 通貨詳細
+#### 通貨詳細
 
 <CommandLine command={{
   command: "/kerria currency info <name>",
@@ -195,7 +248,9 @@ description: サーバー管理者向けコマンドの一覧
 
 - **パーミッション:** `kerria.admin.currency`
 
-## 為替レート
+### 為替レート
+
+#### 為替レート設定
 
 <CommandLine command={{
   command: "/kerria rate set <fromCurrency> <toCurrency> <rate>",
@@ -208,7 +263,7 @@ description: サーバー管理者向けコマンドの一覧
 
 - **パーミッション:** `kerria.admin.currency`
 
-### 為替レート削除
+#### 為替レート削除
 
 <CommandLine command={{
   command: "/kerria rate delete <fromCurrency> <toCurrency>",
@@ -221,7 +276,7 @@ description: サーバー管理者向けコマンドの一覧
 
 - **パーミッション:** `kerria.admin.currency`
 
-### 為替レート一覧
+#### 為替レート一覧
 
 <CommandLine command={{
   command: "/kerria rate list",
@@ -233,9 +288,9 @@ description: サーバー管理者向けコマンドの一覧
 
 - **パーミッション:** `kerria.admin.currency`
 
-## プラグイン管理
+### プラグイン管理
 
-### 再読み込み
+#### 再読み込み
 
 <CommandLine command={{
   command: "/kerria reload",
@@ -247,3 +302,58 @@ description: サーバー管理者向けコマンドの一覧
 不正な内容の場合は再読み込みがスキップされ、直前の正常な内容が維持されます。
 
 - **パーミッション:** `kerria.admin.reload`
+
+## プロキシ（Velocity）のコマンド
+
+以下のコマンドは Velocity プロキシ上で実行します。プロキシに Kerria（Velocity 版）を導入し、Paper サーバーと同じデータベースに接続している場合に利用できます。導入方法は[クロスサーバー](/docs/cross-server)を参照してください。
+
+プロキシ上で処理されるため、プレイヤーがどのサーバーにいても実行でき、送金相手が別のサーバーにいても送金できます。
+扱う通貨は、プロキシの設定ファイルの `default-currency-id` で指定した通貨に固定されます。
+
+:::note
+`/vkerria` のコマンドはパーミッションを確認しません。プロキシに接続しているプレイヤーであれば誰でも実行できます。
+また、コンソールからは実行できません（プレイヤーのみ実行できます）。
+サブコマンドを指定せずに `/vkerria` を実行した場合や、存在しないサブコマンドを指定した場合は、使い方（`Usage: /vkerria <balance|pay>`）が表示されます。
+:::
+
+### 残高確認
+
+<CommandLine command={{
+  command: "/vkerria balance",
+  aliases: [],
+  status: "stable"
+}} />
+
+自分の残高を、プロキシの `default-currency-id` の通貨で表示します。
+
+- **パーミッション:** なし
+
+### 送金
+
+<CommandLine command={{
+  command: "/vkerria pay <player> <amount>",
+  aliases: [],
+  status: "stable"
+}} />
+
+指定したプレイヤーに送金します。送金元からの減算と送金先への加算は、1 つのトランザクションでまとめて実行されます。
+
+- `<player>` は Kerria のアカウント名で解決されます（大文字小文字は区別しません）。オフラインのプレイヤーにも送金できます。
+- `<amount>` には 0 より大きい数値を指定します。
+- 自分自身には送金できません。残高が不足している場合はエラーになります。
+- 送金相手がプロキシに接続している場合は、受け取りの通知が届きます。
+
+```
+/vkerria pay Notch 100
+```
+
+:::warning[Paper の `/pay` との違い]
+`/vkerria pay` は通貨IDや `--message` を指定できず、現在は取引ログ（`/kerria log` で表示される履歴）にも記録されません。
+メッセージも英語の固定文言で表示され、[メッセージファイル](/docs/messages)の設定は反映されません。
+:::
+
+- **パーミッション:** なし
+
+:::note
+Velocity 版が提供するのは残高確認と送金のみです。通貨管理・残高操作・取引履歴などの管理コマンドは Paper サーバー上の `/kerria` で操作してください。
+:::

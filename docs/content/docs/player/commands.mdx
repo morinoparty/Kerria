@@ -1,12 +1,35 @@
 ---
 title: コマンド
-description: プレイヤー向けコマンドの一覧
+description: プレイヤー向けコマンドの一覧（Paper サーバーとプロキシ）
 ---
 
-すべてのコマンドは `/kerria` をルートとして実行します（残高確認は `/balance`・`/bal`、送金は `/pay` でも実行できます）。
+Kerria のプレイヤー向けコマンドは、**Paper サーバーで実行するコマンド** と **プロキシ（Velocity）で実行するコマンド** に分かれています。
 `<param>` は必須パラメータ、`[param]` はオプションパラメータを示します。
 
-## 残高確認
+## コマンド一覧 [#summary]
+
+| コマンド | 実行場所 | 説明 |
+|----------|----------|------|
+| [`/balance`・`/bal`・`/kerria balance`](#balance) | Paper | 自分の残高を確認します。 |
+| [`/pay`・`/kerria pay`](#pay) | Paper | ほかのプレイヤーに送金します（メッセージを添えられます）。 |
+| [`/kerria log`](#log) | Paper | 自分の取引履歴を表示します。 |
+| [`/kerria convert`](#convert) | Paper | 為替レートに基づいて通貨を変換します。 |
+| [`/kerria top`](#top) | Paper | 残高ランキングを表示します（デフォルトでは OP のみ）。 |
+| [`/vkerria balance`](#proxy-balance) | Proxy | プロキシ上で自分の残高を確認します。 |
+| [`/vkerria pay`](#proxy-pay) | Proxy | プロキシ上でほかのプレイヤーに送金します。 |
+
+<Callout title="/kerria と /vkerria の違い">
+`/kerria`（および `/balance`・`/bal`・`/pay`）は、いま接続している Paper サーバーで実行されるコマンドです。
+`/vkerria` はプロキシ（Velocity）で実行されるコマンドで、プロキシに Kerria が導入されているネットワークでのみ使えます。
+プロキシ側のコマンド名が `/vkerria` と分かれているのは、プロキシに同じ名前のコマンドがあると、プロキシが先にコマンドを処理してしまい、Paper 側の `/kerria` が実行できなくなるためです。
+</Callout>
+
+## Paper サーバーのコマンド [#paper-commands]
+
+各 Paper サーバー上で実行するコマンドです。通常はこちらを使います。
+残高確認は `/balance`・`/bal`、送金は `/pay` でも実行でき、そのほかのコマンドは `/kerria` をルートとして実行します。
+
+### 残高確認 [#balance]
 
 <CommandLine command={{
   command: "/balance [currencyId]",
@@ -17,9 +40,9 @@ description: プレイヤー向けコマンドの一覧
 自分の残高を確認します。
 通貨IDを指定すると、その通貨の残高を表示します。省略時はデフォルト通貨（設定ファイルの `economy.default-currency-id`）が使用されます。
 
-- **パーミッション:** `kerria.balance`
+- **パーミッション:** `kerria.balance`（デフォルトで全員に許可）
 
-## 送金
+### 送金 [#pay]
 
 <CommandLine command={{
   command: "/pay <player> <amount> [currencyId] [--message <message>]",
@@ -28,7 +51,8 @@ description: プレイヤー向けコマンドの一覧
 }} />
 
 指定したプレイヤーに送金します。
-自分自身への送金はできません。残高が不足している場合はエラーになります。
+金額には正の数を指定します。自分自身への送金はできません。残高が不足している場合はエラーになります。
+通貨IDを省略した場合はデフォルト通貨で送金します。
 
 `--message` を指定すると、送金にメッセージ（メモ）を添えられます。メッセージは送金者と受取人に表示され、取引履歴にも記録されます。
 メッセージには空白を含められ、最大 512 文字まで指定できます。MiniMessage のタグは解釈されず、入力した文字列がそのまま表示されます。
@@ -37,22 +61,9 @@ description: プレイヤー向けコマンドの一覧
 /pay _NIKOMARU 100 --message ガラス代
 ```
 
-- **パーミッション:** `kerria.pay`
+- **パーミッション:** `kerria.pay`（デフォルトで全員に許可）
 
-## ランキング
-
-<CommandLine command={{
-  command: "/kerria top [currencyId] [page]",
-  aliases: [],
-  status: "stable"
-}} />
-
-残高ランキングを表示します。
-通貨やページ番号を指定してフィルタリングできます。1ページあたり10件表示され、次ページへのクリック可能なリンクが表示されます。
-
-- **パーミッション:** `kerria.top`（他のプレイヤーの残高が見えるため、デフォルトでは OP のみ）
-
-## 取引履歴
+### 取引履歴 [#log]
 
 <CommandLine command={{
   command: "/kerria log [page]",
@@ -63,9 +74,9 @@ description: プレイヤー向けコマンドの一覧
 自分の取引履歴をページ送りで表示します。
 各エントリには日時・金額・取引を実行したプラグイン名・取引メッセージが含まれます。
 
-- **パーミッション:** `kerria.log`
+- **パーミッション:** `kerria.log`（デフォルトで全員に許可）
 
-## 通貨変換
+### 通貨変換 [#convert]
 
 <CommandLine command={{
   command: "/kerria convert <amount> <fromCurrency> <toCurrency>",
@@ -74,9 +85,71 @@ description: プレイヤー向けコマンドの一覧
 }} />
 
 為替レートに基づいて通貨を変換します。
+`<fromCurrency>`・`<toCurrency>` には通貨名を指定します。
 変換元通貨の残高から引き落とし、レートに基づいた金額を変換先通貨に入金します。
 事前に管理者がレートを設定している必要があります。
 
 変換は単一のトランザクションとして処理されます。引き落としと入金は「すべて成功」か「まったく変化しない」のいずれかとなり、途中で失敗して資金が失われることはありません。
 
-- **パーミッション:** `kerria.convert`
+- **パーミッション:** `kerria.convert`（デフォルトで全員に許可）
+
+### ランキング [#top]
+
+<CommandLine command={{
+  command: "/kerria top [currencyId] [page]",
+  aliases: [],
+  status: "stable"
+}} />
+
+残高ランキングを表示します。
+通貨IDやページ番号を指定してフィルタリングできます。1ページあたり10件表示され、次ページへのクリック可能なリンクが表示されます。
+引数は順番で判定されるため、通貨IDを省略してページ番号だけを指定することはできません（`/kerria top 2` は「通貨ID 2 の 1 ページ目」になります）。別のページを見る場合は、`/kerria top 1 2`（通貨ID 1 の 2 ページ目）のように通貨IDも指定してください。次ページへのリンクをクリックすると `/kerria top <currencyId> <page>` が実行されます。
+
+- **パーミッション:** `kerria.top`（他のプレイヤーの残高が見えるため、デフォルトでは OP のみ）
+
+## プロキシ（Velocity）のコマンド [#proxy-commands]
+
+<Callout type="info" title="Proxy">
+このセクションのコマンドは、プロキシ（Velocity）に Kerria が導入されているネットワークでのみ使えます。
+プロキシと各 Paper サーバーは同じデータベースを共有しているため、ネットワーク内のどのサーバーにいても同じ残高を参照・送金できます。
+</Callout>
+
+プロキシのコマンドは、常にプロキシの設定ファイルで指定された通貨（`default-currency-id`）を使います。通貨を指定することはできません。
+ほかの通貨を扱う場合や、送金にメッセージを添える場合は、[Paper サーバーのコマンド](#paper-commands) を使ってください。
+
+### 残高確認 [#proxy-balance]
+
+<CommandLine command={{
+  command: "/vkerria balance",
+  aliases: [],
+  status: "stable"
+}} />
+
+自分の残高を確認します。
+表示される残高は、プロキシの `default-currency-id` で指定された通貨のものです。
+
+### 送金 [#proxy-pay]
+
+<CommandLine command={{
+  command: "/vkerria pay <player> <amount>",
+  aliases: [],
+  status: "stable"
+}} />
+
+指定したプレイヤーに、プロキシの `default-currency-id` で指定された通貨で送金します。
+金額には正の数を指定します。自分自身への送金はできません。残高が不足している場合はエラーになります。
+送金先のプレイヤーがネットワーク内にオンラインであれば、受け取ったことが通知されます。
+
+```
+/vkerria pay _NIKOMARU 100
+```
+
+:::note
+`/vkerria pay` による送金は取引履歴に記録されないため、`/kerria log` には表示されません。
+:::
+
+## 関連ページ [#related]
+
+- [パーミッション](/docs/permissions) — 各コマンドに必要なパーミッションの一覧です。
+- [クロスサーバー対応](/docs/cross-server) — プロキシへの導入方法と仕組みについて説明しています（管理者向け）。
+- [管理者コマンド](/docs/commands) — 残高操作や通貨管理など、管理者向けのコマンドです。

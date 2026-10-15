@@ -3,25 +3,52 @@ title: パーミッション
 description: Kerriaで使用されるパーミッションノードの一覧
 ---
 
-Kerriaのコマンドはパーミッションノードで制御されます。
+Kerria のパーミッションは、Paper サーバーのコマンド（`/kerria ...`・`/balance`・`/pay` など）にのみ設定されています。
+プロキシ（Velocity）の `/vkerria` コマンドはパーミッションを確認しません。
 
-## プレイヤー向け
+| 実行場所 | コマンド | パーミッション |
+|---------|---------|--------------|
+| Paper | `/kerria ...`・`/balance`・`/bal`・`/pay` | 下記の `kerria.*` ノードで制御 |
+| プロキシ（Velocity） | `/vkerria balance`・`/vkerria pay` | なし（プロキシに接続している全プレイヤーが実行可能） |
 
-| パーミッション | 説明 | デフォルト |
-|--------------|------|-----------|
-| `kerria.balance` | 自分の残高を確認する | 全員 |
-| `kerria.pay` | 他のプレイヤーに送金する | 全員 |
-| `kerria.log` | 自分の取引履歴を表示する | 全員 |
-| `kerria.convert` | 通貨を変換する | 全員 |
+各コマンドの詳細は[管理者コマンド](/docs/commands)と[プレイヤー向けコマンド](/docs/player/commands)を参照してください。
 
-## 管理者向け
+## Paper サーバーのパーミッション
 
-以下のパーミッションは、デフォルトでは OP のみに許可されています。LuckPerms などで個別に付与できます。
+パーミッションは Paper プラグインの定義ファイルで宣言されており、LuckPerms などのパーミッション管理プラグインで個別に付与・剥奪できます。
 
-| パーミッション | 説明 |
-|--------------|------|
-| `kerria.top` | 残高ランキング（他のプレイヤーの残高）を表示する |
-| `kerria.admin.economy` | 残高の設定・付与・徴収（set / give / take） |
-| `kerria.admin.currency` | 通貨の作成・削除・一覧・詳細表示・為替レートの設定・削除 |
-| `kerria.admin.log` | 他のプレイヤーの取引履歴の表示・古い取引ログの削除 |
-| `kerria.admin.reload` | 設定ファイルとメッセージファイルを再読み込みする |
+### デフォルトで全員に許可
+
+以下のパーミッションは、デフォルトで全員に許可されています。
+
+| パーミッション | 対象コマンド | 説明 | デフォルト |
+|--------------|------------|------|-----------|
+| `kerria.balance` | `/balance`・`/bal`・`/kerria balance` | 自分の残高を確認する | 全員 |
+| `kerria.pay` | `/pay`・`/kerria pay` | 他のプレイヤーに送金する | 全員 |
+| `kerria.log` | `/kerria log [page]` | 自分の取引履歴を表示する | 全員 |
+| `kerria.convert` | `/kerria convert` | 通貨を変換する | 全員 |
+
+### デフォルトで OP のみ
+
+以下のパーミッションは、デフォルトでは OP のみに許可されています。
+
+| パーミッション | 対象コマンド | 説明 | デフォルト |
+|--------------|------------|------|-----------|
+| `kerria.top` | `/kerria top` | 残高ランキング（他のプレイヤーの残高）を表示する | OP |
+| `kerria.admin.economy` | `/kerria set`・`/kerria give`・`/kerria take` | 残高の設定・付与・徴収 | OP |
+| `kerria.admin.currency` | `/kerria currency ...`・`/kerria rate ...` | 通貨の作成・編集・デフォルト変更・削除・一覧・詳細表示、為替レートの設定・削除・一覧 | OP |
+| `kerria.admin.log` | `/kerria log player`・`/kerria log clear` | 他のプレイヤーの取引履歴の表示・古い取引ログの削除 | OP |
+| `kerria.admin.reload` | `/kerria reload` | 設定ファイルとメッセージファイルを再読み込みする | OP |
+
+:::info
+`kerria.top` はプレイヤー向けのランキングコマンドですが、他のプレイヤーの残高が見えるため OP のみに許可しています。全員に公開する場合は、パーミッション管理プラグインで付与してください。
+:::
+
+## プロキシ（Velocity）のパーミッション
+
+Velocity 版の Kerria には、パーミッションノードはありません。
+`/vkerria balance` と `/vkerria pay` は、プロキシに接続しているプレイヤーであれば誰でも実行できます（コンソールからは実行できません）。
+
+:::warning
+プロキシ側で送金を制限したい場合でも、現在は Kerria のパーミッションで制御することはできません。
+:::
