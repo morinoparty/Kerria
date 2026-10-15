@@ -1,14 +1,3 @@
 {
-    "pages": [
-        "---Introduction---",
-        "index",
-        "---Getting Started---",
-        "getting-started",
-        "---Player---",
-        "...player",
-        "---Administrator---",
-        "...administrator",
-        "---Developer---",
-        "...developer"
-    ]
+    "pages": ["player", "(admin)"]
 }
