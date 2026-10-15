@@ -97,6 +97,38 @@ boolean isOwner = economy.isBankOwner("guild_bank", "Notch").transactionSuccess(
 より細かい制御（メンバーの追加・削除など）が必要な場合は、`KerriaAPI#getBankManager()` から取得できる
 `BankManager` を利用してください。`BankManager` の各メソッドは `Either<KerriaError, T>` を返します。
 
+## 取引メッセージの付与（TransactionContext） [#transaction-context]
+
+Vault の `depositPlayer` / `withdrawPlayer` には取引メッセージを渡す引数がありません。
+`TransactionContext` にメッセージを設定しておくと、そのスレッドで行われた Vault 経由の取引の取引ログに、メッセージが記録されます。
+ショッププラグインの連携など、「何のための取引か」を取引ログに残したい場合に使用します。
+
+```kotlin
+import party.morino.kerria.api.economy.TransactionContext
+
+// ブロックの中で行われた取引にメッセージが付く
+TransactionContext.withMessage("ダイヤモンド ×16 を購入") {
+    economy.withdrawPlayer(player, 100.0)
+}
+```
+
+取引前イベントで設定し、取引後イベントで解除するなど、処理がブロックに収まらない場合は `setMessage` と `clear` を使用します。
+
+| メソッド | 説明 |
+|---------|------|
+| `withMessage(message) { ... }` | ブロックの実行中だけメッセージを設定し、終了後に元に戻す |
+| `setMessage(message)` | 現在のスレッドで以降に行われる取引のメッセージを設定する |
+| `clear()` | 現在のスレッドのメッセージを解除する |
+| `currentMessage()` | 現在のスレッドに設定されているメッセージを取得する |
+
+:::warning
+- メッセージはスレッドごとに保持されます。別のスレッドで行われた取引には付きません。
+- `setMessage` を使った場合は、必ず `clear` を呼んでください。解除しないと、同じスレッドの後続の取引にもメッセージが付きます。
+- メッセージはプレーンテキストとして記録され、MiniMessage のタグは解釈されません。長すぎるメッセージは切り詰められます。
+:::
+
+QuickShop-Hikari については、この仕組みを使った[アドオン](/docs/addons)を提供しています。
+
 ## カスタムイベント
 
 Kerria は経済操作に関して、実行前・実行後の 2 種類のイベントを発火します。用途に応じて使い分けてください。

@@ -69,6 +69,8 @@ adventure-text-minimessage = { group = "net.kyori", name = "adventure-text-minim
 
 vault-api = { group = "com.github.MilkBowl", name = "vaultAPI", version = "1.7.1" }
 placeholderapi = { group = "me.clip", name = "placeholderapi", version = "2.12.3" }
+# QuickShop-Hikari 連携アドオン用（codemc リポジトリで配布）
+quickshop-api = { group = "com.ghostchu", name = "quickshop-api", version = "6.3.0.0" }
 velocity-api = { group = "com.velocitypowered", name = "velocity-api", version = "4.2.0" }
 
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }

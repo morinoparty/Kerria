@@ -9,8 +9,10 @@ import party.morino.kerria.api.account.AccountManager
 import party.morino.kerria.api.account.BankManager
 import party.morino.kerria.api.currency.CurrencyManager
 import party.morino.kerria.api.economy.EconomyManager
+import party.morino.kerria.api.economy.TransactionContext
 import party.morino.kerria.api.files.ConfigManager
 import party.morino.kerria.paper.Kerria
+import party.morino.kerria.paper.message.TransactionMessageFormatter
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -259,6 +261,8 @@ class VaultEconomy : AbstractEconomy(), KoinComponent {
             account.accountId,
             defaultCurrencyId,
             BigDecimal.valueOf(amount),
+            // アドオンなどが TransactionContext に設定したメッセージがあれば取引ログに付ける
+            message = contextMessage(),
             treatePluginName = callerPlugin,
         ).fold(
             ifLeft = { error ->
@@ -283,6 +287,8 @@ class VaultEconomy : AbstractEconomy(), KoinComponent {
             account.accountId,
             defaultCurrencyId,
             BigDecimal.valueOf(amount),
+            // アドオンなどが TransactionContext に設定したメッセージがあれば取引ログに付ける
+            message = contextMessage(),
             treatePluginName = callerPlugin,
         ).fold(
             ifLeft = { error ->
@@ -293,6 +299,22 @@ class VaultEconomy : AbstractEconomy(), KoinComponent {
                 EconomyResponse(amount, newBalance.toDouble(), EconomyResponse.ResponseType.SUCCESS, null)
             },
         )
+    }
+
+    /**
+     * 現在のスレッドの [TransactionContext] に設定されたメッセージを、取引ログの保存形式に変換する
+     *
+     * 他のプラグインが設定したメッセージのため、プレーンテキストとして扱い（タグはエスケープ）、
+     * 取引ログのカラムに収まらない長さは切り詰める。
+     *
+     * @return 保存形式のメッセージ。未設定・空の場合は null
+     */
+    private fun contextMessage(): String? {
+        val raw = TransactionContext.currentMessage()?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+        val stored = TransactionMessageFormatter.fromPlainText(raw)
+        if (TransactionMessageFormatter.isValid(stored)) return stored
+        // エスケープで文字数が最大 2 倍になるため、半分に切り詰めてから変換する
+        return TransactionMessageFormatter.fromPlainText(raw.take(TransactionMessageFormatter.MAX_LENGTH / 2 - 1) + "…")
     }
 
     private companion object {

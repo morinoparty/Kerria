@@ -37,11 +37,44 @@ Kerria のパーミッションは、Paper サーバーのコマンド（`/kerri
 | `kerria.top` | `/kerria top` | 残高ランキング（他のプレイヤーの残高）を表示する | OP |
 | `kerria.admin.economy` | `/kerria set`・`/kerria give`・`/kerria take` | 残高の設定・付与・徴収 | OP |
 | `kerria.admin.currency` | `/kerria currency ...`・`/kerria rate ...` | 通貨の作成・編集・デフォルト変更・削除・一覧・詳細表示、為替レートの設定・削除・一覧 | OP |
-| `kerria.admin.log` | `/kerria log player`・`/kerria log clear` | 他のプレイヤーの取引履歴の表示・古い取引ログの削除 | OP |
+| `kerria.admin.log` | `/kerria log player` | 他のプレイヤーの取引履歴を表示する | OP |
+| `kerria.admin.log.clear` | `/kerria log clear` | 古い取引ログを削除する | OP |
 | `kerria.admin.reload` | `/kerria reload` | 設定ファイルとメッセージファイルを再読み込みする | OP |
 
 :::info
 `kerria.top` は他のプレイヤーの残高が見えるため、OP のみに許可しています。全員に公開する場合は、パーミッション管理プラグインで付与してください。
+:::
+
+### パーミッショングループ
+
+役割ごとに、複数のパーミッションをまとめたグループを用意しています。
+パーミッション管理プラグイン（LuckPerms など）で、グループ単位でまとめて付与できます。
+
+| グループ | デフォルト | 含まれるパーミッション |
+|---------|-----------|----------------------|
+| `kerria.player` | 全員 | `kerria.balance`・`kerria.pay`・`kerria.log`・`kerria.convert` |
+| `kerria.staff` | OP | `kerria.player`・`kerria.admin.log` |
+| `kerria.admin` | OP | `kerria.staff`・`kerria.top`・`kerria.admin.economy`・`kerria.admin.currency`・`kerria.admin.log.clear`・`kerria.admin.reload` |
+
+```mermaid
+flowchart LR
+    admin["kerria.admin"] --> staff["kerria.staff"]
+    admin --> top["kerria.top"]
+    admin --> economy["kerria.admin.economy"]
+    admin --> currency["kerria.admin.currency"]
+    admin --> logclear["kerria.admin.log.clear"]
+    admin --> reload["kerria.admin.reload"]
+    staff --> player["kerria.player"]
+    staff --> adminlog["kerria.admin.log"]
+    player --> balance["kerria.balance"]
+    player --> pay["kerria.pay"]
+    player --> log["kerria.log"]
+    player --> convert["kerria.convert"]
+```
+
+:::info[取引ログの削除]
+取引ログの削除（`/kerria log clear`）は取り消せないため、他のプレイヤーの取引履歴の表示（`kerria.admin.log`）とは別の `kerria.admin.log.clear` で制御しています。
+`kerria.staff` には含まれず、`kerria.admin` にのみ含まれます。
 :::
 
 ## プロキシ（Velocity）のパーミッション

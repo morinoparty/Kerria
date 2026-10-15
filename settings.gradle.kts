@@ -21,3 +21,5 @@ include("api")
 include("common")
 include("paper")
 include("velocity")
+// 外部プラグイン連携のアドオン（それぞれ独立したプラグイン JAR になる）
+include("addons:quickshop-hikari")
