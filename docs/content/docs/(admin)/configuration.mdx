@@ -7,7 +7,7 @@ Kerriaの設定は `plugins/Kerria/config.conf` に [HOCON](https://github.com/l
 初回起動時に、コメント付きの既定ファイルが生成されます。キー名は kebab-case（例: `default-currency-id`）です。
 
 通貨の名前・記号・複数形・フォーマットなどはデータベースで管理しており、設定ファイルには含まれません。
-通貨の作成・編集は [`/kerria currency`](/docs/administrator/commands) コマンドで行います。
+通貨の作成・編集は [`/kerria currency`](/docs/commands) コマンドで行います。
 
 :::note
 以前のバージョンの `config.yaml` は読み込まれません。必要な値を `config.conf` へ手動で移してください。
@@ -55,7 +55,7 @@ database {
 
 プレイヤーへ送信するメッセージの既定の言語ロケールです（例: `ja`, `en`）。
 プレイヤーのクライアント言語に対応する翻訳が無い場合や、コンソール宛のメッセージでこのロケールが使用されます。
-メッセージの多言語対応については[メッセージ設定](/docs/administrator/messages)を参照してください。
+メッセージの多言語対応については[メッセージ設定](/docs/messages)を参照してください。
 
 ## economy
 
@@ -103,4 +103,13 @@ database {
 
 ## database
 
-データベースの接続設定です。`sqlite` と `postgresql` をサポートしています。
+データベースの接続設定です。`mode` で使用するデータベースを選択します。
+
+| `mode` | 用途 | 保存先 |
+|--------|------|--------|
+| `sqlite`（既定） | Paper サーバー 1 台での運用。追加の設定なしで動作します | `plugins/Kerria/<database>.db`（既定では `kerria.db`） |
+| `postgresql` | 複数サーバーでの残高共有（[クロスサーバー対応](/docs/cross-server)） | `host` / `port` / `database` / `username` / `password` で指定した PostgreSQL |
+
+PostgreSQL 使用時は、`database.pool` セクションで HikariCP の接続プールを調整できます。
+
+接続プールの各設定項目や、Kerria が作成するテーブルの構造については、[データベース](/docs/database)を参照してください。

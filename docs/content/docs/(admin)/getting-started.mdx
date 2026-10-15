@@ -1,0 +1,80 @@
+---
+title: はじめ方
+description: Kerria のインストールと初回起動の手引き
+---
+
+このページでは、Kerria をサーバーに導入して動かすまでの手順を説明します。
+
+## 動作環境
+
+Kerria を利用するには、次の環境が必要です。
+
+| 項目 | 要件 |
+|------|------|
+| サーバー | [Paper](https://papermc.io/) 26.1 以上 |
+| Java | Java 25 以上 |
+| プロキシ（任意） | [Velocity](https://papermc.io/software/velocity)（サーバーをまたいで残高を共有する場合のみ） |
+
+:::info[ライブラリの取得]
+Paper 版の Kerria の JAR には依存ライブラリを同梱していません。サーバーの起動時に、Paper が Maven Central のミラーから必要なライブラリを取得します。
+初回起動時はインターネットへの接続が必要です（取得したライブラリはサーバーの `libraries/` にキャッシュされます）。
+:::
+
+## 依存プラグイン
+
+Kerria は単体で動作します。追加のプラグインは必須ではありません。
+
+- **Vault**（任意）: Kerria は Vault の Economy プロバイダーを提供します。ショップや他の経済系プラグインと連携する場合は、サーバーに Vault を導入してください。導入されていれば、Kerria が自動的に経済プロバイダーとして登録されます。詳しくは[API 連携](/docs/api)を参照してください。
+- **PlaceholderAPI**（任意）: 残高などをプレースホルダーとして表示できます。詳しくは[プレースホルダー](/docs/placeholders)を参照してください。
+
+## インストール手順
+
+:::warning
+Kerria は残高データを扱います。運用中の導入・アップデートの前には、必ずデータのバックアップを取得してください。
+:::
+
+### Paper サーバー
+
+1. [リリースページ](https://github.com/morinoparty/Kerria/releases) から `Kerria-paper-<version>.jar` をダウンロードします。
+2. ダウンロードした JAR を、Paper サーバーの `plugins/` ディレクトリに配置します。
+3. サーバーを起動（または再起動）します。
+
+起動すると、`plugins/Kerria/` に設定ファイルが自動生成されます。
+
+### Velocity プロキシ（任意）
+
+Velocity 版は、複数の Paper サーバーで残高を共有する場合にのみ導入します。Paper サーバー 1 台で運用する場合は不要です。
+サーバー間で残高を共有するには、Paper 版と Velocity 版のすべてが同じ PostgreSQL データベースに接続している必要があります。
+
+1. 残高を共有するすべての Paper サーバーに Paper 版の Kerria を導入し、データベースを PostgreSQL に設定します（[データベース](/docs/database)を参照）。
+2. [リリースページ](https://github.com/morinoparty/Kerria/releases) から `Kerria-velocity-<version>.jar` をダウンロードし、Velocity プロキシの `plugins/` ディレクトリに配置します。
+3. プロキシを起動すると、`plugins/kerria/config.conf` が生成されます。Paper 側と同じ PostgreSQL を指定して、プロキシを再起動してください。
+
+詳しい手順とプロキシ用の `/vkerria` コマンドについては、[クロスサーバー対応](/docs/cross-server)を参照してください。
+
+## 初回起動後
+
+Paper サーバーの初回起動時に、次のファイルが生成されます。
+
+| パス | 内容 |
+|------|------|
+| `plugins/Kerria/config.conf` | 言語・初期残高・デフォルト通貨・データベースなどの設定（HOCON 形式） |
+| `plugins/Kerria/translation/` | メッセージのロケール別ファイル（`ja_JP.properties` など） |
+| `plugins/Kerria/kerria.db` | SQLite のデータベースファイル（`database.mode` が `sqlite` の場合） |
+
+既定ではデータベースに SQLite が使用され、追加の設定なしで動作します。
+また、通貨が 1 つも無い場合は、デフォルト通貨として `JPY` が作成されます。通貨そのものは `/kerria currency` コマンドで管理します。
+
+導入が完了したら、次のページも確認してください。
+
+| ページ | 内容 |
+|------|------|
+| [設定ファイル](/docs/configuration) | 言語・初期残高・デフォルト通貨・通貨の表示形式 |
+| [データベース](/docs/database) | SQLite / PostgreSQL の設定とテーブル構造 |
+| [コマンド](/docs/commands) | 管理者向けを含むコマンドの一覧 |
+| [パーミッション](/docs/permissions) | 各コマンドに必要な権限 |
+| [プレイヤー向けコマンド](/docs/player/commands) | プレイヤーが使うコマンドの使い方 |
+
+:::note
+Kerria は現在開発中のため、バージョンアップにより破壊的な仕様変更が発生する可能性があります。
+:::

@@ -1,0 +1,23 @@
+{
+    "title": "開発者・管理者向け",
+    "root": true,
+    "icon": "Wrench",
+    "description": "導入・設定・運用と開発のためのドキュメント",
+    "pages": [
+        "---はじめに---",
+        "index",
+        "getting-started",
+        "configuration",
+        "database",
+        "cross-server",
+        "---コマンド・権限---",
+        "commands",
+        "permissions",
+        "---機能---",
+        "messages",
+        "placeholders",
+        "---開発者向け---",
+        "api",
+        "game-test"
+    ]
+}

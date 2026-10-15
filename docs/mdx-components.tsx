@@ -4,6 +4,7 @@ import { Mermaid } from "./components/mdx/mermaind";
 import { CommandList } from "./components/mdx/command-list";
 import { CommandLine } from "./components/mdx/command-line";
 import { UUIDV4, UUIDV7 } from "./components/mdx/uuid-example";
+import { MinecraftUUID } from "./components/mdx/minecraft-uuid";
 import { Timestamp } from "./components/mdx/timestamp";
 
 const customComponents = {
@@ -11,6 +12,7 @@ const customComponents = {
     CommandLine,
     UUIDV4,
     UUIDV7,
+    MinecraftUUID,
     Timestamp,
 };
 
