@@ -14,7 +14,6 @@ Kerria のプレイヤー向けコマンドは、**Paper サーバーで実行�
 | [`/pay`・`/kerria pay`](#pay) | Paper | ほかのプレイヤーに送金します（メッセージを添えられます）。 |
 | [`/kerria log`](#log) | Paper | 自分の取引履歴を表示します。 |
 | [`/kerria convert`](#convert) | Paper | 為替レートに基づいて通貨を変換します。 |
-| [`/kerria top`](#top) | Paper | 残高ランキングを表示します（デフォルトでは OP のみ）。 |
 | [`/vkerria balance`](#proxy-balance) | Proxy | プロキシ上で自分の残高を確認します。 |
 | [`/vkerria pay`](#proxy-pay) | Proxy | プロキシ上でほかのプレイヤーに送金します。 |
 
@@ -92,20 +91,6 @@ Kerria のプレイヤー向けコマンドは、**Paper サーバーで実行�
 変換は単一のトランザクションとして処理されます。引き落としと入金は「すべて成功」か「まったく変化しない」のいずれかとなり、途中で失敗して資金が失われることはありません。
 
 - **パーミッション:** `kerria.convert`（デフォルトで全員に許可）
-
-### ランキング [#top]
-
-<CommandLine command={{
-  command: "/kerria top [currencyId] [page]",
-  aliases: [],
-  status: "stable"
-}} />
-
-残高ランキングを表示します。
-通貨IDやページ番号を指定してフィルタリングできます。1ページあたり10件表示され、次ページへのクリック可能なリンクが表示されます。
-引数は順番で判定されるため、通貨IDを省略してページ番号だけを指定することはできません（`/kerria top 2` は「通貨ID 2 の 1 ページ目」になります）。別のページを見る場合は、`/kerria top 1 2`（通貨ID 1 の 2 ページ目）のように通貨IDも指定してください。次ページへのリンクをクリックすると `/kerria top <currencyId> <page>` が実行されます。
-
-- **パーミッション:** `kerria.top`（他のプレイヤーの残高が見えるため、デフォルトでは OP のみ）
 
 ## プロキシ（Velocity）のコマンド [#proxy-commands]
 

@@ -17,6 +17,7 @@ Kerria のコマンドは、**Paper サーバー上で実行するコマンド**
 | `/kerria take <player> <amount> [currencyId] [--message <message>]` | Paper | 残高を徴収する | `kerria.admin.economy` |
 | `/kerria log player <player> [page]` | Paper | 他のプレイヤーの取引履歴を表示する | `kerria.admin.log` |
 | `/kerria log clear <days> [--confirm]` | Paper | 古い取引ログを削除する | `kerria.admin.log` |
+| `/kerria top [currencyId] [page]` | Paper | 残高ランキングを表示する | `kerria.top` |
 | `/kerria currency create <name> <symbol> [decimals]` | Paper | 通貨を作成する | `kerria.admin.currency` |
 | `/kerria currency edit <name> <property> <newValue>` | Paper | 通貨のプロパティを変更する | `kerria.admin.currency` |
 | `/kerria currency default <name>` | Paper | デフォルト通貨を変更する | `kerria.admin.currency` |
@@ -145,6 +146,20 @@ flowchart LR
 取引ログの保存先については[データベース](/docs/database)を参照してください。
 
 - **パーミッション:** `kerria.admin.log`
+
+### ランキング
+
+<CommandLine command={{
+  command: "/kerria top [currencyId] [page]",
+  aliases: [],
+  status: "stable"
+}} />
+
+残高ランキングを表示します。
+通貨IDやページ番号を指定してフィルタリングできます。1ページあたり10件表示され、次ページへのクリック可能なリンクが表示されます。
+引数は順番で判定されるため、通貨IDを省略してページ番号だけを指定することはできません（`/kerria top 2` は「通貨ID 2 の 1 ページ目」になります）。別のページを見る場合は、`/kerria top 1 2`（通貨ID 1 の 2 ページ目）のように通貨IDも指定してください。次ページへのリンクをクリックすると `/kerria top <currencyId> <page>` が実行されます。
+
+- **パーミッション:** `kerria.top`（他のプレイヤーの残高が見えるため、デフォルトでは OP のみ。全員に公開する場合はパーミッション管理プラグインで付与してください）
 
 ### 通貨管理
 
