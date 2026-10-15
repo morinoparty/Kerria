@@ -10,7 +10,7 @@ import java.util.UUID
  *
  * @property accountId アカウント固有ID (UUID v7)
  * @property accountType アカウントの種類
- * @property playerUniqueId プレイヤーUUID (PLAYERの場合のみ)
+ * @property playerUniqueId プレイヤーの Minecraft UUID (PLAYERの場合のみ)
  * @property name アカウント名（プレイヤー名またはサービス名）
  */
 data class Account(
