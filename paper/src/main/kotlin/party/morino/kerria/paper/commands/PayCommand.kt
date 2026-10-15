@@ -6,7 +6,6 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotations.Command
-import org.incendo.cloud.annotations.Default
 import org.incendo.cloud.annotations.Flag
 import org.incendo.cloud.annotations.Permission
 import org.koin.core.component.KoinComponent
@@ -38,7 +37,7 @@ class PayCommand : KoinComponent {
         stack: CommandSourceStack,
         player: String,
         amount: Double,
-        @Default("1") currencyId: Int,
+        currencyId: Int?,
         @Flag("message") @Greedy message: String?,
     ) {
         val sender = stack.sender
@@ -74,8 +73,8 @@ class PayCommand : KoinComponent {
             return
         }
 
-        // 通貨を取得
-        val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
+        // 通貨を取得（省略時はデフォルト通貨）
+        val currency = api.getCurrencyManager().getCurrencyOrDefault(currencyId).getOrNull() ?: run {
             sender.sendMessage(messages.get("common.currency-not-found"))
             return
         }
@@ -91,7 +90,7 @@ class PayCommand : KoinComponent {
         api.getEconomyManager().transfer(
             fromAccount.accountId,
             toAccount.accountId,
-            currencyId,
+            currency.id,
             bigAmount,
             message = storedMessage,
             treatePluginName = "Kerria",

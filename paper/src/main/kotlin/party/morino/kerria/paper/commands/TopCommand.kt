@@ -29,13 +29,13 @@ class TopCommand : KoinComponent {
     @Suppress("UnstableApiUsage")
     fun top(
         stack: CommandSourceStack,
-        @Default("1") currencyId: Int,
+        currencyId: Int?,
         @Default("1") page: Int,
     ) {
         val sender = stack.sender
 
-        // 通貨を取得
-        val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
+        // 通貨を取得（省略時はデフォルト通貨）
+        val currency = api.getCurrencyManager().getCurrencyOrDefault(currencyId).getOrNull() ?: run {
             sender.sendMessage(messages.get("common.currency-not-found"))
             return
         }
@@ -45,7 +45,7 @@ class TopCommand : KoinComponent {
         val offset = (safePage - 1) * pageSize
 
         // ランキングデータを取得
-        val entries = api.getAccountManager().getTopBalances(currencyId, pageSize, offset).getOrNull() ?: run {
+        val entries = api.getAccountManager().getTopBalances(currency.id, pageSize, offset).getOrNull() ?: run {
             sender.sendMessage(messages.get("top.fetch-failed"))
             return
         }
@@ -81,7 +81,7 @@ class TopCommand : KoinComponent {
             // クリックコマンドはコード側で組み立てる（テンプレート内のタグ引数は解決されないため）
             sender.sendMessage(
                 messages.get("top.next-page", "page" to nextPage.toString())
-                    .clickEvent(ClickEvent.runCommand("/kerria top $currencyId $nextPage")),
+                    .clickEvent(ClickEvent.runCommand("/kerria top ${currency.id} $nextPage")),
             )
         }
     }

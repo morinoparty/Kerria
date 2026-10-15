@@ -6,27 +6,29 @@ description: Kerriaのデータベース仕様
 KerriaはSQLiteとPostgreSQLをサポートしています。
 PostgreSQL使用時は、HikariCPによる接続プーリングが自動的に有効になります。
 
-プール設定は `config.yaml` の `database.pool` セクションで変更できます。
+プール設定は `config.conf` の `database.pool` セクションで変更できます。
 
-```yaml
-database:
-  mode: postgresql
-  host: localhost
-  port: 5432
-  database: kerria
-  username: user
-  password: password
-  pool:
+```hcl
+database {
+  mode = "postgresql"
+  host = "localhost"
+  port = 5432
+  database = "kerria"
+  username = "user"
+  password = "password"
+  pool {
     # 最大コネクション数
-    maximumPoolSize: 10
+    maximum-pool-size = 10
     # 最小アイドルコネクション数
-    minimumIdle: 2
+    minimum-idle = 2
     # 接続タイムアウト（ミリ秒）
-    connectionTimeout: 30000
+    connection-timeout = 30000
     # アイドルタイムアウト（ミリ秒）
-    idleTimeout: 600000
+    idle-timeout = 600000
     # コネクションの最大生存時間（ミリ秒）
-    maxLifetime: 1800000
+    max-lifetime = 1800000
+  }
+}
 ```
 
 :::info[SQLite使用時]

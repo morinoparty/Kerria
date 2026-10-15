@@ -30,7 +30,7 @@ class VaultEconomy : AbstractEconomy(), KoinComponent {
 
     /** デフォルト通貨IDを取得するヘルパー */
     private val defaultCurrencyId: Int
-        get() = configManager.getConfig().economy.currency.id
+        get() = configManager.getConfig().economy.defaultCurrencyId
 
     override fun isEnabled(): Boolean = plugin.isEnabled
 
@@ -38,7 +38,9 @@ class VaultEconomy : AbstractEconomy(), KoinComponent {
 
     override fun hasBankSupport(): Boolean = true
 
-    override fun fractionalDigits(): Int = configManager.getConfig().economy.fractionalDigits
+    // 通貨の情報はDBで管理しているため、デフォルト通貨から取得する（取得できなければ一般的な2桁とする）
+    override fun fractionalDigits(): Int =
+        currencyManager.getDefaultCurrency().getOrNull()?.fractionalDigits ?: FALLBACK_FRACTIONAL_DIGITS
 
     override fun format(amount: Double): String {
         val currency = currencyManager.getDefaultCurrency().getOrNull()
@@ -46,9 +48,10 @@ class VaultEconomy : AbstractEconomy(), KoinComponent {
         return currency.format(BigDecimal.valueOf(amount))
     }
 
-    override fun currencyNamePlural(): String = configManager.getConfig().economy.currency.plural
+    // 通貨名もDBのデフォルト通貨から取得する（取得できなければ空文字）
+    override fun currencyNamePlural(): String = currencyManager.getDefaultCurrency().getOrNull()?.plural ?: ""
 
-    override fun currencyNameSingular(): String = configManager.getConfig().economy.currency.name
+    override fun currencyNameSingular(): String = currencyManager.getDefaultCurrency().getOrNull()?.name ?: ""
 
     // --- アカウント存在確認 ---
 
@@ -290,5 +293,10 @@ class VaultEconomy : AbstractEconomy(), KoinComponent {
                 EconomyResponse(amount, newBalance.toDouble(), EconomyResponse.ResponseType.SUCCESS, null)
             },
         )
+    }
+
+    private companion object {
+        // デフォルト通貨を取得できない場合に使う小数点以下の桁数
+        const val FALLBACK_FRACTIONAL_DIGITS = 2
     }
 }

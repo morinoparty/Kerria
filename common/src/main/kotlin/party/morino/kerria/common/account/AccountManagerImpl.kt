@@ -58,7 +58,7 @@ class AccountManagerImpl : AccountManager, KoinComponent {
                     val config = configManager.getConfig()
                     val initialBalance = BigDecimal.valueOf(config.economy.initialBalance)
                     if (initialBalance > BigDecimal.ZERO) {
-                        val currencyId = config.economy.currency.id
+                        val currencyId = config.economy.defaultCurrencyId
                         accountRepository.ensureBalanceRow(account.accountId, currencyId)
                         accountRepository.setBalance(account.accountId, currencyId, initialBalance)
                     }

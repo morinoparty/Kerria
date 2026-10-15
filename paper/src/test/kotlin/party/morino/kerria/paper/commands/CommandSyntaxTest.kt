@@ -43,7 +43,7 @@ class CommandSyntaxTest {
             sender: TestSender,
             @Argument("player") player: String,
             @Argument("amount") amount: Double,
-            @Argument("currencyId") @Default("1") currencyId: Int,
+            @Argument("currencyId") currencyId: Int?,
             @Flag("message") @Greedy message: String?,
         ) {
             calls += listOf(player, amount, currencyId, message)
@@ -71,7 +71,7 @@ class CommandSyntaxTest {
             sender: TestSender,
             @Argument("player") player: PlayerTarget,
             @Argument("amount") amount: Double,
-            @Argument("currencyId") @Default("1") currencyId: Int,
+            @Argument("currencyId") currencyId: Int?,
             @Flag("message") @Greedy message: String?,
         ) {
             calls += listOf(player.input, amount, currencyId, message)
@@ -121,16 +121,17 @@ class CommandSyntaxTest {
     @Test
     @DisplayName("Message flag captures the rest of the input")
     fun messageFlagIsGreedy() {
-        assertEquals(listOf("Bob", 100.0, 1, "glass fee"), execute("pay Bob 100 --message glass fee"))
+        assertEquals(listOf("Bob", 100.0, null, "glass fee"), execute("pay Bob 100 --message glass fee"))
         assertEquals(listOf("Bob", 5.0, 2, "hi"), execute("pay Bob 5 2 --message hi"))
-        assertEquals(listOf("Bob", 10.0, 1, null), execute("pay Bob 10"))
+        // 通貨IDを省略すると null になり、コマンド側でデフォルト通貨に解決される
+        assertEquals(listOf("Bob", 10.0, null, null), execute("pay Bob 10"))
     }
 
     @Test
     @DisplayName("Selector target is parsed with the message flag")
     fun selectorTargetIsParsed() {
         assertEquals(
-            listOf("@a[distance=..10]", 100.0, 1, "<gold>Event reward"),
+            listOf("@a[distance=..10]", 100.0, null, "<gold>Event reward"),
             execute("give @a[distance=..10] 100 --message <gold>Event reward"),
         )
     }

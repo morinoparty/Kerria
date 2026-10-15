@@ -32,19 +32,24 @@ Kerria はモジュールごとに役割が分かれています。
 
 1. Paper サーバー側の Kerria で、データベースを PostgreSQL に設定します（[設定ファイル](/docs/administrator/configuration)を参照）。
 2. Velocity プロキシの `plugins/` に Velocity 版の Kerria を配置します。
-3. プロキシを起動すると、`plugins/kerria/config.yaml` が生成されます。Paper 側と**同じ PostgreSQL** を指定してください。
+3. プロキシを起動すると、`plugins/kerria/config.conf`（HOCON 形式）が生成されます。Paper 側と**同じ PostgreSQL** を指定してください。
 
-```yaml
-database:
-  mode: postgresql
-  host: localhost
-  port: 5432
-  database: kerria
-  username: user
-  password: password
-# 既定の通貨ID
-defaultCurrencyId: 1
+```hcl
+# 既定の通貨ID（Paper 側の economy.default-currency-id と同じ値にする）
+default-currency-id = 1
+
+database {
+  mode = "postgresql"
+  host = "localhost"
+  port = 5432
+  database = "kerria"
+  username = "user"
+  password = "password"
+}
 ```
+
+通貨の名前・記号・フォーマットは共有データベースから読み込まれるため、プロキシ側で設定する必要はありません。
+ただし、デフォルト通貨のIDはサーバーごとの設定ファイルに保存されます。Paper 側で `/kerria currency default` を実行しても `default-currency-id` は自動で更新されないため、同じ値になるように手動で合わせてください。
 
 ## プロキシコマンド
 

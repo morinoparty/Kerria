@@ -25,7 +25,6 @@ dependencies {
 
     implementation(kotlin("stdlib-jdk8"))
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.kaml)
 
     // メッセージ API で Adventure の Component を公開するため（実行時は Paper 等が提供）
     compileOnly(libs.adventure.api)

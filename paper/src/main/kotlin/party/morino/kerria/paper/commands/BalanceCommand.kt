@@ -3,7 +3,6 @@ package party.morino.kerria.paper.commands
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import org.bukkit.entity.Player
 import org.incendo.cloud.annotations.Command
-import org.incendo.cloud.annotations.Default
 import org.incendo.cloud.annotations.Permission
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -27,7 +26,7 @@ class BalanceCommand : KoinComponent {
     @Command("kerria balance [currencyId]")
     @Permission("kerria.balance")
     @Suppress("UnstableApiUsage")
-    fun balance(stack: CommandSourceStack, @Default("1") currencyId: Int) {
+    fun balance(stack: CommandSourceStack, currencyId: Int?) {
         val sender = stack.sender
         if (sender !is Player) {
             sender.sendMessage(messages.get("common.player-only"))
@@ -40,8 +39,8 @@ class BalanceCommand : KoinComponent {
             return
         }
 
-        // 通貨を取得
-        val currency = api.getCurrencyManager().getCurrency(currencyId).getOrNull() ?: run {
+        // 通貨を取得（省略時はデフォルト通貨）
+        val currency = api.getCurrencyManager().getCurrencyOrDefault(currencyId).getOrNull() ?: run {
             sender.sendMessage(messages.get("common.currency-not-found"))
             return
         }

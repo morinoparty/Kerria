@@ -113,7 +113,7 @@ description: サーバー管理者向けコマンドの一覧
 `decimals` は小数点以下の桁数で、省略時は 2 になります。
 フォーマットはデフォルトで `%amount% <name>` が設定されます。
 
-フォーマットでは `%amount%`（桁区切り済みの金額）・`%plural%`・`%symbol%`・`%name%` のプレースホルダが利用できます。桁区切り文字や小数点記号は設定ファイルの `thousandsSeparator` / `decimalSeparator` で通貨ごとに調整できます。詳しくは[設定ファイル](/docs/administrator/configuration)を参照してください。
+フォーマットでは `%amount%`（桁区切り済みの金額）・`%plural%`・`%symbol%`・`%name%` のプレースホルダが利用できます。桁区切り文字や小数点記号は、後述の `/kerria currency edit` で `thousandsSeparator` / `decimalSeparator` を変更して通貨ごとに調整できます。表示例は[設定ファイル](/docs/administrator/configuration#通貨の表示形式)を参照してください。
 
 - **パーミッション:** `kerria.admin.currency`
 
@@ -153,9 +153,9 @@ description: サーバー管理者向けコマンドの一覧
 }} />
 
 デフォルト通貨を、設定ファイルを直接編集せずに実行時に変更します。
-指定した通貨の情報が設定ファイルの `economy.currency` に書き込まれ、以降のデフォルト通貨として使用されます。
+指定した通貨のIDが設定ファイルの `economy.default-currency-id` に書き込まれ、以降のデフォルト通貨として使用されます。
 
-Vault 連携でもこの通貨が使用されるため、`id` だけでなく名前・記号・フォーマット等もあわせて更新されます。
+通貨の名前・記号・フォーマットなどはデータベースで管理されているため、Vault 連携でもデータベース上の通貨の情報がそのまま使用されます。
 
 - **パーミッション:** `kerria.admin.currency`
 
@@ -243,7 +243,7 @@ Vault 連携でもこの通貨が使用されるため、`id` だけでなく名
   status: "stable"
 }} />
 
-サーバーを再起動せずに、設定ファイル (`config.yaml`) とメッセージファイル (`messages.yml`) をディスクから再読み込みします。
+サーバーを再起動せずに、設定ファイル (`config.conf`) とメッセージファイル (`translation/*.properties`) をディスクから再読み込みします。
 不正な内容の場合は再読み込みがスキップされ、直前の正常な内容が維持されます。
 
 - **パーミッション:** `kerria.admin.reload`

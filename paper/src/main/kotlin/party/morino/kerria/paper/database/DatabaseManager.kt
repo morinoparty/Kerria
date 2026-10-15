@@ -29,7 +29,7 @@ class DatabaseManager(private val plugin: JavaPlugin) : KoinComponent {
         }
         dataSource = result.dataSource
         DatabaseInitializer.createTables()
-        DatabaseInitializer.seedDefaultCurrency(config.economy.currency) { plugin.logger.info(it) }
+        DatabaseInitializer.seedDefaultCurrency { plugin.logger.info(it) }
     }
 
     /**
