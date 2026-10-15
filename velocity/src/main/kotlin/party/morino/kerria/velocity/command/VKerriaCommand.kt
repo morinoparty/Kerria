@@ -9,11 +9,13 @@ import party.morino.kerria.velocity.economy.CrossServerEconomy
 import java.math.BigDecimal
 
 /**
- * Velocity 側の `/kerria` コマンド
+ * Velocity 側の `/vkerria` コマンド
  *
  * `balance` と `pay` のサブコマンドを提供し、共有DBを通じてクロスサーバーで動作する。
+ * Paper 側の `/kerria` とラベルを分けるのは、プロキシに同名のコマンドがあると
+ * プロキシがコマンドを先に処理し、Paper 側の `/kerria` が実行できなくなるため。
  */
-class KerriaCommand(
+class VKerriaCommand(
     private val proxy: ProxyServer,
     private val economy: CrossServerEconomy,
     private val currencyId: Int,
@@ -25,7 +27,7 @@ class KerriaCommand(
         when (args.getOrNull(0)?.lowercase()) {
             "balance" -> handleBalance(source)
             "pay" -> handlePay(source, args)
-            else -> source.sendMessage(text("Usage: /kerria <balance|pay>", NamedTextColor.GRAY))
+            else -> source.sendMessage(text("Usage: /$LABEL <balance|pay>", NamedTextColor.GRAY))
         }
     }
 
@@ -46,7 +48,7 @@ class KerriaCommand(
         val targetName = args.getOrNull(1)
         val amount = args.getOrNull(2)?.toBigDecimalOrNull()
         if (targetName == null || amount == null) {
-            source.sendMessage(text("Usage: /kerria pay <player> <amount>", NamedTextColor.GRAY))
+            source.sendMessage(text("Usage: /$LABEL pay <player> <amount>", NamedTextColor.GRAY))
             return
         }
         if (amount <= BigDecimal.ZERO) {
@@ -89,4 +91,9 @@ class KerriaCommand(
 
     private fun text(content: String, color: NamedTextColor): Component =
         Component.text(content, color)
+
+    companion object {
+        /** プロキシに登録するコマンドのラベル */
+        const val LABEL = "vkerria"
+    }
 }

@@ -7,7 +7,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory
 import com.velocitypowered.api.proxy.ProxyServer
 import org.slf4j.Logger
 import party.morino.kerria.common.database.DatabaseInitializer
-import party.morino.kerria.velocity.command.KerriaCommand
+import party.morino.kerria.velocity.command.VKerriaCommand
 import party.morino.kerria.velocity.economy.CrossServerEconomy
 import party.morino.kerria.velocity.files.VelocityConfigManager
 import java.nio.file.Path
@@ -40,8 +40,8 @@ class KerriaVelocity
 
             // コマンドを登録する
             val economy = CrossServerEconomy(config.defaultCurrencyId)
-            val meta = proxy.commandManager.metaBuilder("kerria").plugin(this).build()
-            proxy.commandManager.register(meta, KerriaCommand(proxy, economy, config.defaultCurrencyId))
+            val meta = proxy.commandManager.metaBuilder(VKerriaCommand.LABEL).plugin(this).build()
+            proxy.commandManager.register(meta, VKerriaCommand(proxy, economy, config.defaultCurrencyId))
 
             logger.info("Kerria (Velocity) has been enabled.")
         }
