@@ -31,6 +31,10 @@ class CrossServerEconomy(private val defaultCurrencyId: Int) {
     fun currency(currencyId: Int = defaultCurrencyId): Currency? =
         transaction { currencyRepository.findById(currencyId) }
 
+    /** 通貨名から通貨情報を取得する */
+    fun currencyByName(name: String): Currency? =
+        transaction { currencyRepository.findByName(name) }
+
     /** プレイヤーUUIDから残高を取得する（アカウントが無ければ null） */
     fun balanceOf(uuid: UUID, currencyId: Int = defaultCurrencyId): BigDecimal? =
         transaction {

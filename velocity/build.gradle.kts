@@ -13,6 +13,8 @@ dependencies {
     implementation(project(":common"))
 
     compileOnly(libs.velocity.api)
+    // MiniPlaceholders 連携（存在する場合のみ利用する任意依存。実行時は MiniPlaceholders が提供する）
+    compileOnly(libs.miniplaceholders.api)
 
     implementation(libs.kotlinx.serialization.json)
 }
@@ -34,6 +36,8 @@ sourceSets.main {
             url.set("https://github.com/morinoparty/Kerria")
             authors.add("morinoparty")
             main.set("party.morino.kerria.velocity.KerriaVelocity")
+            // MiniPlaceholders は任意依存（存在すればプレースホルダーを登録する）
+            dependency("miniplaceholders", true)
         }
     }
 }

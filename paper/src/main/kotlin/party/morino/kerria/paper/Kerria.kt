@@ -47,7 +47,8 @@ import party.morino.kerria.paper.economy.ExchangeRateManagerImpl
 import party.morino.kerria.paper.economy.VaultEconomy
 import party.morino.kerria.paper.files.ConfigManagerImpl
 import party.morino.kerria.paper.files.MessageManagerImpl
-import party.morino.kerria.paper.integration.placeholder.KerriaExpansion
+import party.morino.kerria.common.placeholder.KerriaPlaceholders
+import party.morino.kerria.paper.integration.placeholder.PaperPlaceholderBalanceSource
 import party.morino.kerria.common.log.LogManagerImpl
 
 /**
@@ -97,7 +98,7 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
         // 参加時のアカウント作成リスナーの登録
         server.pluginManager.registerEvents(AccountCreateListener(), this)
 
-        // PlaceholderAPI 連携の登録（存在する場合のみ）
+        // MiniPlaceholders 連携の登録（存在する場合のみ）
         registerPlaceholders()
 
         logger.info("${pluginMeta.name} v${pluginMeta.version} has been enabled!")
@@ -174,22 +175,21 @@ open class Kerria : SuspendingJavaPlugin(), KerriaAPI {
     }
 
     /**
-     * PlaceholderAPI が存在する場合に Kerria の Expansion を登録する
+     * MiniPlaceholders が存在する場合に Kerria のプレースホルダーを登録する
      *
-     * PlaceholderAPI は任意依存（softdepend）のため、未導入でもプラグインは正常に動作する。
+     * MiniPlaceholders は任意依存のため、未導入でもプラグインは正常に動作する。
      */
     private fun registerPlaceholders() {
-        // PlaceholderAPI が無い環境では KerriaExpansion をクラスロードしないよう、
-        // 参照はこのガードの内側に閉じ込める
-        if (!server.pluginManager.isPluginEnabled("PlaceholderAPI")) {
+        // MiniPlaceholders が無い環境では API のクラスを読み込まないよう、参照はこのガードの内側に閉じ込める
+        if (!server.pluginManager.isPluginEnabled("MiniPlaceholders")) {
             return
         }
         try {
-            KerriaExpansion().register()
-            logger.info("Registered PlaceholderAPI expansion.")
+            KerriaPlaceholders.create(PaperPlaceholderBalanceSource(), pluginMeta.version).register()
+            logger.info("Registered MiniPlaceholders expansion.")
         } catch (e: Exception) {
             // 連携の失敗は致命的ではないため、警告のみで続行する
-            logger.warning("Failed to register PlaceholderAPI expansion: ${e.message}")
+            logger.warning("Failed to register MiniPlaceholders expansion: ${e.message}")
         }
     }
 

@@ -17,6 +17,10 @@ dependencies {
     // 設定ファイル（HOCON）の読み書き。Paper / Velocity の両方で同じローダーを使う
     api(libs.bundles.hocon)
 
+    // MiniPlaceholders のプレースホルダー定義（実行時は MiniPlaceholders と各プラットフォームが提供する）
+    compileOnly(libs.miniplaceholders.api)
+    compileOnly(libs.adventure.text.minimessage)
+
     // DI（by inject を利用する実装のため）
     api(libs.koin.core)
 }
