@@ -211,6 +211,28 @@ sourceSets.main {
                         default = Permission.Default.OP
                     }
                 }
+                // 役割ごとのグループ。パーミッション管理プラグインでグループ単位にまとめて付与できるようにする
+                register("kerria.player") {
+                    description = "プレイヤー向けの全コマンド（残高確認・送金・取引履歴・通貨変換）"
+                    default = Permission.Default.TRUE
+                    children("kerria.balance", "kerria.pay", "kerria.log", "kerria.convert")
+                }
+                register("kerria.staff") {
+                    description = "スタッフ向けの権限（kerria.player と、他のプレイヤーの取引履歴の表示）"
+                    default = Permission.Default.OP
+                    children("kerria.player", "kerria.admin.log")
+                }
+                register("kerria.admin") {
+                    description = "管理者向けの全権限（kerria.staff と、ランキング・残高操作・通貨管理・再読み込み）"
+                    default = Permission.Default.OP
+                    children(
+                        "kerria.staff",
+                        "kerria.top",
+                        "kerria.admin.economy",
+                        "kerria.admin.currency",
+                        "kerria.admin.reload",
+                    )
+                }
             }
             dependencies {
                 server("PlaceholderAPI", PaperPluginYaml.Load.BEFORE, required = false)

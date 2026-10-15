@@ -44,6 +44,37 @@ Kerria のパーミッションは、Paper サーバーのコマンド（`/kerri
 `kerria.top` は他のプレイヤーの残高が見えるため、OP のみに許可しています。全員に公開する場合は、パーミッション管理プラグインで付与してください。
 :::
 
+### パーミッショングループ
+
+役割ごとに、複数のパーミッションをまとめたグループを用意しています。
+パーミッション管理プラグイン（LuckPerms など）で、グループ単位でまとめて付与できます。
+
+| グループ | デフォルト | 含まれるパーミッション |
+|---------|-----------|----------------------|
+| `kerria.player` | 全員 | `kerria.balance`・`kerria.pay`・`kerria.log`・`kerria.convert` |
+| `kerria.staff` | OP | `kerria.player`・`kerria.admin.log` |
+| `kerria.admin` | OP | `kerria.staff`・`kerria.top`・`kerria.admin.economy`・`kerria.admin.currency`・`kerria.admin.reload` |
+
+```mermaid
+flowchart LR
+    admin["kerria.admin"] --> staff["kerria.staff"]
+    admin --> top["kerria.top"]
+    admin --> economy["kerria.admin.economy"]
+    admin --> currency["kerria.admin.currency"]
+    admin --> reload["kerria.admin.reload"]
+    staff --> player["kerria.player"]
+    staff --> adminlog["kerria.admin.log"]
+    player --> balance["kerria.balance"]
+    player --> pay["kerria.pay"]
+    player --> log["kerria.log"]
+    player --> convert["kerria.convert"]
+```
+
+:::warning[kerria.staff と取引ログの削除]
+`kerria.admin.log` には、他のプレイヤーの取引履歴の表示に加えて、古い取引ログの削除（`/kerria log clear`）も含まれます。
+そのため、`kerria.staff` を付与したプレイヤーは取引ログを削除できます。
+:::
+
 ## プロキシ（Velocity）のパーミッション
 
 Velocity 版の Kerria には、パーミッションノードはありません。
