@@ -71,7 +71,8 @@ class LogCommand : KoinComponent {
     }
 
     @Command("log clear <days>")
-    @Permission("kerria.admin.log")
+    // ログの削除は取り消せないため、他プレイヤーの履歴の閲覧（kerria.admin.log）とは別の権限にする
+    @Permission("kerria.admin.log.clear")
     @Suppress("UnstableApiUsage")
     fun clear(
         stack: CommandSourceStack,

@@ -16,7 +16,7 @@ Kerria のコマンドは、**Paper サーバー上で実行するコマンド**
 | `/kerria give <player> <amount> [currencyId] [--message <message>]` | Paper | 残高を付与する | `kerria.admin.economy` |
 | `/kerria take <player> <amount> [currencyId] [--message <message>]` | Paper | 残高を徴収する | `kerria.admin.economy` |
 | `/kerria log player <player> [page]` | Paper | 他のプレイヤーの取引履歴を表示する | `kerria.admin.log` |
-| `/kerria log clear <days> [--confirm]` | Paper | 古い取引ログを削除する | `kerria.admin.log` |
+| `/kerria log clear <days> [--confirm]` | Paper | 古い取引ログを削除する | `kerria.admin.log.clear` |
 | `/kerria top [currencyId] [page]` | Paper | 残高ランキングを表示する | `kerria.top` |
 | `/kerria currency create <name> <symbol> [decimals]` | Paper | 通貨を作成する | `kerria.admin.currency` |
 | `/kerria currency edit <name> <property> <newValue>` | Paper | 通貨のプロパティを変更する | `kerria.admin.currency` |
@@ -145,7 +145,7 @@ flowchart LR
 日数には 1 以上の整数を指定します。削除した取引ログは元に戻せません。
 取引ログの保存先については[データベース](/docs/database)を参照してください。
 
-- **パーミッション:** `kerria.admin.log`
+- **パーミッション:** `kerria.admin.log.clear`
 
 ### ランキング
 

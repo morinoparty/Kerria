@@ -203,7 +203,8 @@ sourceSets.main {
                     "kerria.top" to "残高ランキング（他のプレイヤーの残高）を表示する",
                     "kerria.admin.economy" to "残高の設定・付与・徴収",
                     "kerria.admin.currency" to "通貨と為替レートの管理",
-                    "kerria.admin.log" to "他のプレイヤーの取引履歴の表示・古い取引ログの削除",
+                    "kerria.admin.log" to "他のプレイヤーの取引履歴を表示する",
+                    "kerria.admin.log.clear" to "古い取引ログを削除する",
                     "kerria.admin.reload" to "設定ファイルとメッセージファイルを再読み込みする",
                 ).forEach { (name, text) ->
                     register(name) {
@@ -223,13 +224,14 @@ sourceSets.main {
                     children("kerria.player", "kerria.admin.log")
                 }
                 register("kerria.admin") {
-                    description = "管理者向けの全権限（kerria.staff と、ランキング・残高操作・通貨管理・再読み込み）"
+                    description = "管理者向けの全権限（kerria.staff と、ランキング・残高操作・通貨管理・取引ログの削除・再読み込み）"
                     default = Permission.Default.OP
                     children(
                         "kerria.staff",
                         "kerria.top",
                         "kerria.admin.economy",
                         "kerria.admin.currency",
+                        "kerria.admin.log.clear",
                         "kerria.admin.reload",
                     )
                 }
