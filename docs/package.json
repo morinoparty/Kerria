@@ -4,8 +4,9 @@
     "version": "0.0.1",
     "scripts": {
         "dev": "next dev",
-        "build": "next build && node scripts/postbuild.mjs",
-        "start": "next start"
+        "build": "pnpm run build:mpm-index && next build && node scripts/postbuild.mjs",
+        "start": "next start",
+        "build:mpm-index": "node scripts/build-mpm-index.mjs"
     },
     "dependencies": {
         "@orama/orama": "^3.1.18",

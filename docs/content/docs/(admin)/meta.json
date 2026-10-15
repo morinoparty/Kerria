@@ -17,6 +17,7 @@
         "messages",
         "placeholders",
         "addons",
+        "mpm-repository",
         "---開発者向け---",
         "api",
         "game-test"
