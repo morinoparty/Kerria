@@ -20,7 +20,7 @@ arrow = "2.3.0-alpha.4"
 adventure = "5.2.0"
 sqlite = "3.53.4.0"
 typesafeConfig = "1.4.9"
-postgresql = "42.7.13"
+postgresql = "42.7.14"
 hikaricp = "7.1.0"
 allure = "2.35.5"
 # fukurou の Kotlin ハーネス（JitPack）。v3 はまだタグが無いため、コミット d87616a2521ec540af8e8a2d8f3358c48b340353 の短縮ハッシュに固定する
