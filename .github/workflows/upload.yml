@@ -63,19 +63,19 @@ jobs:
 
       # GitHub Attestations で署名（Paper）
       - name: Attest Paper JAR artifact
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: './paper/build/libs/Kerria-paper-${{ env.PLUGIN_VERSION }}.jar'
 
       # GitHub Attestations で署名（Velocity）
       - name: Attest Velocity JAR artifact
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: './velocity/build/libs/Kerria-velocity-${{ env.PLUGIN_VERSION }}.jar'
 
       # GitHub Attestations で署名（アドオン - 動的に検出）
       - name: Attest addon JAR artifacts
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: './addons/*/build/libs/Kerria-addon-*-${{ env.PLUGIN_VERSION }}.jar'
 
